@@ -2,7 +2,7 @@
    Routines invoked by a function key
    They normally operate on the current panel.
 
-   Copyright (C) 1994-2016
+   Copyright (C) 1994-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -53,7 +53,6 @@
 
 #include "lib/tty/tty.h"        /* LINES, tty_touch_screen() */
 #include "lib/tty/key.h"        /* ALT() macro */
-#include "lib/tty/win.h"        /* do_enter_ca_mode() */
 #include "lib/mcconfig.h"
 #include "lib/filehighlight.h"  /* MC_FHL_INI_FILE */
 #include "lib/vfs/vfs.h"
@@ -99,9 +98,11 @@
 
 /*** file scope macro definitions ****************************************************************/
 
+#ifdef HAVE_MMAP
 #ifndef MAP_FILE
 #define MAP_FILE 0
 #endif
+#endif /* HAVE_MMAP */
 
 /*** file scope type declarations ****************************************************************/
 
@@ -152,7 +153,7 @@ do_view_cmd (gboolean normal)
 
         file_idx = current_panel->selected;
         filename_vpath = vfs_path_from_str (current_panel->dir.list[file_idx].fname);
-        view_file (filename_vpath, normal, use_internal_view != 0);
+        view_file (filename_vpath, normal, use_internal_view);
         vfs_path_free (filename_vpath);
     }
 
@@ -164,7 +165,7 @@ do_view_cmd (gboolean normal)
 static inline void
 do_edit (const vfs_path_t * what_vpath)
 {
-    edit_file_at_line (what_vpath, use_internal_edit != 0, 0);
+    edit_file_at_line (what_vpath, use_internal_edit, 0);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -173,12 +174,15 @@ static void
 set_panel_filter_to (WPanel * p, char *allocated_filter_string)
 {
     g_free (p->filter);
-    p->filter = 0;
+    p->filter = NULL;
 
-    if (!(allocated_filter_string[0] == '*' && allocated_filter_string[1] == 0))
-        p->filter = allocated_filter_string;
-    else
+    /* Three ways to clear filter: NULL, "", "*" */
+    if (allocated_filter_string == NULL ||
+        allocated_filter_string[0] == '\0' ||
+        (allocated_filter_string[0] == '*' && allocated_filter_string[1] == '\0'))
         g_free (allocated_filter_string);
+    else
+        p->filter = allocated_filter_string;
     reread_cmd ();
 }
 
@@ -333,8 +337,8 @@ compare_dir (WPanel * panel, WPanel * other, enum CompareMode mode)
             {
                 vfs_path_t *src_name, *dst_name;
 
-                src_name = vfs_path_append_new (panel->cwd_vpath, source->fname, NULL);
-                dst_name = vfs_path_append_new (other->cwd_vpath, target->fname, NULL);
+                src_name = vfs_path_append_new (panel->cwd_vpath, source->fname, (char *) NULL);
+                dst_name = vfs_path_append_new (other->cwd_vpath, target->fname, (char *) NULL);
                 if (compare_files (src_name, dst_name, source->st.st_size))
                     do_file_mark (panel, i, 1);
                 vfs_path_free (src_name);
@@ -371,10 +375,10 @@ do_link (link_type_t link_type, const char *fname)
 
         /* suggest the full path for symlink, and either the full or
            relative path to the file it points to  */
-        s = vfs_path_append_new (current_panel->cwd_vpath, fname, NULL);
+        s = vfs_path_append_new (current_panel->cwd_vpath, fname, (char *) NULL);
 
         if (get_other_type () == view_listing)
-            d = vfs_path_append_new (other_panel->cwd_vpath, fname, NULL);
+            d = vfs_path_append_new (other_panel->cwd_vpath, fname, (char *) NULL);
         else
             d = vfs_path_from_str (fname);
 
@@ -461,29 +465,33 @@ nice_cd (const char *text, const char *xtext, const char *help,
         vfs_path_free (cd_vpath);
     }
     g_free (cd_path);
+
+    /* In case of passive panel, restore current VFS directory that was changed in do_panel_cd() */
+    if (MENU_PANEL != current_panel)
+        (void) mc_chdir (current_panel->cwd_vpath);
 }
 #endif /* ENABLE_VFS_UNDELFS || ENABLE_VFS_NET */
 
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-configure_panel_listing (WPanel * p, int list_type, int brief_cols, int use_msformat, char **user,
-                         char **status)
+configure_panel_listing (WPanel * p, int list_format, int brief_cols, gboolean use_msformat,
+                         char **user, char **status)
 {
     p->user_mini_status = use_msformat;
-    p->list_type = list_type;
+    p->list_format = list_format;
 
-    if (list_type == list_brief)
+    if (list_format == list_brief)
         p->brief_cols = brief_cols;
 
-    if (list_type == list_user || use_msformat)
+    if (list_format == list_user || use_msformat)
     {
         g_free (p->user_format);
         p->user_format = *user;
         *user = NULL;
 
-        g_free (p->user_status_format[list_type]);
-        p->user_status_format[list_type] = *status;
+        g_free (p->user_status_format[list_format]);
+        p->user_status_format[list_format] = *status;
         *status = NULL;
 
         set_panel_formats (p);
@@ -500,38 +508,6 @@ switch_to_listing (int panel_index)
 {
     if (get_display_type (panel_index) != view_listing)
         set_display_type (panel_index, view_listing);
-    else
-    {
-        WPanel *p;
-
-        p = PANEL (get_panel_widget (panel_index));
-        if (p->is_panelized)
-        {
-            p->is_panelized = FALSE;
-            panel_reload (p);
-        }
-    }
-}
-
-/* --------------------------------------------------------------------------------------------- */
-/** Handle the tree internal listing modes switching */
-
-static gboolean
-set_basic_panel_listing_to (int panel_index, int listing_mode)
-{
-    WPanel *p;
-    gboolean ok;
-
-    p = PANEL (get_panel_widget (panel_index));
-    switch_to_listing (panel_index);
-    p->list_type = listing_mode;
-
-    ok = set_panel_formats (p) == 0;
-
-    if (ok)
-        do_refresh ();
-
-    return ok;
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -653,7 +629,7 @@ view_file_cmd (void)
 
     vpath = vfs_path_from_str (filename);
     g_free (filename);
-    view_file (vpath, FALSE, use_internal_view != 0);
+    view_file (vpath, FALSE, use_internal_view);
     vfs_path_free (vpath);
 }
 
@@ -673,7 +649,7 @@ view_filtered_cmd (void)
     char *command;
     const char *initial_command;
 
-    if (cmdline->buffer[0] == '\0')
+    if (input_is_empty (cmdline))
         initial_command = selection (current_panel)->fname;
     else
         initial_command = cmdline->buffer;
@@ -875,7 +851,7 @@ mkdir_cmd (void)
             if (dir[0] == '\\' && dir[1] == '~')
                 tmpdir = dir + 1;
 
-            absdir = vfs_path_append_new (current_panel->cwd_vpath, tmpdir, NULL);
+            absdir = vfs_path_append_new (current_panel->cwd_vpath, tmpdir, (char *) NULL);
         }
 
         save_cwds_stat ();
@@ -976,7 +952,7 @@ ext_cmd (void)
                             _("Which extension file you want to edit?"), D_NORMAL, 2,
                             _("&User"), _("&System Wide"));
     }
-    extdir_vpath = vfs_path_build_filename (mc_global.sysconfig_dir, MC_LIB_EXT, NULL);
+    extdir_vpath = vfs_path_build_filename (mc_global.sysconfig_dir, MC_LIB_EXT, (char *) NULL);
 
     if (dir == 0)
     {
@@ -992,7 +968,8 @@ ext_cmd (void)
         if (!exist_file (vfs_path_get_last_path_str (extdir_vpath)))
         {
             vfs_path_free (extdir_vpath);
-            extdir_vpath = vfs_path_build_filename (mc_global.share_data_dir, MC_LIB_EXT, NULL);
+            extdir_vpath =
+                vfs_path_build_filename (mc_global.share_data_dir, MC_LIB_EXT, (char *) NULL);
         }
         do_edit (extdir_vpath);
     }
@@ -1015,12 +992,14 @@ edit_mc_menu_cmd (void)
                         _("Which menu file do you want to edit?"),
                         D_NORMAL, geteuid ()? 2 : 3, _("&Local"), _("&User"), _("&System Wide"));
 
-    menufile_vpath = vfs_path_build_filename (mc_global.sysconfig_dir, MC_GLOBAL_MENU, NULL);
+    menufile_vpath =
+        vfs_path_build_filename (mc_global.sysconfig_dir, MC_GLOBAL_MENU, (char *) NULL);
 
     if (!exist_file (vfs_path_get_last_path_str (menufile_vpath)))
     {
         vfs_path_free (menufile_vpath);
-        menufile_vpath = vfs_path_build_filename (mc_global.share_data_dir, MC_GLOBAL_MENU, NULL);
+        menufile_vpath =
+            vfs_path_build_filename (mc_global.share_data_dir, MC_GLOBAL_MENU, (char *) NULL);
     }
 
     switch (dir)
@@ -1037,11 +1016,13 @@ edit_mc_menu_cmd (void)
         break;
 
     case 2:
-        buffer_vpath = vfs_path_build_filename (mc_global.sysconfig_dir, MC_GLOBAL_MENU, NULL);
+        buffer_vpath =
+            vfs_path_build_filename (mc_global.sysconfig_dir, MC_GLOBAL_MENU, (char *) NULL);
         if (!exist_file (vfs_path_get_last_path_str (buffer_vpath)))
         {
             vfs_path_free (buffer_vpath);
-            buffer_vpath = vfs_path_build_filename (mc_global.share_data_dir, MC_GLOBAL_MENU, NULL);
+            buffer_vpath =
+                vfs_path_build_filename (mc_global.share_data_dir, MC_GLOBAL_MENU, (char *) NULL);
         }
         break;
 
@@ -1072,7 +1053,8 @@ edit_fhl_cmd (void)
                             _("Which highlighting file you want to edit?"), D_NORMAL, 2,
                             _("&User"), _("&System Wide"));
     }
-    fhlfile_vpath = vfs_path_build_filename (mc_global.sysconfig_dir, MC_FHL_INI_FILE, NULL);
+    fhlfile_vpath =
+        vfs_path_build_filename (mc_global.sysconfig_dir, MC_FHL_INI_FILE, (char *) NULL);
 
     if (dir == 0)
     {
@@ -1089,7 +1071,7 @@ edit_fhl_cmd (void)
         {
             vfs_path_free (fhlfile_vpath);
             fhlfile_vpath =
-                vfs_path_build_filename (mc_global.sysconfig_dir, MC_FHL_INI_FILE, NULL);
+                vfs_path_build_filename (mc_global.sysconfig_dir, MC_FHL_INI_FILE, (char *) NULL);
         }
         do_edit (fhlfile_vpath);
     }
@@ -1572,28 +1554,36 @@ quick_cmd_no_menu (void)
 void
 listing_cmd (void)
 {
+    WPanel *p;
+
     switch_to_listing (MENU_PANEL_IDX);
+
+    p = PANEL (get_panel_widget (MENU_PANEL_IDX));
+
+    p->is_panelized = FALSE;
+    set_panel_filter_to (p, NULL);      /* including panel reload */
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 void
-change_listing_cmd (void)
+setup_listing_format_cmd (void)
 {
-    int list_type;
-    int use_msformat, brief_cols;
+    int list_format;
+    gboolean use_msformat;
+    int brief_cols;
     char *user, *status;
     WPanel *p = NULL;
 
     if (SELECTED_IS_PANEL)
         p = MENU_PANEL_IDX == 0 ? left_panel : right_panel;
 
-    list_type = panel_listing_box (p, MENU_PANEL_IDX, &user, &status, &use_msformat, &brief_cols);
-    if (list_type != -1)
+    list_format = panel_listing_box (p, MENU_PANEL_IDX, &user, &status, &use_msformat, &brief_cols);
+    if (list_format != -1)
     {
         switch_to_listing (MENU_PANEL_IDX);
         p = MENU_PANEL_IDX == 0 ? left_panel : right_panel;
-        configure_panel_listing (p, list_type, brief_cols, use_msformat, &user, &status);
+        configure_panel_listing (p, list_format, brief_cols, use_msformat, &user, &status);
         g_free (user);
         g_free (status);
     }
@@ -1623,20 +1613,6 @@ quick_view_cmd (void)
     if (PANEL (get_panel_widget (MENU_PANEL_IDX)) == current_panel)
         change_panel ();
     set_display_type (MENU_PANEL_IDX, view_quick);
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-void
-toggle_listing_cmd (void)
-{
-    int current;
-    WPanel *p;
-
-    current = get_current_index ();
-    p = PANEL (get_panel_widget (current));
-
-    set_basic_panel_listing_to (current, (p->list_type + 1) % LIST_TYPES);
 }
 
 /* --------------------------------------------------------------------------------------------- */

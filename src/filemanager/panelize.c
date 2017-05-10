@@ -1,7 +1,7 @@
 /*
    External panelize
 
-   Copyright (C) 1995-2016
+   Copyright (C) 1995-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -63,7 +63,6 @@
 #define UX 3
 #define UY 2
 
-#define LABELS   3
 #define B_ADD    B_USER
 #define B_REMOVE (B_USER + 1)
 
@@ -165,11 +164,11 @@ init_panelize (void)
     }
 
     panelize_cols = COLS - 6;
-    panelize_cols = max (panelize_cols, blen + 4);
+    panelize_cols = MAX (panelize_cols, blen + 4);
 
     panelize_dlg =
-        dlg_create (TRUE, 0, 0, 20, panelize_cols, dialog_colors, panelize_callback, NULL,
-                    "[External panelize]", _("External panelize"), DLG_CENTER);
+        dlg_create (TRUE, 0, 0, 20, panelize_cols, WPOS_CENTER, FALSE, dialog_colors,
+                    panelize_callback, NULL, "[External panelize]", _("External panelize"));
 
     /* add listbox to the dialogs */
     y = UY;
@@ -206,7 +205,7 @@ init_panelize (void)
         x += button_get_len (b) + 1;
     }
 
-    dlg_select_widget (l_panelize);
+    widget_select (WIDGET (l_panelize));
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -256,7 +255,7 @@ add2panelize (char *label, char *command)
 static void
 add2panelize_cmd (void)
 {
-    if (pname->buffer != NULL && *pname->buffer != '\0')
+    if (!input_is_empty (pname))
     {
         char *label;
 
@@ -356,21 +355,7 @@ do_external_panelize (char *command)
     }
 
     current_panel->is_panelized = TRUE;
-
-    if (list->len == 0)
-        dir_list_init (list);
-    else if (IS_PATH_SEP (list->list[0].fname[0]))
-    {
-        vfs_path_t *vpath_root;
-        int ret;
-
-        vpath_root = vfs_path_from_str (PATH_SEP_STR);
-        panel_set_cwd (current_panel, vpath_root);
-        ret = mc_chdir (vpath_root);
-        vfs_path_free (vpath_root);
-
-        (void) ret;
-    }
+    panelize_absolutize_if_needed (current_panel);
 
     if (pclose (external) < 0)
         message (D_NORMAL, _("External panelize"), _("Pipe close failed"));
@@ -400,7 +385,6 @@ do_panelize_cd (WPanel * panel)
 
     list = &panel->dir;
     list->len = panelized_panel.list.len;
-    panel->is_panelized = TRUE;
 
     panelized_same = vfs_path_equal (panelized_panel.root_vpath, panel->cwd_vpath);
 
@@ -419,7 +403,7 @@ do_panelize_cd (WPanel * panel)
 
             tmp_vpath =
                 vfs_path_append_new (panelized_panel.root_vpath, panelized_panel.list.list[i].fname,
-                                     NULL);
+                                     (char *) NULL);
             fname = vfs_path_as_str (tmp_vpath);
             list->list[i].fnamelen = strlen (fname);
             list->list[i].fname = g_strndup (fname, list->list[i].fnamelen);
@@ -433,6 +417,10 @@ do_panelize_cd (WPanel * panel)
         list->list[i].sort_key = panelized_panel.list.list[i].sort_key;
         list->list[i].second_sort_key = panelized_panel.list.list[i].second_sort_key;
     }
+
+    panel->is_panelized = TRUE;
+    panelize_absolutize_if_needed (panel);
+
     try_to_select (panel, NULL);
 }
 
@@ -487,6 +475,44 @@ panelize_save_panel (WPanel * panel)
 
 /* --------------------------------------------------------------------------------------------- */
 
+/**
+ * Conditionally switches a panel's directory to "/" (root).
+ *
+ * If a panelized panel's listing contain absolute paths, this function
+ * sets the panel's directory to "/". Otherwise it does nothing.
+ *
+ * Rationale:
+ *
+ * This makes tokenized strings like "%d/%p" work. This also makes other
+ * places work where such naive concatenation is done in code (e.g., when
+ * pressing ctrl+shift+enter, for CK_PutCurrentFullSelected).
+ *
+ * When to call:
+ *
+ * You should always call this function after you populate the listing
+ * of a panelized panel.
+ */
+void
+panelize_absolutize_if_needed (WPanel * panel)
+{
+    const dir_list *const list = &panel->dir;
+
+    /* Note: We don't support mixing of absolute and relative paths, which is
+     * why it's ok for us to check only the 1st entry. */
+    if (list->len > 1 && g_path_is_absolute (list->list[1].fname))
+    {
+        vfs_path_t *root;
+
+        root = vfs_path_from_str (PATH_SEP_STR);
+        panel_set_cwd (panel, root);
+        if (panel == current_panel)
+            mc_chdir (root);
+        vfs_path_free (root);
+    }
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
 void
 cd_panelize_cmd (void)
 {
@@ -501,8 +527,6 @@ cd_panelize_cmd (void)
 void
 external_panelize (void)
 {
-    char *target = NULL;
-
     if (!vfs_current_is_local ())
     {
         message (D_ERROR, MSG_ERROR, _("Cannot run external panelize in a non-local directory"));
@@ -533,11 +557,11 @@ external_panelize (void)
         }
 
     case B_ENTER:
-        target = pname->buffer;
-        if (target != NULL && *target)
+        if (!input_is_empty (pname))
         {
-            char *cmd = g_strdup (target);
+            char *cmd;
 
+            cmd = g_strdup (pname->buffer);
             dlg_destroy (panelize_dlg);
             do_external_panelize (cmd);
             g_free (cmd);
@@ -560,7 +584,7 @@ load_panelize (void)
 {
     char **keys;
 
-    keys = mc_config_get_keys (mc_main_config, panelize_section, NULL);
+    keys = mc_config_get_keys (mc_global.main_config, panelize_section, NULL);
 
     add2panelize (g_strdup (_("Other command")), g_strdup (""));
 
@@ -596,8 +620,8 @@ load_panelize (void)
             }
 
             add2panelize (g_string_free (buffer, FALSE),
-                          mc_config_get_string (mc_main_config, panelize_section, *profile_keys,
-                                                ""));
+                          mc_config_get_string (mc_global.main_config, panelize_section,
+                                                *profile_keys, ""));
         }
 
         str_close_conv (conv);
@@ -613,11 +637,11 @@ save_panelize (void)
 {
     struct panelize *current = panelize;
 
-    mc_config_del_group (mc_main_config, panelize_section);
+    mc_config_del_group (mc_global.main_config, panelize_section);
     for (; current; current = current->next)
     {
         if (strcmp (current->label, _("Other command")))
-            mc_config_set_string (mc_main_config,
+            mc_config_set_string (mc_global.main_config,
                                   panelize_section, current->label, current->command);
     }
 }

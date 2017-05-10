@@ -2,7 +2,7 @@
    Search text engine.
    Regex search
 
-   Copyright (C) 2009-2016
+   Copyright (C) 2009-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -34,6 +34,7 @@
 #include "lib/strutil.h"
 #include "lib/search.h"
 #include "lib/strescape.h"
+#include "lib/util.h"           /* MC_PTR_FREE */
 
 #include "internal.h"
 
@@ -168,7 +169,7 @@ mc_search__cond_struct_new_regex_accum_append (const char *charset, GString * st
 
         one_char =
             mc_search__get_one_symbol (charset, &(str_from->str[loop]),
-                                       min (str_from->len - loop, 6), &just_letters);
+                                       MIN (str_from->len - loop, 6), &just_letters);
         one_char_len = strlen (one_char);
 
         if (one_char_len == 0)
@@ -194,6 +195,19 @@ mc_search__cond_struct_new_regex_accum_append (const char *charset, GString * st
 
 /* --------------------------------------------------------------------------------------------- */
 
+/**
+ * Creates a case-insensitive version of a regex pattern.
+ *
+ * For example (assuming ASCII charset): given "\\bHello!\\xAB", returns
+ * "\\b[Hh][Ee][Ll][Ll][Oo]!\\xAB" (this example is for easier reading; in
+ * reality hex codes are used instead of letters).
+ *
+ * This function knows not to ruin special regex symbols.
+ *
+ * This function is used when working with non-UTF-8 charsets: GLib's
+ * regex engine doesn't understand such charsets and therefore can't do
+ * this job itself.
+ */
 static GString *
 mc_search__cond_struct_new_regex_ci_str (const char *charset, const GString * astr)
 {
@@ -263,16 +277,14 @@ mc_search__g_regex_match_full_safe (const GRegex * regex,
     char *string_safe, *p, *end;
     gboolean ret;
 
+    if (string_len < 0)
+        string_len = strlen (string);
+
     if ((g_regex_get_compile_flags (regex) & G_REGEX_RAW)
         || g_utf8_validate (string, string_len, NULL))
     {
         return g_regex_match_full (regex, string, string_len, start_position, match_options,
                                    match_info, error);
-    }
-
-    if (string_len < 0)
-    {
-        string_len = strlen (string);
     }
 
     /* Correctly handle embedded NULs while copying */
@@ -322,6 +334,7 @@ mc_search__regex_found_cond_one (mc_search_t * lc_mc_search, mc_search_regex_t *
         if (mcerror != NULL)
         {
             lc_mc_search->error = MC_SEARCH_E_REGEX;
+            g_free (lc_mc_search->error_str);
             lc_mc_search->error_str =
                 str_conv_gerror_message (mcerror, _("Regular expression error"));
             g_error_free (mcerror);
@@ -816,6 +829,7 @@ mc_search__cond_struct_new_init_regex (const char *charset, mc_search_t * lc_mc_
         if (mcerror != NULL)
         {
             lc_mc_search->error = MC_SEARCH_E_REGEX_COMPILE;
+            g_free (lc_mc_search->error_str);
             lc_mc_search->error_str =
                 str_conv_gerror_message (mcerror, _("Regular expression error"));
             g_error_free (mcerror);
@@ -848,21 +862,15 @@ mc_search__cond_struct_new_init_regex (const char *charset, mc_search_t * lc_mc_
             pcre_compile (mc_search_cond->str->str, pcre_options, &error, &erroffset, NULL);
         if (mc_search_cond->regex_handle == NULL)
         {
-            lc_mc_search->error = MC_SEARCH_E_REGEX_COMPILE;
-            lc_mc_search->error_str = g_strdup (error);
+            mc_search_set_error (lc_mc_search, MC_SEARCH_E_REGEX_COMPILE, "%s", error);
             return;
         }
         lc_mc_search->regex_match_info = pcre_study (mc_search_cond->regex_handle, 0, &error);
-        if (lc_mc_search->regex_match_info == NULL)
+        if (lc_mc_search->regex_match_info == NULL && error != NULL)
         {
-            if (error != NULL)
-            {
-                lc_mc_search->error = MC_SEARCH_E_REGEX_COMPILE;
-                lc_mc_search->error_str = g_strdup (error);
-                g_free (mc_search_cond->regex_handle);
-                mc_search_cond->regex_handle = NULL;
-                return;
-            }
+            mc_search_set_error (lc_mc_search, MC_SEARCH_E_REGEX_COMPILE, "%s", error);
+            MC_PTR_FREE (mc_search_cond->regex_handle);
+            return;
         }
 #endif /* SEARCH_TYPE_GLIB */
     }
@@ -876,15 +884,15 @@ gboolean
 mc_search__run_regex (mc_search_t * lc_mc_search, const void *user_data,
                       gsize start_search, gsize end_search, gsize * found_len)
 {
-    mc_search_cbret_t ret = MC_SEARCH_CB_ABORT;
+    mc_search_cbret_t ret = MC_SEARCH_CB_NOTFOUND;
     gsize current_pos, virtual_pos;
     gint start_pos;
     gint end_pos;
 
     if (lc_mc_search->regex_buffer != NULL)
-        g_string_free (lc_mc_search->regex_buffer, TRUE);
-
-    lc_mc_search->regex_buffer = g_string_sized_new (64);
+        g_string_set_size (lc_mc_search->regex_buffer, 0);
+    else
+        lc_mc_search->regex_buffer = g_string_sized_new (64);
 
     virtual_pos = current_pos = start_search;
     while (virtual_pos <= end_search)
@@ -927,9 +935,8 @@ mc_search__run_regex (mc_search_t * lc_mc_search, const void *user_data,
              */
             while (TRUE)
             {
-                char current_chr;
+                const char current_chr = ((const char *) user_data)[current_pos];
 
-                current_chr = ((char *) user_data)[current_pos];
                 if (current_chr == '\0')
                     break;
 
@@ -940,7 +947,7 @@ mc_search__run_regex (mc_search_t * lc_mc_search, const void *user_data,
             }
 
             /* use virtual_pos as index of start of current chunk */
-            g_string_append_len (lc_mc_search->regex_buffer, (char *) user_data + virtual_pos,
+            g_string_append_len (lc_mc_search->regex_buffer, (const char *) user_data + virtual_pos,
                                  current_pos - virtual_pos);
             virtual_pos = current_pos;
         }
@@ -970,18 +977,15 @@ mc_search__run_regex (mc_search_t * lc_mc_search, const void *user_data,
             ((lc_mc_search->update_fn) (user_data, current_pos) == MC_SEARCH_CB_ABORT))
             ret = MC_SEARCH_CB_ABORT;
 
-        if (ret == MC_SEARCH_CB_ABORT)
+        if (ret == MC_SEARCH_CB_ABORT || ret == MC_SEARCH_CB_NOTFOUND)
             break;
     }
 
     g_string_free (lc_mc_search->regex_buffer, TRUE);
     lc_mc_search->regex_buffer = NULL;
-    lc_mc_search->error = MC_SEARCH_E_NOTFOUND;
 
-    if (ret != MC_SEARCH_CB_ABORT)
-        lc_mc_search->error_str = g_strdup (_(STR_E_NOTFOUND));
-    else
-        lc_mc_search->error_str = NULL;
+    MC_PTR_FREE (lc_mc_search->error_str);
+    lc_mc_search->error = ret == MC_SEARCH_CB_ABORT ? MC_SEARCH_E_ABORT : MC_SEARCH_E_NOTFOUND;
 
     return FALSE;
 }
@@ -1007,8 +1011,8 @@ mc_search_regex_prepare_replace_str (mc_search_t * lc_mc_search, GString * repla
     if (num_replace_tokens > lc_mc_search->num_results - 1
         || num_replace_tokens > MC_SEARCH__NUM_REPLACE_ARGS)
     {
-        lc_mc_search->error = MC_SEARCH_E_REGEX_REPLACE;
-        lc_mc_search->error_str = g_strdup (_(STR_E_RPL_NOT_EQ_TO_FOUND));
+        mc_search_set_error (lc_mc_search, MC_SEARCH_E_REGEX_REPLACE, "%s",
+                             _(STR_E_RPL_NOT_EQ_TO_FOUND));
         return NULL;
     }
 
@@ -1064,8 +1068,8 @@ mc_search_regex_prepare_replace_str (mc_search_t * lc_mc_search, GString * repla
         if (lc_index > lc_mc_search->num_results)
         {
             g_string_free (ret, TRUE);
-            lc_mc_search->error = MC_SEARCH_E_REGEX_REPLACE;
-            lc_mc_search->error_str = g_strdup_printf (_(STR_E_RPL_INVALID_TOKEN), lc_index);
+            mc_search_set_error (lc_mc_search, MC_SEARCH_E_REGEX_REPLACE,
+                                 _(STR_E_RPL_INVALID_TOKEN), lc_index);
             return NULL;
         }
 

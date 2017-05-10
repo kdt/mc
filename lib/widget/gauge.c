@@ -1,7 +1,7 @@
 /*
    Widgets for the Midnight Commander
 
-   Copyright (C) 1994-2016
+   Copyright (C) 1994-2017
    Free Software Foundation, Inc.
 
    Authors:
@@ -62,13 +62,6 @@ gauge_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *d
 
     switch (msg)
     {
-    case MSG_INIT:
-        return MSG_HANDLED;
-
-        /* We don't want to get the focus */
-    case MSG_FOCUS:
-        return MSG_NOT_HANDLED;
-
     case MSG_DRAW:
         widget_move (w, 0, 0);
         if (!g->shown)
@@ -138,8 +131,6 @@ gauge_new (int y, int x, int cols, gboolean shown, int max, int current)
     g = g_new (WGauge, 1);
     w = WIDGET (g);
     widget_init (w, y, x, 1, cols, gauge_callback, NULL);
-    widget_want_cursor (w, FALSE);
-    widget_want_hotkey (w, FALSE);
 
     g->shown = shown;
     if (max == 0)

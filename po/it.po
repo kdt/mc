@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Translators:
-# Marco Ciampa <ciampix@libero.it>, 1999-2014
+# Marco Ciampa <ciampix@libero.it>, 1999-2016
 # Andreas Troschka <signupbox001@om.it.eu.org>, 2012.
 # Giuliano Natali <diaolin@diaolin.com>, 1998.
 # Slava Zanko <slavazanko@gmail.com>, 2011.
@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Midnight Commander\n"
 "Report-Msgid-Bugs-To: http://www.midnight-commander.org/\n"
-"POT-Creation-Date: 2016-02-02 09:44+0300\n"
-"PO-Revision-Date: 2016-01-08 21:48+0100\n"
+"POT-Creation-Date: 2017-05-02 21:10+0200\n"
+"PO-Revision-Date: 2017-05-03 09:33+0200\n"
 "Last-Translator: Marco Ciampa <ciampix@libero.it>\n"
 "Language-Team: Italian (http://www.transifex.com/projects/p/mc/language/"
 "it/)\n"
@@ -102,6 +102,25 @@ msgstr ""
 "Le vecchie impostazioni sono state migrate da %s\n"
 "a %s\n"
 
+msgid ""
+"Number out of range (should be in byte range, 0 <= n <= 0xFF, expressed in "
+"hex)"
+msgstr "Numero fuori range (dovrebbe entrare in un byte, 0 <= n <= 0xFF, in esadecimale)"
+
+msgid "Invalid character"
+msgstr "Carattere non valido"
+
+msgid "Unmatched quotes character"
+msgstr "Virgolette non corrispondenti"
+
+#, c-format
+msgid ""
+"Hex pattern error at position %d:\n"
+"%s."
+msgstr ""
+"Errore esadecimale alla posizione %d:\n"
+"%s."
+
 msgid "Search string not found"
 msgstr " Stringa cercata non trovata "
 
@@ -148,6 +167,16 @@ msgstr ""
 
 #, c-format
 msgid ""
+"Unable to use '%s' skin with true colors support:\n"
+"%s\n"
+"Default skin has been loaded"
+msgstr ""
+"Impossibile usare il tema \"%s\" con supporto true color:\n"
+"%s\n"
+"È stato caricato il tema predefinito"
+
+#, c-format
+msgid ""
 "Unable to use '%s' skin with 256 colors support\n"
 "on non-256 colors terminal.\n"
 "Default skin has been loaded"
@@ -155,6 +184,18 @@ msgstr ""
 "Impossibile usare il tema \"%s\" con supporto a 256\n"
 "colori su terminale non a 256 colori.\n"
 "È stato caricato il tema predefinito"
+
+msgid "True color not supported with ncurses."
+msgstr "True color non supportato con ncurses."
+
+msgid "True color not supported in this slang version."
+msgstr "True color non supportato in questa versione di slang."
+
+msgid "Your terminal doesn't even seem to support 256 colors."
+msgstr "Il terminale non sembra supportare neanche 256 colori."
+
+msgid "Set COLORTERM=truecolor if your terminal really supports true colors."
+msgstr "Impostare COLORTERM=truecolor se il terminale supporta il true color."
 
 msgid "Escape"
 msgstr "Escape "
@@ -450,11 +491,29 @@ msgstr ""
 "Schermo di dimensione %dx%d non supportato.\n"
 "Controllare la variabile ambiente TERM.\n"
 
+msgid "B"
+msgstr "B"
+
+msgid "kB"
+msgstr "kB"
+
+msgid "KiB"
+msgstr "KiB"
+
+msgid "MB"
+msgstr "MB"
+
+msgid "MiB"
+msgstr "MiB"
+
+msgid "GB"
+msgstr "GB"
+
+msgid "GiB"
+msgstr "GiB"
+
 msgid "Cannot create pipe descriptor"
 msgstr "Impossibile creare il descrittore pipe"
-
-msgid "Cannot parse command for pipe"
-msgstr "Impossibile analizzare il comando per la pipe"
 
 msgid "Cannot create pipe streams"
 msgstr "Impossibile creare flussi pipe"
@@ -578,6 +637,10 @@ msgstr "Processo in background:"
 
 msgid "Error"
 msgstr "Errore"
+
+#, c-format
+msgid "%s (%d)"
+msgstr "%s (%d)"
 
 msgid "&Abort"
 msgstr "&Annulla"
@@ -726,14 +789,17 @@ msgstr ""
 msgid "Color options"
 msgstr "Opzioni colore"
 
-msgid "+number"
-msgstr "+numero"
+msgid "[+lineno] file1[:lineno] [file2[:lineno]...]"
+msgstr "[+numriga] file1[:numriga] [file2[:numriga]...]"
+
+msgid "file"
+msgstr "file"
+
+msgid "file1 file2"
+msgstr "file1 file2"
 
 msgid "[this_dir] [other_panel_dir]"
 msgstr "[questa_dir] [dir_altro_pannello]"
-
-msgid "Set initial line number for the internal editor"
-msgstr "Imposta numero di riga iniziale per l'editor interno"
 
 msgid ""
 "\n"
@@ -1466,7 +1532,7 @@ msgid "Save &mode..."
 msgstr "&Modalità salvataggio..."
 
 msgid "Learn &keys..."
-msgstr "Impara &tasti..."
+msgstr "&Impara tasti..."
 
 msgid "Syntax &highlighting..."
 msgstr "Sintassi &evidenziata..."
@@ -1772,10 +1838,10 @@ msgstr ""
 "%s"
 
 msgid "< Default >"
-msgstr "< predefinito >"
+msgstr "< Predefinito >"
 
 msgid "Skins"
-msgstr "Skin"
+msgstr "Temi"
 
 msgid "Other 8 bit"
 msgstr "Altre a 8 bit"
@@ -1862,7 +1928,7 @@ msgid "Configure options"
 msgstr "Configura opzioni"
 
 msgid "Skin:"
-msgstr "Skin:"
+msgstr "Tema:"
 
 msgid "Appearance"
 msgstr "Aspetto"
@@ -1911,6 +1977,9 @@ msgstr "Navigazione stile Lyn&x"
 
 msgid "Pa&ge scrolling"
 msgstr "Scorrimento pa&gine"
+
+msgid "Center &scrolling"
+msgstr "Centra &scorrimento"
 
 msgid "&Mouse page scrolling"
 msgstr "Scorrimento pagine &mouse"
@@ -1963,8 +2032,8 @@ msgstr "colonne"
 msgid "User &mini status"
 msgstr "&Mini stato utente"
 
-msgid "Listing mode"
-msgstr "Modalità lista"
+msgid "Listing format"
+msgstr "Formato lista"
 
 msgid "Executable &first"
 msgstr "Eseguibili &prima"
@@ -2281,6 +2350,10 @@ msgstr ""
 "i pannelli non possono essere nascosti."
 
 #, c-format
+msgid "'%s' is not a symbolic link"
+msgstr "\"%s\" non è un coll. simbolico"
+
+#, c-format
 msgid "Symlink '%s' points to:"
 msgstr "Il coll. simb. \"%s\" punta a:"
 
@@ -2294,10 +2367,6 @@ msgstr "modifica collegamento simb., impossibile rimuovere %s: %s"
 #, c-format
 msgid "edit symlink: %s"
 msgstr "modifica del collegamento simb.: %s"
-
-#, c-format
-msgid "'%s' is not a symbolic link"
-msgstr "\"%s\" non è un coll. simbolico"
 
 msgid "FTP to machine"
 msgstr "Connessione FTP"
@@ -2412,9 +2481,6 @@ msgstr "%o %f%n\"%s\"%m"
 msgid "%o %d %f%m"
 msgstr "%o %d %f%m"
 
-msgid "file"
-msgstr "file"
-
 msgid "files"
 msgstr "file"
 
@@ -2443,11 +2509,11 @@ msgstr ""
 "%s"
 
 msgid ""
-"Cannot make stable symlinks acrossnon-local filesystems:\n"
+"Cannot make stable symlinks across non-local filesystems:\n"
 "\n"
 "Option Stable Symlinks will be disabled"
 msgstr ""
-"Non posso creare coll. simbolici stabili su un filesystem non locale \n"
+"Non posso creare coll. simbolici stabili con filesystem non locali:\n"
 "\n"
 "L'opzione coll. simbolici stabili sarà disabilitata"
 
@@ -2460,7 +2526,7 @@ msgstr ""
 "%s"
 
 msgid "Ski&p all"
-msgstr "Salta tutti"
+msgstr "Sa&lta tutti"
 
 msgid "&Retry"
 msgstr "&Riprova"
@@ -2627,7 +2693,7 @@ msgstr ""
 
 #, c-format
 msgid ""
-"Cannot read source file\"%s\"\n"
+"Cannot read source file \"%s\"\n"
 "%s"
 msgstr ""
 "Impossibile leggere il file sorgente \"%s\"\n"
@@ -2743,8 +2809,8 @@ msgstr ""
 "%s"
 
 #, c-format
-msgid "Directories: %zd, total size: %s"
-msgstr "Directory: %zd, dim totale: %s"
+msgid "Directories: %zu, total size: %s"
+msgstr "Directory: %zu, dim totale: %s"
 
 msgid "Cannot operate on \"..\"!"
 msgstr "Impossibile operare su \"..\"!"
@@ -2895,8 +2961,8 @@ msgid "&Edit - F4"
 msgstr "&Modifica - F4"
 
 #, c-format
-msgid "Found: %ld"
-msgstr "Trovato: %ld"
+msgid "Found: %lu"
+msgstr "Trovato: %lu"
 
 msgid "Malformed regular expression"
 msgstr "Espressione regolare malformata"
@@ -2945,10 +3011,10 @@ msgid "Finished"
 msgstr "Terminato"
 
 #, c-format
-msgid "Finished (ignored %zd directory)"
-msgid_plural "Finished (ignored %zd directories)"
-msgstr[0] "Finito (ignorata %zd directory)"
-msgstr[1] "Finito (ignorate %zd directory)"
+msgid "Finished (ignored %zu directory)"
+msgid_plural "Finished (ignored %zu directories)"
+msgstr[0] "Finito (ignorata %zu directory)"
+msgstr[1] "Finito (ignorate %zu directory)"
 
 msgid "Searching"
 msgstr "Cercando"
@@ -3108,10 +3174,10 @@ msgid "Size:       %s"
 msgstr "Dimensione:    %s"
 
 #, c-format
-msgid " (%ld block)"
-msgid_plural " (%ld blocks)"
-msgstr[0] " (%ld blocco)"
-msgstr[1] " (%ld blocchi)"
+msgid " (%lu block)"
+msgid_plural " (%lu blocks)"
+msgstr[0] " (%lu blocco)"
+msgstr[1] " (%lu blocchi)"
 
 #, c-format
 msgid "Owner:      %s/%s"
@@ -3166,7 +3232,7 @@ msgid "Output lines:"
 msgstr "Righe d'uscita:"
 
 msgid "Layout"
-msgstr "Aspetto"
+msgstr "Disposizione"
 
 msgid "File listin&g"
 msgstr "&Elenco file"
@@ -3177,8 +3243,8 @@ msgstr "&Vista veloce"
 msgid "&Info"
 msgstr "&Info"
 
-msgid "&Listing mode..."
-msgstr "&Modalità lista..."
+msgid "&Listing format..."
+msgstr "Formato &lista..."
 
 msgid "&Sort order..."
 msgstr "&Ordina per..."
@@ -3322,7 +3388,7 @@ msgid "&Configuration..."
 msgstr "&Configurazione..."
 
 msgid "&Layout..."
-msgstr "&Aspetto..."
+msgstr "&Disposizione..."
 
 msgid "&Panel options..."
 msgstr "Opzioni &pannello..."
@@ -3343,10 +3409,10 @@ msgid "Panels:"
 msgstr "Pannelli:"
 
 #, c-format
-msgid "You have %zd opened screen. Quit anyway?"
-msgid_plural "You have %zd opened screens. Quit anyway?"
-msgstr[0] "È stato aperto %zd schermo. Uscire comunque?"
-msgstr[1] "Sono stati aperti %zd schermi. Uscire comunque?"
+msgid "You have %zu opened screen. Quit anyway?"
+msgid_plural "You have %zu opened screens. Quit anyway?"
+msgstr[0] "È aperto %zu schermo. Uscire comunque?"
+msgstr[1] "Sono aperti %zu schermi. Uscire comunque?"
 
 msgid "The Midnight Commander"
 msgstr "Il Midnight Commander"
@@ -3488,12 +3554,6 @@ msgstr "SUB-DIR"
 
 msgid "<readlink failed>"
 msgstr "<readlink fallito>"
-
-#, c-format
-msgid "%s byte"
-msgid_plural "%s bytes"
-msgstr[0] "%s byte"
-msgstr[1] "%s byte"
 
 #, c-format
 msgid "%s in %d file"
@@ -3850,8 +3910,11 @@ msgstr "File System Virtuali:"
 msgid "Data types:"
 msgstr "Tipo dati:"
 
-msgid "Root directory:"
-msgstr "Directory radice:"
+msgid "Home directory:"
+msgstr "Directory home:"
+
+msgid "Profile root directory:"
+msgstr "Profilo directory root:"
 
 msgid "System data"
 msgstr "Dati di sistema"
@@ -4158,9 +4221,8 @@ msgstr "sftp: inserire password per %s "
 msgid "sftp: Password is empty."
 msgstr "sftp: la password è vuota."
 
-#, fuzzy
 msgid "sftp: Failure establishing SSH session"
-msgstr "sftp: fallito inizio sessione SSH: (%d)"
+msgstr "sftp: fallita avvio sessione SSH"
 
 msgid "sftp: No file handler data present for reading file"
 msgstr "sftp: nessun file handler dati per la lettura del file"
@@ -4412,6 +4474,3 @@ msgstr "Continuare dall'inizio?"
 
 msgid "Cannot fetch a local copy of /ftp://some.host/editme.txt"
 msgstr "Impossibile ricevere copia locale di /ftp://un.host/modificami.txt"
-
-#~ msgid "%d: %s"
-#~ msgstr "%d: %s"

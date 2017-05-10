@@ -1,7 +1,7 @@
 /*
    Text conversion from one charset to another.
 
-   Copyright (C) 2001-2016
+   Copyright (C) 2001-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -36,6 +36,8 @@
 #include "lib/global.h"
 #include "lib/strutil.h"        /* utf-8 functions */
 #include "lib/fileloc.h"
+#include "lib/util.h"           /* whitespace() */
+
 #include "lib/charsets.h"
 
 /*** global variables ****************************************************************************/
@@ -53,12 +55,6 @@ const char *cp_source = NULL;
 #define UNKNCHAR '\001'
 
 #define OTHER_8BIT "Other_8_bit"
-
-/*
- * FIXME: This assumes that ASCII is always the first encoding
- * in mc.charsets
- */
-#define CP_ASCII 0
 
 /*** file scope type declarations ****************************************************************/
 
@@ -117,7 +113,7 @@ load_codepages_list_from_file (GPtrArray ** list, const char *fname)
 
         if (buflen > 0 && buf[buflen - 1] == '\n')
             buf[buflen - 1] = '\0';
-        while (*p != '\t' && *p != ' ' && *p != '\0')
+        while (*p != '\0' && !whitespace (*p))
             ++p;
         if (*p == '\0')
             goto fail;
@@ -231,6 +227,8 @@ free_codepages_list (void)
 {
     g_ptr_array_foreach (codepages, free_codepage_desc, NULL);
     g_ptr_array_free (codepages, TRUE);
+    /* NULL-ize pointer to make unit tests happy */
+    codepages = NULL;
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -354,7 +352,7 @@ convert_to_display (char *str)
 /* --------------------------------------------------------------------------------------------- */
 
 GString *
-str_convert_to_display (char *str)
+str_convert_to_display (const char *str)
 {
     return str_nconvert_to_display (str, -1);
 
@@ -363,7 +361,7 @@ str_convert_to_display (char *str)
 /* --------------------------------------------------------------------------------------------- */
 
 GString *
-str_nconvert_to_display (char *str, int len)
+str_nconvert_to_display (const char *str, int len)
 {
     GString *buff;
     GIConv conv;
@@ -400,7 +398,7 @@ convert_from_input (char *str)
 /* --------------------------------------------------------------------------------------------- */
 
 GString *
-str_convert_to_input (char *str)
+str_convert_to_input (const char *str)
 {
     return str_nconvert_to_input (str, -1);
 }
@@ -408,7 +406,7 @@ str_convert_to_input (char *str)
 /* --------------------------------------------------------------------------------------------- */
 
 GString *
-str_nconvert_to_input (char *str, int len)
+str_nconvert_to_input (const char *str, int len)
 {
     GString *buff;
     GIConv conv;
@@ -466,7 +464,7 @@ convert_from_utf_to_current (const char *str)
 /* --------------------------------------------------------------------------------------------- */
 
 unsigned char
-convert_from_utf_to_current_c (const int input_char, GIConv conv)
+convert_from_utf_to_current_c (int input_char, GIConv conv)
 {
     unsigned char str[UTF8_CHAR_LEN + 1];
     unsigned char buf_ch[UTF8_CHAR_LEN + 1];
@@ -498,7 +496,7 @@ convert_from_utf_to_current_c (const int input_char, GIConv conv)
 /* --------------------------------------------------------------------------------------------- */
 
 int
-convert_from_8bit_to_utf_c (const char input_char, GIConv conv)
+convert_from_8bit_to_utf_c (char input_char, GIConv conv)
 {
     unsigned char str[2];
     unsigned char buf_ch[UTF8_CHAR_LEN + 1];
@@ -530,7 +528,7 @@ convert_from_8bit_to_utf_c (const char input_char, GIConv conv)
 /* --------------------------------------------------------------------------------------------- */
 
 int
-convert_from_8bit_to_utf_c2 (const char input_char)
+convert_from_8bit_to_utf_c2 (char input_char)
 {
     unsigned char str[2];
     int ch = '.';

@@ -1,7 +1,7 @@
 /*
    User Menu implementation
 
-   Copyright (C) 1994-2016
+   Copyright (C) 1994-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -37,6 +37,7 @@
 #include <string.h>
 
 #include "lib/global.h"
+#include "lib/fileloc.h"
 #include "lib/tty/tty.h"
 #include "lib/skin.h"
 #include "lib/search.h"
@@ -114,15 +115,15 @@ check_patterns (char *p)
 
     p += sizeof (def_name) - 1;
     if (*p == '1')
-        easy_patterns = 1;
+        easy_patterns = TRUE;
     else if (*p == '0')
-        easy_patterns = 0;
+        easy_patterns = FALSE;
     else
         return p0;
 
     /* Skip spaces */
     p++;
-    while (*p == '\n' || *p == '\t' || *p == ' ')
+    while (whiteness (*p))
         p++;
     return p;
 }
@@ -134,7 +135,7 @@ check_patterns (char *p)
 static char *
 extract_arg (char *p, char *arg, int size)
 {
-    while (*p != '\0' && (*p == ' ' || *p == '\t' || *p == '\n'))
+    while (*p != '\0' && whiteness (*p))
         p++;
 
     /* support quote space .mnu */
@@ -455,9 +456,9 @@ execute_menu_command (const WEdit * edit_widget, const char *commands, gboolean 
     {
         if (col == 0)
         {
-            if (*commands != ' ' && *commands != '\t')
+            if (!whitespace (*commands))
                 break;
-            while (*commands == ' ' || *commands == '\t')
+            while (whitespace (*commands))
                 commands++;
             if (*commands == '\0')
                 break;
@@ -921,7 +922,8 @@ user_menu_cmd (const WEdit * edit_widget, const char *menu_file, int selected_en
     int max_cols, menu_lines, menu_limit;
     int col, i;
     gboolean accept_entry = TRUE;
-    int selected, old_patterns;
+    int selected;
+    gboolean old_patterns;
     gboolean res = FALSE;
     gboolean interactive = TRUE;
 
@@ -956,21 +958,22 @@ user_menu_cmd (const WEdit * edit_widget, const char *menu_file, int selected_en
             g_free (menu);
             menu =
                 mc_build_filename (mc_config_get_home_dir (),
-                                   edit_widget != NULL ? EDIT_GLOBAL_MENU : MC_GLOBAL_MENU, NULL);
+                                   edit_widget != NULL ? EDIT_GLOBAL_MENU : MC_GLOBAL_MENU,
+                                   (char *) NULL);
             if (!exist_file (menu))
             {
                 g_free (menu);
                 menu =
                     mc_build_filename (mc_global.sysconfig_dir,
                                        edit_widget != NULL ? EDIT_GLOBAL_MENU : MC_GLOBAL_MENU,
-                                       NULL);
+                                       (char *) NULL);
                 if (!exist_file (menu))
                 {
                     g_free (menu);
                     menu =
                         mc_build_filename (mc_global.share_data_dir,
                                            edit_widget != NULL ? EDIT_GLOBAL_MENU : MC_GLOBAL_MENU,
-                                           NULL);
+                                           (char *) NULL);
                 }
             }
         }
@@ -1051,7 +1054,7 @@ user_menu_cmd (const WEdit * edit_widget, const char *menu_file, int selected_en
                         selected = menu_lines;
                 }
             }
-            else if (*p != ' ' && *p != '\t' && str_isprint (p))
+            else if (!whitespace (*p) && str_isprint (p))
             {
                 /* A menu entry title line */
                 if (accept_entry)
@@ -1067,7 +1070,7 @@ user_menu_cmd (const WEdit * edit_widget, const char *menu_file, int selected_en
                 menu_lines++;
                 accept_entry = TRUE;
             }
-            max_cols = max (max_cols, col);
+            max_cols = MAX (max_cols, col);
             col = 0;
         }
         else
@@ -1091,7 +1094,7 @@ user_menu_cmd (const WEdit * edit_widget, const char *menu_file, int selected_en
         {
             Listbox *listbox;
 
-            max_cols = min (max (max_cols, col), MAX_ENTRY_LEN);
+            max_cols = MIN (MAX (max_cols, col), MAX_ENTRY_LEN);
 
             /* Create listbox */
             listbox = create_listbox_window (menu_lines, max_cols + 2, _("User menu"),

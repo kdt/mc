@@ -1,6 +1,6 @@
 /* lib/vfs - test vfs_path_from_str_flags() function
 
-   Copyright (C) 2013-2016
+   Copyright (C) 2013-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -31,8 +31,6 @@
 #include "lib/vfs/path.h"
 
 #include "src/vfs/local/local.c"
-
-const char *mc_config_get_home_dir (void);
 
 /* --------------------------------------------------------------------------------------------- */
 

@@ -1,7 +1,7 @@
 /*
    Directory cache support
 
-   Copyright (C) 1998-2016
+   Copyright (C) 1998-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -118,7 +118,7 @@ vfs_s_automake (struct vfs_class *me, struct vfs_s_inode *dir, char *path, int f
     if (sep != NULL)
         *sep = '\0';
 
-    res = vfs_s_generate_entry (me, path, dir, flags & FL_MKDIR ? (0777 | S_IFDIR) : 0777);
+    res = vfs_s_generate_entry (me, path, dir, (flags & FL_MKDIR) != 0 ? (0777 | S_IFDIR) : 0777);
     vfs_s_insert_entry (me, dir, res);
 
     if (sep != NULL)
@@ -383,13 +383,14 @@ vfs_s_inode_from_path (const vfs_path_t * vpath, int flags)
 
     ino =
         vfs_s_find_inode (path_element->class, super, q,
-                          flags & FL_FOLLOW ? LINK_FOLLOW : LINK_NO_FOLLOW, flags & ~FL_FOLLOW);
+                          (flags & FL_FOLLOW) != 0 ? LINK_FOLLOW : LINK_NO_FOLLOW,
+                          flags & ~FL_FOLLOW);
     if ((!ino) && (!*q))
         /* We are asking about / directory of ftp server: assume it exists */
         ino =
             vfs_s_find_inode (path_element->class, super, q,
-                              flags & FL_FOLLOW ? LINK_FOLLOW :
-                              LINK_NO_FOLLOW, FL_DIR | (flags & ~FL_FOLLOW));
+                              (flags & FL_FOLLOW) != 0 ? LINK_FOLLOW : LINK_NO_FOLLOW,
+                              FL_DIR | (flags & ~FL_FOLLOW));
     return ino;
 }
 
@@ -490,31 +491,6 @@ vfs_s_internal_stat (const vfs_path_t * vpath, struct stat *buf, int flag)
     if (ino == NULL)
         return -1;
     *buf = ino->st;
-    return 0;
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-static int
-vfs_s_stat (const vfs_path_t * vpath, struct stat *buf)
-{
-    return vfs_s_internal_stat (vpath, buf, FL_FOLLOW);
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-static int
-vfs_s_lstat (const vfs_path_t * vpath, struct stat *buf)
-{
-    return vfs_s_internal_stat (vpath, buf, FL_NONE);
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-static int
-vfs_s_fstat (void *fh, struct stat *buf)
-{
-    *buf = FH->ino->st;
     return 0;
 }
 
@@ -991,13 +967,54 @@ vfs_s_default_stat (struct vfs_class *me, mode_t mode)
     st.st_mode = mode;
     st.st_ino = 0;
     st.st_dev = 0;
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
     st.st_rdev = 0;
+#endif
     st.st_uid = getuid ();
     st.st_gid = getgid ();
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
+    st.st_blksize = 512;
+#endif
     st.st_size = 0;
     st.st_mtime = st.st_atime = st.st_ctime = time (NULL);
 
+    vfs_adjust_stat (&st);
+
     return &st;
+}
+
+/* --------------------------------------------------------------------------------------------- */
+/**
+ * Calculate number of st_blocks using st_size and st_blksize.
+ * In according to stat(2), st_blocks is the size in 512-byte units.
+ *
+ * @param s stat info
+ */
+
+void
+vfs_adjust_stat (struct stat *s)
+{
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
+    if (s->st_size == 0)
+        s->st_blocks = 0;
+    else
+    {
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
+        blkcnt_t ioblocks;
+        blksize_t ioblock_size;
+
+        /* 1. Calculate how many IO blocks are occupied */
+        ioblocks = 1 + (s->st_size - 1) / s->st_blksize;
+        /* 2. Calculate size of st_blksize in 512-byte units */
+        ioblock_size = 1 + (s->st_blksize - 1) / 512;
+        /* 3. Calculate number of blocks */
+        s->st_blocks = ioblocks * ioblock_size;
+#else
+        /* Let IO block size is 512 bytes */
+        s->st_blocks = 1 + (s->st_size - 1) / 512;
+#endif /* HAVE_STRUCT_STAT_ST_BLKSIZE */
+    }
+#endif /* HAVE_STRUCT_STAT_ST_BLOCKS */
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -1316,6 +1333,31 @@ vfs_s_open (const vfs_path_t * vpath, int flags, mode_t mode)
     super->fd_usage++;
     fh->ino->st.st_nlink++;
     return fh;
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+int
+vfs_s_stat (const vfs_path_t * vpath, struct stat *buf)
+{
+    return vfs_s_internal_stat (vpath, buf, FL_FOLLOW);
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+int
+vfs_s_lstat (const vfs_path_t * vpath, struct stat *buf)
+{
+    return vfs_s_internal_stat (vpath, buf, FL_NONE);
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+int
+vfs_s_fstat (void *fh, struct stat *buf)
+{
+    *buf = FH->ino->st;
+    return 0;
 }
 
 /* --------------------------------------------------------------------------------------------- */

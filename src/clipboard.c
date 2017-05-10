@@ -1,7 +1,7 @@
 /*
    Util for external clipboard.
 
-   Copyright (C) 2009-2016
+   Copyright (C) 2009-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -197,7 +197,7 @@ clipboard_text_to_file (const gchar * event_group_name, const gchar * event_name
     {
         ssize_t ret;
 
-        ret = mc_write (file, (char *) text, str_len);
+        ret = mc_write (file, text, str_len);
         (void) ret;
     }
     mc_close (file);

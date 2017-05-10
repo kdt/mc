@@ -1,7 +1,7 @@
 /*
    Main program for the Midnight Commander
 
-   Copyright (C) 1994-2016
+   Copyright (C) 1994-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -108,7 +108,7 @@ check_codeset (void)
             if (mc_global.display_codepage == -1)
                 mc_global.display_codepage = 0;
 
-            mc_config_set_string (mc_main_config, CONFIG_MISC_SECTION, "display_codepage",
+            mc_config_set_string (mc_global.main_config, CONFIG_MISC_SECTION, "display_codepage",
                                   cp_display);
         }
     }
@@ -219,7 +219,7 @@ main (int argc, char *argv[])
 {
     GError *mcerror = NULL;
     gboolean config_migrated = FALSE;
-    char *config_migrate_msg;
+    char *config_migrate_msg = NULL;
     int exit_code = EXIT_FAILURE;
 
     mc_global.timer = mc_timer_new ();
@@ -233,6 +233,8 @@ main (int argc, char *argv[])
 
     /* do this before args parsing */
     str_init_strings (NULL);
+
+    mc_setup_run_mode (argv);   /* are we mc? editor? viewer? etc... */
 
     if (!mc_args_parse (&argc, &argv, "mc", &mcerror))
     {
@@ -282,20 +284,6 @@ main (int argc, char *argv[])
     /* Must be done after load_setup because depends on mc_global.vfs.cd_symlinks */
     vfs_setup_work_dir ();
 
-    /* Resolve the other_dir panel option. Must be done after vfs_setup_work_dir */
-    {
-        char *buffer;
-        vfs_path_t *vpath;
-
-        buffer = mc_config_get_string (mc_panels_config, "Dirs", "other_dir", ".");
-        vpath = vfs_path_from_str (buffer);
-        if (vfs_file_is_local (vpath))
-            saved_other_dir = buffer;
-        else
-            g_free (buffer);
-        vfs_path_free (vpath);
-    }
-
     /* Set up temporary directory after VFS initialization */
     mc_tmpdir ();
 
@@ -310,8 +298,26 @@ main (int argc, char *argv[])
         goto startup_exit_falure;
     }
 
+    /* Resolve the other_dir panel option.
+     * 1. Must be done after vfs_setup_work_dir().
+     * 2. Must be done after mc_setup_by_args() because of mc_run_mode.
+     */
+    if (mc_global.mc_run_mode == MC_RUN_FULL)
+    {
+        char *buffer;
+        vfs_path_t *vpath;
+
+        buffer = mc_config_get_string (mc_global.panels_config, "Dirs", "other_dir", ".");
+        vpath = vfs_path_from_str (buffer);
+        if (vfs_file_is_local (vpath))
+            saved_other_dir = buffer;
+        else
+            g_free (buffer);
+        vfs_path_free (vpath);
+    }
+
     /* check terminal type
-     * $TEMR must be set and not empty
+     * $TERM must be set and not empty
      * mc_global.tty.xterm_flag is used in init_key() and tty_init()
      * Do this after mc_args_handle() where mc_args__force_xterm is set up.
      */
@@ -383,7 +389,7 @@ main (int argc, char *argv[])
        w/o Shift button in subshell in the native console */
     init_mouse ();
 
-    /* Done after do_enter_ca_mode (tty_init) because in VTE bracketed mode is
+    /* Done after tty_enter_ca_mode (tty_init) because in VTE bracketed mode is
        separate for the normal and alternate screens */
     enable_bracketed_paste ();
 
@@ -401,6 +407,10 @@ main (int argc, char *argv[])
         exit_code = EXIT_SUCCESS;
     else
         exit_code = do_nc ()? EXIT_SUCCESS : EXIT_FAILURE;
+
+    disable_bracketed_paste ();
+
+    disable_mouse ();
 
     /* Save the tree store */
     (void) tree_store_save ();

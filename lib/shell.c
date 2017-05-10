@@ -1,7 +1,7 @@
 /*
    Provides a functions for working with shell.
 
-   Copyright (C) 2006-2016
+   Copyright (C) 2006-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -53,7 +53,7 @@ static char rp_shell[PATH_MAX];
 /**
  * Get a system shell.
  *
- * @return newly allocated string with shell name
+ * @return newly allocated mc_shell_t object with shell name
  */
 
 static mc_shell_t *
@@ -76,6 +76,8 @@ mc_shell_get_installed_in_system (void)
         mc_shell->path = g_strdup ("/bin/zsh");
     else if (access ("/bin/tcsh", X_OK) == 0)
         mc_shell->path = g_strdup ("/bin/tcsh");
+    else if (access ("/bin/csh", X_OK) == 0)
+        mc_shell->path = g_strdup ("/bin/csh");
     /* No fish as fallback because it is so much different from other shells and
      * in a way exotic (even though user-friendly by name) that we should not
      * present it as a subshell without the user's explicit intention. We rather
@@ -153,6 +155,12 @@ mc_shell_recognize_real_path (mc_shell_t * mc_shell)
         /* Also detects csh symlinked to tcsh */
         mc_shell->type = SHELL_TCSH;
         mc_shell->name = "tcsh";
+    }
+    else if (strstr (mc_shell->path, "/csh") != NULL
+             || strstr (mc_shell->real_path, "/csh") != NULL)
+    {
+        mc_shell->type = SHELL_TCSH;
+        mc_shell->name = "csh";
     }
     else if (strstr (mc_shell->path, "/fish") != NULL
              || strstr (mc_shell->real_path, "/fish") != NULL)
@@ -233,7 +241,9 @@ mc_shell_init (void)
     if (mc_shell->type == SHELL_NONE)
         mc_shell_recognize_path (mc_shell);
 
-    mc_global.tty.use_subshell = mc_shell->type != SHELL_NONE;
+    if (mc_shell->type == SHELL_NONE)
+        mc_global.tty.use_subshell = FALSE;
+
     mc_global.shell = mc_shell;
 }
 

@@ -1,7 +1,7 @@
 /*
    Default values for keybinding engine
 
-   Copyright (C) 2009-2016
+   Copyright (C) 2009-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -83,6 +83,7 @@ typedef struct global_keymap_ini_t
 
 /* midnight */
 static const global_keymap_ini_t default_main_keymap[] = {
+    {"ChangePanel", "tab"},
     {"Help", "f1"},
     {"UserMenu", "f2"},
     {"View", "f3"},
@@ -100,9 +101,11 @@ static const global_keymap_ini_t default_main_keymap[] = {
     /* Copy useful information to the command line */
     {"PutCurrentPath", "alt-a"},
     {"PutOtherPath", "alt-shift-a"},
+    {"PutCurrentSelected", "alt-enter; ctrl-enter"},
+    {"PutCurrentFullSelected", "ctrl-shift-enter"},
     {"CdQuick", "alt-c"},
     /* To access the directory hotlist */
-    {"HotList", "ctrl-backspace"},
+    {"HotList", "ctrl-backslash"},
     /* Suspend */
     {"Suspend", "ctrl-z"},
     /* The filtered view command */
@@ -112,7 +115,6 @@ static const global_keymap_ini_t default_main_keymap[] = {
     /* Panel refresh */
     {"Reread", "ctrl-r"},
     /* Switch listing between long, user defined and full formats */
-    {"PanelListingSwitch", "alt-t"},
     /* Swap panels */
     {"Swap", "ctrl-u"},
     /* Resize panels */
@@ -165,6 +167,7 @@ static const global_keymap_ini_t default_main_x_keymap[] = {
 
 /* panel */
 static const global_keymap_ini_t default_panel_keymap[] = {
+    {"CycleListingFormat", "alt-t"},
     {"PanelOtherCd", "alt-o"},
     {"PanelOtherCdLink", "alt-l"},
     {"CopySingle", "f15"},

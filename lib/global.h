@@ -95,21 +95,11 @@
 
 #include "fs.h"
 #include "shell.h"
+#include "mcconfig.h"
 
 #ifdef USE_MAINTAINER_MODE
 #include "lib/logging.h"
 #endif
-
-#ifdef min
-#undef min
-#endif
-
-#ifdef max
-#undef max
-#endif
-
-#define min(x, y) ((x) > (y) ? (y) : (x))
-#define max(x, y) ((x) > (y) ? (x) : (y))
 
 /* Just for keeping Your's brains from invention a proper size of the buffer :-) */
 #define BUF_10K 10240L
@@ -145,20 +135,6 @@
 /* one caused by typing 'exit' or 'logout' in the subshell */
 #define SUBSHELL_EXIT 128
 
-/* C++ style type casts */
-#define const_cast(m_type, m_expr) ((m_type) (m_expr))
-
-#if 0
-#ifdef MC_ENABLE_DEBUGGING_CODE
-#undef NDEBUG
-#else
-#define NDEBUG
-#endif
-#ifdef HAVE_ASSERT_H
-#include <assert.h>
-#endif
-#endif
-
 #define MC_ERROR g_quark_from_static_string (PACKAGE)
 
 #define DEFAULT_CHARSET "ASCII"
@@ -192,18 +168,21 @@ typedef struct
     /* share_data_dir: Area for default settings from developers */
     char *share_data_dir;
 
+    mc_config_t *main_config;
+    mc_config_t *panels_config;
+
 #ifdef HAVE_CHARSET
     /* Numbers of (file I/O) and (input/display) codepages. -1 if not selected */
     int source_codepage;
     int display_codepage;
 #else
     /* If true, allow characters in the range 160-255 */
-    int eight_bit_clean;
+    gboolean eight_bit_clean;
     /*
      * If true, also allow characters in the range 128-159.
      * This is reported to break on many terminals (xterm, qansi-m).
      */
-    int full_eight_bits;
+    gboolean full_eight_bits;
 #endif                          /* !HAVE_CHARSET */
     /*
      * If utf-8 terminal utf8_display = TRUE

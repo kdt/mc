@@ -1,7 +1,7 @@
 /*
    Virtual File System: GNU Tar file system.
 
-   Copyright (C) 1995-2016
+   Copyright (C) 1995-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -47,6 +47,7 @@
 
 #include "lib/global.h"
 #include "lib/util.h"
+#include "lib/unixcompat.h"     /* makedev() */
 #include "lib/widget.h"         /* message() */
 
 #include "lib/vfs/vfs.h"
@@ -387,7 +388,7 @@ tar_fill_stat (struct vfs_s_super *archive, struct stat *st, union record *heade
      * know about the other modes but I think I cause no new
      * problem when I adjust them, too. -- Norbert.
      */
-    if (header->header.linkflag == LF_DIR)
+    if (header->header.linkflag == LF_DIR || header->header.linkflag == LF_DUMPDIR)
         st->st_mode |= S_IFDIR;
     else if (header->header.linkflag == LF_SYMLINK)
         st->st_mode |= S_IFLNK;
@@ -401,7 +402,10 @@ tar_fill_stat (struct vfs_s_super *archive, struct stat *st, union record *heade
         st->st_mode |= S_IFREG;
 
     st->st_dev = 0;
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
     st->st_rdev = 0;
+#endif
+
     switch (arch->type)
     {
     case TAR_USTAR:
@@ -420,16 +424,23 @@ tar_fill_stat (struct vfs_s_super *archive, struct stat *st, union record *heade
         {
         case LF_BLK:
         case LF_CHR:
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
             st->st_rdev =
-                (tar_from_oct (8, header->header.devmajor) << 8) |
-                tar_from_oct (8, header->header.devminor);
+                makedev (tar_from_oct (8, header->header.devmajor),
+                         tar_from_oct (8, header->header.devminor));
+#endif
+            break;
         default:
             break;
         }
+        break;
+
     default:
         st->st_uid = tar_from_oct (8, header->header.uid);
         st->st_gid = tar_from_oct (8, header->header.gid);
+        break;
     }
+
     st->st_size = h_size;
     st->st_mtime = tar_from_oct (1 + 12, header->header.mtime);
     st->st_atime = 0;
@@ -439,6 +450,11 @@ tar_fill_stat (struct vfs_s_super *archive, struct stat *st, union record *heade
         st->st_atime = tar_from_oct (1 + 12, header->header.unused.oldgnu.atime);
         st->st_ctime = tar_from_oct (1 + 12, header->header.unused.oldgnu.ctime);
     }
+
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
+    st->st_blksize = 8 * 1024;  /* FIXME */
+#endif
+    vfs_adjust_stat (st);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -538,15 +554,10 @@ tar_read_header (struct vfs_class *me, struct vfs_s_super *archive, int tard, si
     else
         *h_size = tar_from_oct (1 + 12, header->header.size);
 
-    /*
-     * Skip over directory snapshot info records that
-     * are stored in incremental tar archives.
-     */
     if (header->header.linkflag == LF_DUMPDIR)
     {
         if (arch->type == TAR_UNKNOWN)
             arch->type = TAR_GNU;
-        return STATUS_SUCCESS;
     }
 
     /*

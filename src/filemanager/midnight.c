@@ -1,7 +1,7 @@
 /*
    Main dialog (file panels) of the Midnight Commander
 
-   Copyright (C) 1994-2016
+   Copyright (C) 1994-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -138,10 +138,10 @@ static gboolean ctl_x_map_enabled = FALSE;
 static void
 stop_dialogs (void)
 {
-    midnight_dlg->state = DLG_CLOSED;
+    dlg_stop (midnight_dlg);
 
     if ((top_dlg != NULL) && (top_dlg->data != NULL))
-        DIALOG (top_dlg->data)->state = DLG_CLOSED;
+        dlg_stop (DIALOG (top_dlg->data));
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -179,7 +179,7 @@ listmode_cmd (void)
         return;
 
     g_free (current_panel->user_format);
-    current_panel->list_type = list_user;
+    current_panel->list_format = list_user;
     current_panel->user_format = newmode;
     set_panel_formats (current_panel);
 
@@ -200,7 +200,8 @@ create_panel_menu (void)
     entries = g_list_prepend (entries, menu_entry_create (_("&Tree"), CK_PanelTree));
     entries = g_list_prepend (entries, menu_separator_create ());
     entries =
-        g_list_prepend (entries, menu_entry_create (_("&Listing mode..."), CK_PanelListingChange));
+        g_list_prepend (entries,
+                        menu_entry_create (_("&Listing format..."), CK_SetupListingFormat));
     entries = g_list_prepend (entries, menu_entry_create (_("&Sort order..."), CK_Sort));
     entries = g_list_prepend (entries, menu_entry_create (_("&Filter..."), CK_Filter));
 #ifdef HAVE_CHARSET
@@ -368,10 +369,7 @@ init_menu (void)
 static void
 menu_last_selected_cmd (void)
 {
-    the_menubar->is_active = TRUE;
-    the_menubar->is_dropped = (drop_menus != 0);
-    the_menubar->previous_widget = dlg_get_current_widget_id (midnight_dlg);
-    dlg_select_widget (the_menubar);
+    menubar_activate (the_menubar, drop_menus, -1);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -379,14 +377,14 @@ menu_last_selected_cmd (void)
 static void
 menu_cmd (void)
 {
-    if (the_menubar->is_active)
-        return;
+    int selected;
 
     if ((get_current_index () == 0) == (current_panel->active != 0))
-        the_menubar->selected = 0;
+        selected = 0;
     else
-        the_menubar->selected = g_list_length (the_menubar->menu) - 1;
-    menu_last_selected_cmd ();
+        selected = g_list_length (the_menubar->menu) - 1;
+
+    menubar_activate (the_menubar, drop_menus, selected);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -751,7 +749,7 @@ put_link (WPanel * panel)
         vfs_path_t *vpath;
         int i;
 
-        vpath = vfs_path_append_new (panel->cwd_vpath, selection (panel)->fname, NULL);
+        vpath = vfs_path_append_new (panel->cwd_vpath, selection (panel)->fname, (char *) NULL);
         i = mc_readlink (vpath, buffer, sizeof (buffer) - 1);
         vfs_path_free (vpath);
 
@@ -784,7 +782,7 @@ put_other_link (void)
 
 /** Insert the selected file name into the input line */
 static void
-put_prog_name (void)
+put_current_selected (void)
 {
     const char *tmp;
 
@@ -865,7 +863,7 @@ setup_mc (void)
 #ifdef HAVE_CHARSET
     tty_display_8bit (TRUE);
 #else
-    tty_display_8bit (mc_global.full_eight_bits != 0);
+    tty_display_8bit (mc_global.full_eight_bits);
 #endif /* HAVE_CHARSET */
 
 #else /* HAVE_SLANG */
@@ -873,7 +871,7 @@ setup_mc (void)
 #ifdef HAVE_CHARSET
     tty_display_8bit (TRUE);
 #else
-    tty_display_8bit (mc_global.eight_bit_clean != 0);
+    tty_display_8bit (mc_global.eight_bit_clean);
 #endif /* HAVE_CHARSET */
 #endif /* HAVE_SLANG */
 
@@ -883,7 +881,7 @@ setup_mc (void)
 #endif /* !ENABLE_SUBSHELL */
 
     if ((tty_baudrate () < 9600) || mc_global.tty.slow_terminal)
-        verbose = 0;
+        verbose = FALSE;
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -935,6 +933,8 @@ create_panels_and_run_mc (void)
 {
     midnight_dlg->get_shortcut = midnight_get_shortcut;
     midnight_dlg->get_title = midnight_get_title;
+    /* allow rebind tab */
+    widget_want_tab (WIDGET (midnight_dlg), TRUE);
 
     create_panels ();
 
@@ -969,7 +969,7 @@ prepend_cwd_on_local (const char *filename)
 
     vfs_path_free (vpath);
 
-    return vfs_path_append_new (vfs_get_raw_current_dir (), filename, NULL);
+    return vfs_path_append_new (vfs_get_raw_current_dir (), filename, (char *) NULL);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -1026,8 +1026,8 @@ quit_cmd_internal (int quiet)
         char msg[BUF_MEDIUM];
 
         g_snprintf (msg, sizeof (msg),
-                    ngettext ("You have %zd opened screen. Quit anyway?",
-                              "You have %zd opened screens. Quit anyway?", n), n);
+                    ngettext ("You have %zu opened screen. Quit anyway?",
+                              "You have %zu opened screens. Quit anyway?", n), n);
 
         if (query_dialog (_("The Midnight Commander"), msg, D_NORMAL, 2, _("&Yes"), _("&No")) != 0)
             return FALSE;
@@ -1107,11 +1107,14 @@ midnight_execute_cmd (Widget * sender, long command)
 
     switch (command)
     {
+    case CK_ChangePanel:
+        change_panel ();
+        break;
     case CK_HotListAdd:
         add2hotlist_cmd ();
         break;
-    case CK_PanelListingChange:
-        change_listing_cmd ();
+    case CK_SetupListingFormat:
+        setup_listing_format_cmd ();
         break;
     case CK_ChangeMode:
         chmod_cmd ();
@@ -1141,6 +1144,13 @@ midnight_execute_cmd (Widget * sender, long command)
         break;
     case CK_PutCurrentPath:
         midnight_put_panel_path (current_panel);
+        break;
+    case CK_PutCurrentSelected:
+        put_current_selected ();
+        break;
+    case CK_PutCurrentFullSelected:
+        midnight_put_panel_path (current_panel);
+        put_current_selected ();
         break;
     case CK_PutCurrentLink:
         put_current_link ();
@@ -1343,9 +1353,6 @@ midnight_execute_cmd (Widget * sender, long command)
     case CK_LinkSymbolic:
         link_cmd (LINK_SYMLINK_ABSOLUTE);
         break;
-    case CK_PanelListingSwitch:
-        toggle_listing_cmd ();
-        break;
     case CK_ShowHidden:
         toggle_show_hidden ();
         break;
@@ -1393,6 +1400,54 @@ midnight_execute_cmd (Widget * sender, long command)
 
 /* --------------------------------------------------------------------------------------------- */
 
+/**
+ * Whether the command-line should not respond to key events.
+ *
+ * This is TRUE if a QuickView or TreeView have the focus, as they're going
+ * to consume some keys and there's no sense in passing to the command-line
+ * just the leftovers.
+ */
+static gboolean
+is_cmdline_mute (void)
+{
+    /* When one of panels is other than view_listing,
+       current_panel points to view_listing panel all time independently of
+       it's activity. Thus, we can't use get_current_type() here.
+       current_panel should point to actualy current active panel
+       independently of it's type. */
+    return (current_panel->active == 0
+            && (get_other_type () == view_quick || get_other_type () == view_tree));
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+/**
+ * Handles the Enter key on the command-line.
+ *
+ * Returns TRUE if non-whitespace was indeed processed.
+ */
+static gboolean
+handle_cmdline_enter (void)
+{
+    size_t i;
+
+    for (i = 0; cmdline->buffer[i] != '\0' && whitespace (cmdline->buffer[i]); i++)
+        ;
+
+    if (cmdline->buffer[i] != '\0')
+    {
+        send_message (cmdline, NULL, MSG_KEY, '\n', NULL);
+        return TRUE;
+    }
+
+    input_insert (cmdline, "", FALSE);
+    cmdline->point = 0;
+
+    return FALSE;
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
 static cb_ret_t
 midnight_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
 {
@@ -1424,12 +1479,12 @@ midnight_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void
 
     case MSG_IDLE:
         /* We only need the first idle event to show user menu after start */
-        widget_want_idle (w, FALSE);
+        widget_idle (w, FALSE);
 
         if (boot_current_is_left)
-            dlg_select_widget (get_panel_widget (0));
+            widget_select (get_panel_widget (0));
         else
-            dlg_select_widget (get_panel_widget (1));
+            widget_select (get_panel_widget (1));
 
         if (auto_menu)
             midnight_execute_cmd (NULL, CK_UserMenu);
@@ -1445,53 +1500,14 @@ midnight_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void
         }
 
         /* FIXME: should handle all menu shortcuts before this point */
-        if (the_menubar->is_active)
+        if (widget_get_state (WIDGET (the_menubar), WST_FOCUSED))
             return MSG_NOT_HANDLED;
 
-        if (parm == '\t')
-            input_free_completions (cmdline);
-
-        if (parm == '\n')
+        if (parm == '\n' && !is_cmdline_mute ())
         {
-            size_t i;
-
-            /* HACK: don't execute command in the command line if Enter was pressed
-               in the quick viewer panel. */
-            /* TODO: currently, when one of panels is other than view_listing,
-               current_panel points to view_listing panel all time independently of
-               it's activity. Thus, we can't use get_current_type() here.
-               current_panel should point to actualy current active panel
-               independently of it's type. */
-            if (current_panel->active == 0 && get_other_type () == view_quick)
-                return MSG_NOT_HANDLED;
-
-            for (i = 0; cmdline->buffer[i] != '\0' &&
-                 (cmdline->buffer[i] == ' ' || cmdline->buffer[i] == '\t'); i++)
-                ;
-
-            if (cmdline->buffer[i] != '\0')
-            {
-                send_message (cmdline, NULL, MSG_KEY, parm, NULL);
+            if (handle_cmdline_enter ())
                 return MSG_HANDLED;
-            }
-
-            input_insert (cmdline, "", FALSE);
-            cmdline->point = 0;
-        }
-
-        /* Ctrl-Enter and Alt-Enter */
-        if (((parm & ~(KEY_M_CTRL | KEY_M_ALT)) == '\n') && (parm & (KEY_M_CTRL | KEY_M_ALT)))
-        {
-            put_prog_name ();
-            return MSG_HANDLED;
-        }
-
-        /* Ctrl-Shift-Enter */
-        if (parm == (KEY_M_CTRL | KEY_M_SHIFT | '\n'))
-        {
-            midnight_put_panel_path (current_panel);
-            put_prog_name ();
-            return MSG_HANDLED;
+            /* Else: the panel will handle it. */
         }
 
         if ((!mc_global.tty.alternate_plus_minus
@@ -1554,14 +1570,14 @@ midnight_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void
             if (command != CK_IgnoreKey)
                 v = midnight_execute_cmd (NULL, command);
 
-            if (v == MSG_NOT_HANDLED && command_prompt)
+            if (v == MSG_NOT_HANDLED && command_prompt && !is_cmdline_mute ())
                 v = send_message (cmdline, NULL, MSG_KEY, parm, NULL);
 
             return v;
         }
 
     case MSG_POST_KEY:
-        if (!the_menubar->is_active)
+        if (!widget_get_state (WIDGET (the_menubar), WST_FOCUSED))
             update_dirty_panels ();
         return MSG_HANDLED;
 
@@ -1576,42 +1592,6 @@ midnight_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void
     default:
         return dlg_default_callback (w, sender, msg, parm, data);
     }
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-static int
-midnight_event (Gpm_Event * event, void *data)
-{
-    Widget *wh = WIDGET (data);
-    int ret = MOU_UNHANDLED;
-
-    if (event->y == wh->y + 1)
-    {
-        /* menubar */
-        if (menubar_visible || the_menubar->is_active)
-            ret = WIDGET (the_menubar)->mouse (event, the_menubar);
-        else
-        {
-            Widget *w;
-
-            w = get_panel_widget (0);
-            if (w->mouse != NULL)
-                ret = w->mouse (event, w);
-
-            if (ret == MOU_UNHANDLED)
-            {
-                w = get_panel_widget (1);
-                if (w->mouse != NULL)
-                    ret = w->mouse (event, w);
-            }
-
-            if (ret == MOU_UNHANDLED)
-                ret = WIDGET (the_menubar)->mouse (event, the_menubar);
-        }
-    }
-
-    return ret;
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -1756,7 +1736,7 @@ void
 change_panel (void)
 {
     input_free_completions (cmdline);
-    dlg_one_down (midnight_dlg);
+    dlg_select_next_widget (midnight_dlg);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -1796,8 +1776,8 @@ do_nc (void)
     edit_stack_init ();
 #endif
 
-    midnight_dlg = dlg_create (FALSE, 0, 0, LINES, COLS, dialog_colors, midnight_callback,
-                               midnight_event, "[main]", NULL, DLG_NONE);
+    midnight_dlg = dlg_create (FALSE, 0, 0, 1, 1, WPOS_FULLSCREEN, FALSE, dialog_colors,
+                               midnight_callback, NULL, "[main]", NULL);
 
     /* Check if we were invoked as an editor or file viewer */
     if (mc_global.mc_run_mode != MC_RUN_FULL)
@@ -1808,7 +1788,7 @@ do_nc (void)
     else
     {
         /* We only need the first idle event to show user menu after start */
-        widget_want_idle (WIDGET (midnight_dlg), TRUE);
+        widget_idle (WIDGET (midnight_dlg), TRUE);
 
         setup_mc ();
         mc_filehighlight = mc_fhl_new (TRUE);

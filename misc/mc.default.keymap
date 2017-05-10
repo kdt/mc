@@ -1,4 +1,5 @@
 [main]
+ChangePanel = tab
 Help = f1
 UserMenu = f2
 View = f3
@@ -22,8 +23,7 @@ Suspend = ctrl-z
 Swap = ctrl-u
 History = alt-h
 # PanelListing =
-PanelListingSwitch = alt-t
-# PanelListingChange =
+# SetupListingFormat =
 ShowHidden = alt-dot
 SplitVertHoriz = alt-comma
 SplitEqual = alt-equal
@@ -32,6 +32,8 @@ SplitLess = alt-shift-left
 Shell = ctrl-o
 PutCurrentPath = alt-a
 PutOtherPath = alt-shift-a
+PutCurrentSelected = alt-enter; ctrl-enter
+PutCurrentFullSelected = ctrl-shift-enter
 ViewFiltered = alt-exclamation
 Select = kpplus
 Unselect = kpminus
@@ -77,6 +79,7 @@ PutCurrentLink = r
 PutOtherLink = ctrl-r
 
 [panel]
+CycleListingFormat = alt-t
 Search = ctrl-s; alt-s
 Mark = insert; ctrl-t
 MarkUp = shift-up

@@ -1,7 +1,7 @@
 /*
    Chown command -- for the Midnight Commander
 
-   Copyright (C) 1994-2016
+   Copyright (C) 1994-2017
    Free Software Foundation, Inc.
 
    This file is part of the Midnight Commander.
@@ -213,8 +213,8 @@ init_chown (void)
     lines = GH + 4 + (single_set ? 2 : 4);
 
     ch_dlg =
-        dlg_create (TRUE, 0, 0, lines, cols, dialog_colors, chown_callback, NULL, "[Chown]",
-                    _("Chown command"), DLG_CENTER);
+        dlg_create (TRUE, 0, 0, lines, cols, WPOS_CENTER, FALSE, dialog_colors, chown_callback,
+                    NULL, "[Chown]", _("Chown command"));
 
     add_widget (ch_dlg, groupbox_new (2, 3, GH, GW, _("User name")));
     l_user = listbox_new (3, 4, GH - 2, GW - 2, FALSE, NULL);
@@ -276,7 +276,7 @@ init_chown (void)
                             chown_but[i].flags, chown_but[i].text, NULL));
 
     /* select first listbox */
-    dlg_select_widget (l_user);
+    widget_select (WIDGET (l_user));
 
     return ch_dlg;
 }

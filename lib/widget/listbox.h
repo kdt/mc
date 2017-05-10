@@ -52,7 +52,6 @@ typedef struct WListbox
     gboolean allow_duplicates;  /* Do we allow duplicates on the list? */
     gboolean scrollbar;         /* Draw a scrollbar? */
     gboolean deletable;         /* Can list entries be deleted? */
-    gboolean focused;           /* Listbox is focused */
     lcback_fn callback;         /* The callback function */
     int cursor_x, cursor_y;     /* Cache the values */
 } WListbox;
@@ -65,6 +64,7 @@ extern const global_keymap_t *listbox_map;
 
 WListbox *listbox_new (int y, int x, int height, int width, gboolean deletable, lcback_fn callback);
 int listbox_search_text (WListbox * l, const char *text);
+int listbox_search_data (WListbox * l, const void *data);
 void listbox_select_first (WListbox * l);
 void listbox_select_last (WListbox * l);
 void listbox_select_entry (WListbox * l, int dest);

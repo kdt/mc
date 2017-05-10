@@ -2,7 +2,7 @@
    Internal file viewer for the Midnight Commander
    Function for whow info on display
 
-   Copyright (C) 1994-2016
+   Copyright (C) 1994-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -111,11 +111,8 @@ mcview_set_buttonbar (WView * view)
     buttonbar_set_label (b, 8, view->magic_mode ? Q_ ("ButtonBar|Raw")
                          : Q_ ("ButtonBar|Parse"), keymap, WIDGET (view));
 
-    if (mcview_is_in_panel (view))
-        buttonbar_set_label (b, 10, "", keymap, WIDGET (view));
-    else
+    if (!mcview_is_in_panel (view))     /* don't override some panel buttonbar keys  */
     {
-        /* don't override some panel buttonbar keys  */
         buttonbar_set_label (b, 3, Q_ ("ButtonBar|Quit"), keymap, WIDGET (view));
         buttonbar_set_label (b, 9, view->text_nroff_mode ? Q_ ("ButtonBar|Unform")
                              : Q_ ("ButtonBar|Format"), keymap, WIDGET (view));
@@ -284,12 +281,12 @@ mcview_compute_areas (WView * view)
     /* Compute the heights of the areas */
     rest = view_area.height;
 
-    height = min (rest, 1);
+    height = MIN (rest, 1);
     view->status_area.height = height;
     rest -= height;
 
     height = (ruler == RULER_NONE || view->hex_mode) ? 0 : 2;
-    height = min (rest, height);
+    height = MIN (rest, height);
     view->ruler_area.height = height;
     rest -= height;
 
@@ -326,9 +323,8 @@ mcview_update_bytes_per_line (WView * view)
         bytes = 4;
     else
         bytes = 4 * ((cols - 9) / ((cols <= 80) ? 17 : 18));
-#ifdef HAVE_ASSERT_H
-    assert (bytes != 0);
-#endif
+
+    g_assert (bytes != 0);
 
     view->bytes_per_line = bytes;
     view->dirty = mcview_max_dirt_limit + 1;    /* To force refresh */
@@ -346,9 +342,8 @@ mcview_display_toggle_ruler (WView * view)
         RULER_NONE
     };
 
-#ifdef HAVE_ASSERT_H
-    assert ((size_t) ruler < 3);
-#endif
+    g_assert ((size_t) ruler < 3);
+
     ruler = next[(size_t) ruler];
     mcview_compute_areas (view);
     view->dirty++;

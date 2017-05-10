@@ -1,7 +1,7 @@
 /*
    Virtual File System: External file system.
 
-   Copyright (C) 1995-2016
+   Copyright (C) 1995-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -246,7 +246,7 @@ extfs_find_entry_int (struct entry *dir, const char *name, GSList * list,
     if (g_path_is_absolute (name))
     {
         /* Handle absolute paths */
-        name = (char *) g_path_skip_root (name);
+        name = g_path_skip_root (name);
         dir = dir->inode->archive->root_entry;
     }
 
@@ -1095,9 +1095,7 @@ extfs_stat_move (struct stat *buf, const struct inode *inode)
 #ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
     buf->st_blksize = RECORDSIZE;
 #endif
-#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
-    buf->st_blocks = (inode->size + RECORDSIZE - 1) / RECORDSIZE;
-#endif
+    vfs_adjust_stat (buf);
     buf->st_atime = inode->atime;
     buf->st_mtime = inode->mtime;
     buf->st_ctime = inode->ctime;

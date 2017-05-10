@@ -2,7 +2,7 @@
    Search text engine.
    Glob-style pattern matching
 
-   Copyright (C) 2009-2016
+   Copyright (C) 2009-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -116,7 +116,7 @@ static GString *
 mc_search__translate_replace_glob_to_regex (const char *str)
 {
     GString *buff;
-    int cnt = '0';
+    char cnt = '0';
     gboolean escaped_mode = FALSE;
 
     buff = g_string_sized_new (32);

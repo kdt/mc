@@ -68,6 +68,7 @@ Dmitry Koterov <dmitry.koterov@gmail.com>
 
 Egmont Koblinger <egmont@gmail.com>
         Support of 256 colors
+        Support of True Color (16 millions colors)
         Support of italic text
         Support of extended mouse clicks beyond 223 column
         Support of bracketed paste mode of xterm
@@ -102,6 +103,10 @@ Leonard den Ottolander <leonard * den ottolander nl>
 Marcelo Roccasalva <mfroccas@raiz.uncu.edu.ar>
 
 Massimo Fontanelli <MC8737@mclink.it>
+
+Mooffie <mooffie@gmail.com>
+	New high-level mouse API
+	extfs helpers tester
 
 Oliver Lange <modarin@bloody.in-berlin.de>
 	modarin256: set of 256-color skins

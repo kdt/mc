@@ -21,7 +21,7 @@
 #define selection(p) (&(p->dir.list[p->selected]))
 #define DEFAULT_USER_FORMAT "half type name | size | perm"
 
-#define LIST_TYPES 4
+#define LIST_FORMATS 4
 
 #define UP_KEEPSEL ((char *) -1)
 
@@ -33,7 +33,7 @@ typedef enum
     list_brief,                 /* Name */
     list_long,                  /* Like ls -l */
     list_user                   /* User defined */
-} list_type_t;
+} list_format_t;
 
 typedef enum
 {
@@ -93,7 +93,7 @@ typedef struct
     Widget widget;
     dir_list dir;               /* Directory contents */
 
-    list_type_t list_type;      /* listing type */
+    list_format_t list_format;  /* listing type */
     int active;                 /* If panel is currently selected */
     vfs_path_t *cwd_vpath;      /* Current Working Directory */
     vfs_path_t *lwd_vpath;      /* Last Working Directory */
@@ -117,9 +117,9 @@ typedef struct
 
     int dirty;                  /* Should we redisplay the panel? */
 
-    int user_mini_status;       /* Is user_status_format used */
+    gboolean user_mini_status;  /* Is user_status_format used */
     char *user_format;          /* User format */
-    char *user_status_format[LIST_TYPES];       /* User format for status line */
+    char *user_status_format[LIST_FORMATS];     /* User format for status line */
 
     struct format_e *format;    /* Display format */
     struct format_e *status_format;     /* Mini status format */
@@ -166,7 +166,6 @@ vfs_path_t *remove_encoding_from_path (const vfs_path_t * vpath);
 
 void update_panels (panel_update_flags_t flags, const char *current_file);
 int set_panel_formats (WPanel * p);
-void panel_update_cols (Widget * widget, panel_display_t frame_size);
 
 void try_to_select (WPanel * panel, const char *name);
 
@@ -180,12 +179,12 @@ void do_file_mark (WPanel * panel, int idx, int val);
 gboolean do_panel_cd (WPanel * panel, const vfs_path_t * new_dir_vpath, enum cd_enum cd_type);
 
 gsize panel_get_num_of_sortable_fields (void);
-const char **panel_get_sortable_fields (gsize *);
+char **panel_get_sortable_fields (gsize *);
 const panel_field_t *panel_get_field_by_id (const char *);
 const panel_field_t *panel_get_field_by_title (const char *);
 const panel_field_t *panel_get_field_by_title_hotkey (const char *);
 gsize panel_get_num_of_user_possible_fields (void);
-const char **panel_get_user_possible_fields (gsize *);
+char **panel_get_user_possible_fields (gsize *);
 void panel_set_cwd (WPanel * panel, const vfs_path_t * vpath);
 void panel_set_lwd (WPanel * panel, const vfs_path_t * vpath);
 

@@ -1,7 +1,7 @@
 /*
    lib/vfs - vfs_path_t charset recode functions
 
-   Copyright (C) 2011-2016
+   Copyright (C) 2011-2017
    Free Software Foundation, Inc.
 
    Written by:
@@ -34,8 +34,6 @@
 #include "lib/vfs/path.h"
 
 #include "src/vfs/local/local.c"
-
-const char *mc_config_get_home_dir (void);
 
 /* --------------------------------------------------------------------------------------------- */
 
