@@ -1,7 +1,7 @@
 /*
    Editor low level data handling and cursor fundamentals.
 
-   Copyright (C) 1996-2017
+   Copyright (C) 1996-2021
    Free Software Foundation, Inc.
 
    Written by:
@@ -49,7 +49,7 @@
 #include "lib/tty/tty.h"        /* attrset() */
 #include "lib/tty/key.h"        /* is_idle() */
 #include "lib/skin.h"           /* EDITOR_NORMAL_COLOR */
-#include "lib/fileloc.h"        /* EDIT_BLOCK_FILE */
+#include "lib/fileloc.h"        /* EDIT_HOME_BLOCK_FILE */
 #include "lib/vfs/vfs.h"
 #include "lib/strutil.h"        /* utf string functions */
 #include "lib/util.h"           /* load_file_position(), save_file_position() */
@@ -61,14 +61,17 @@
 #include "lib/charsets.h"       /* get_codepage_id */
 #endif
 
-#include "src/filemanager/usermenu.h"   /* user_menu_cmd() */
+#include "src/usermenu.h"       /* user_menu_cmd() */
 
 #include "src/setup.h"          /* option_tab_spacing */
-#include "src/learn.h"          /* learn_keys */
-#include "src/keybind-defaults.h"
+#include "src/keymap.h"
 
 #include "edit-impl.h"
 #include "editwidget.h"
+#include "editsearch.h"
+#include "editcomplete.h"       /* edit_complete_word_cmd() */
+#include "editmacros.h"
+#include "etags.h"              /* edit_get_match_keyword_cmd() */
 #ifdef HAVE_ASPELL
 #include "spell.h"
 #endif
@@ -126,6 +129,7 @@ static const struct edit_filters
 {
     /* *INDENT-OFF* */
     { "xz -cd %s 2>&1", "xz > %s", ".xz"},
+    { "zstd -cd %s 2>&1", "zstd > %s", ".zst"},
     { "lz4 -cd %s 2>&1", "lz4 > %s", ".lz4" },
     { "lzip -cd %s 2>&1", "lzip > %s", ".lz"},
     { "lzma -cd %s 2>&1", "lzma > %s", ".lzma" },
@@ -890,11 +894,8 @@ my_type_of (int c)
     if (c == 0)
         return 0;
     if (c == '!')
-    {
-        if (*option_chars_move_whole_word == '!')
-            return 2;
-        return 0x80000000UL;
-    }
+        return 2;
+
     if (g_ascii_isupper ((gchar) c))
         c = 'A';
     else if (g_ascii_islower ((gchar) c))
@@ -1772,7 +1773,7 @@ user_menu (WEdit * edit, const char *menu_file, int selected_entry)
     struct stat status;
     vfs_path_t *block_file_vpath;
 
-    block_file = mc_config_get_full_path (EDIT_BLOCK_FILE);
+    block_file = mc_config_get_full_path (EDIT_HOME_BLOCK_FILE);
     block_file_vpath = vfs_path_from_str (block_file);
     curs = edit->buffer.curs1;
     nomark = !eval_marks (edit, &start_mark, &end_mark);
@@ -1804,11 +1805,11 @@ user_menu (WEdit * edit, const char *menu_file, int selected_entry)
             fclose (fd);
     }
     g_free (block_file);
-    vfs_path_free (block_file_vpath);
+    vfs_path_free (block_file_vpath, TRUE);
 
     edit_cursor_move (edit, curs - edit->buffer.curs1);
     edit->force |= REDRAW_PAGE;
-    widget_redraw (WIDGET (edit));
+    widget_draw (WIDGET (edit));
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -2087,21 +2088,18 @@ edit_init (WEdit * edit, int y, int x, int lines, int cols, const vfs_path_t * f
 
     if (edit != NULL)
     {
+        gboolean fullscreen;
+        WRect loc_prev;
+
         /* save some widget parameters */
-        gboolean fullscreen = edit->fullscreen;
-        int y_prev = edit->y_prev;
-        int x_prev = edit->x_prev;
-        int lines_prev = edit->lines_prev;
-        int cols_prev = edit->cols_prev;
+        fullscreen = edit->fullscreen;
+        loc_prev = edit->loc_prev;
 
         edit_purge_widget (edit);
 
         /* restore saved parameters */
         edit->fullscreen = fullscreen;
-        edit->y_prev = y_prev;
-        edit->x_prev = x_prev;
-        edit->lines_prev = lines_prev;
-        edit->cols_prev = cols_prev;
+        edit->loc_prev = loc_prev;
     }
     else
     {
@@ -2112,6 +2110,8 @@ edit_init (WEdit * edit, int y, int x, int lines, int cols, const vfs_path_t * f
         w = WIDGET (edit);
         widget_init (w, y, x, lines, cols, NULL, NULL);
         w->options |= WOP_SELECTABLE | WOP_TOP_SELECT | WOP_WANT_CURSOR;
+        w->keymap = editor_map;
+        w->ext_keymap = editor_x_map;
         edit->fullscreen = TRUE;
         edit_save_size (edit);
     }
@@ -2187,13 +2187,13 @@ edit_clean (WEdit * edit)
 
     /* a stale lock, remove it */
     if (edit->locked)
-        edit->locked = unlock_file (edit->filename_vpath);
+        (void) unlock_file (edit->filename_vpath);
 
     /* save cursor position */
     if (option_save_position)
         edit_save_position (edit);
     else if (edit->serialized_bookmarks != NULL)
-        edit->serialized_bookmarks = (GArray *) g_array_free (edit->serialized_bookmarks, TRUE);
+        g_array_free (edit->serialized_bookmarks, TRUE);
 
     /* File specified on the mcedit command line and never saved */
     if (edit->delete_file)
@@ -2206,11 +2206,9 @@ edit_clean (WEdit * edit)
 
     g_free (edit->undo_stack);
     g_free (edit->redo_stack);
-    vfs_path_free (edit->filename_vpath);
-    vfs_path_free (edit->dir_vpath);
-    mc_search_free (edit->search);
-    edit->search = NULL;
-    MC_PTR_FREE (edit->last_search_string);
+    vfs_path_free (edit->filename_vpath, TRUE);
+    vfs_path_free (edit->dir_vpath, TRUE);
+    edit_search_deinit (edit);
 
 #ifdef HAVE_CHARSET
     if (edit->converter != str_cnv_from_term)
@@ -2241,10 +2239,7 @@ edit_reload_line (WEdit * edit, const vfs_path_t * filename_vpath, long line)
     *WIDGET (e) = *w;
     /* save some widget parameters */
     e->fullscreen = edit->fullscreen;
-    e->y_prev = edit->y_prev;
-    e->x_prev = edit->x_prev;
-    e->lines_prev = edit->lines_prev;
-    e->cols_prev = edit->cols_prev;
+    e->loc_prev = edit->loc_prev;
 
     if (edit_init (e, w->y, w->x, w->lines, w->cols, filename_vpath, line) == NULL)
     {
@@ -2829,6 +2824,15 @@ edit_move_forward3 (const WEdit * edit, off_t current, long cols, off_t upto)
 }
 
 /* --------------------------------------------------------------------------------------------- */
+/** returns the current offset of the cursor from the beginning of a file */
+
+off_t
+edit_get_cursor_offset (const WEdit * edit)
+{
+    return edit->buffer.curs1;
+}
+
+/* --------------------------------------------------------------------------------------------- */
 /** returns the current column position of the cursor */
 
 long
@@ -3356,7 +3360,12 @@ edit_execute_cmd (WEdit * edit, long command, int char_for_insertion)
         if (option_cursor_beyond_eol && edit->over_col > 0)
             edit_insert_over (edit);
 #ifdef HAVE_CHARSET
-        if (char_for_insertion > 255 && !mc_global.utf8_display)
+        /**
+           Encode 8-bit input as UTF-8, if display (locale) is *not* UTF-8,
+           *but* source encoding *is* set to UTF-8; see ticket #3843 for the details.
+        */
+        if (char_for_insertion > 127 && str_isutf8 (get_codepage_id (mc_global.source_codepage))
+            && !mc_global.utf8_display)
         {
             unsigned char str[UTF8_CHAR_LEN + 1];
             size_t i = 0;
@@ -3420,6 +3429,7 @@ edit_execute_cmd (WEdit * edit, long command, int char_for_insertion)
             edit->column_highlight = 0;
             edit_mark_cmd (edit, TRUE);
         }
+        break;
     default:
         break;
     }
@@ -3442,11 +3452,13 @@ edit_execute_cmd (WEdit * edit, long command, int char_for_insertion)
     case CK_MarkColumnDown:
         if (edit->mark2 == -1)
             break;              /*marking is following the cursor: may need to highlight a whole line */
+        MC_FALLTHROUGH;
     case CK_Left:
     case CK_Right:
     case CK_MarkLeft:
     case CK_MarkRight:
         edit->force |= REDRAW_CHAR_ONLY;
+        break;
     default:
         break;
     }
@@ -3537,18 +3549,21 @@ edit_execute_cmd (WEdit * edit, long command, int char_for_insertion)
 
     case CK_MarkColumnPageUp:
         edit->column_highlight = 1;
+        MC_FALLTHROUGH;
     case CK_PageUp:
     case CK_MarkPageUp:
         edit_move_up (edit, w->lines - 1, TRUE);
         break;
     case CK_MarkColumnPageDown:
         edit->column_highlight = 1;
+        MC_FALLTHROUGH;
     case CK_PageDown:
     case CK_MarkPageDown:
         edit_move_down (edit, w->lines - 1, TRUE);
         break;
     case CK_MarkColumnLeft:
         edit->column_highlight = 1;
+        MC_FALLTHROUGH;
     case CK_Left:
     case CK_MarkLeft:
         if (option_fake_half_tabs && is_in_indent (&edit->buffer) && right_of_four_spaces (edit))
@@ -3564,6 +3579,7 @@ edit_execute_cmd (WEdit * edit, long command, int char_for_insertion)
         break;
     case CK_MarkColumnRight:
         edit->column_highlight = 1;
+        MC_FALLTHROUGH;
     case CK_Right:
     case CK_MarkRight:
         if (option_fake_half_tabs && is_in_indent (&edit->buffer) && left_of_four_spaces (edit))
@@ -3594,36 +3610,42 @@ edit_execute_cmd (WEdit * edit, long command, int char_for_insertion)
         break;
     case CK_MarkColumnUp:
         edit->column_highlight = 1;
+        MC_FALLTHROUGH;
     case CK_Up:
     case CK_MarkUp:
         edit_move_up (edit, 1, FALSE);
         break;
     case CK_MarkColumnDown:
         edit->column_highlight = 1;
+        MC_FALLTHROUGH;
     case CK_Down:
     case CK_MarkDown:
         edit_move_down (edit, 1, FALSE);
         break;
     case CK_MarkColumnParagraphUp:
         edit->column_highlight = 1;
+        MC_FALLTHROUGH;
     case CK_ParagraphUp:
     case CK_MarkParagraphUp:
         edit_move_up_paragraph (edit, FALSE);
         break;
     case CK_MarkColumnParagraphDown:
         edit->column_highlight = 1;
+        MC_FALLTHROUGH;
     case CK_ParagraphDown:
     case CK_MarkParagraphDown:
         edit_move_down_paragraph (edit, FALSE);
         break;
     case CK_MarkColumnScrollUp:
         edit->column_highlight = 1;
+        MC_FALLTHROUGH;
     case CK_ScrollUp:
     case CK_MarkScrollUp:
         edit_move_up (edit, 1, TRUE);
         break;
     case CK_MarkColumnScrollDown:
         edit->column_highlight = 1;
+        MC_FALLTHROUGH;
     case CK_ScrollDown:
     case CK_MarkScrollDown:
         edit_move_down (edit, 1, TRUE);
@@ -3893,7 +3915,7 @@ edit_execute_cmd (WEdit * edit, long command, int char_for_insertion)
     case CK_ExternalCommand:
         edit_ext_cmd (edit);
         break;
-    case CK_Mail:
+    case CK_EditMail:
         edit_mail_dialog (edit);
         break;
 #ifdef HAVE_CHARSET
@@ -3911,7 +3933,7 @@ edit_execute_cmd (WEdit * edit, long command, int char_for_insertion)
         edit_begin_end_repeat_cmd (edit);
         break;
     case CK_ExtendedKeyMap:
-        edit->extmod = TRUE;
+        w->ext_mode = TRUE;
         break;
     default:
         break;
@@ -3981,6 +4003,7 @@ edit_execute_cmd (WEdit * edit, long command, int char_for_insertion)
         case CK_DeleteToEnd:
             format_paragraph (edit, FALSE);
             edit->force |= REDRAW_PAGE;
+            break;
         default:
             break;
         }
@@ -4007,7 +4030,7 @@ void
 edit_stack_free (void)
 {
     for (edit_stack_iterator = 0; edit_stack_iterator < MAX_HISTORY_MOVETO; edit_stack_iterator++)
-        vfs_path_free (edit_history_moveto[edit_stack_iterator].filename_vpath);
+        vfs_path_free (edit_history_moveto[edit_stack_iterator].filename_vpath, TRUE);
 }
 
 /* --------------------------------------------------------------------------------------------- */

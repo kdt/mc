@@ -2,17 +2,28 @@ dnl
 dnl Configure.in file for the Midnight Commander
 dnl
 
-AC_PREREQ(2.60)
-AC_INIT([GNU Midnight Commander], [], [mc-devel@gnome.org])
+dnl 2.64 is required at least for m4_esyscmd_s()
+AC_PREREQ(2.64)
+
+AC_INIT([GNU Midnight Commander], m4_esyscmd_s([./version.sh .]),
+        [https://www.midnight-commander.org/wiki/NewTicket], [mc],
+        [https://www.midnight-commander.org/])
+
 m4_pattern_forbid(MC_)
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR(src/main.c)
 AC_CONFIG_HEADERS(config.h)
-mc_VERSION
-AM_INIT_AUTOMAKE(mc, ${VERSION} )
+
+dnl Apply "no-define" to avoid defining the VERSION macro in config.h
+AM_INIT_AUTOMAKE([no-define])
+dnl PACKAGE macro isn't defined if "no-define" is applied
+AC_DEFINE([PACKAGE], ["mc"], [Name of package])
+
 dnl Enable silent rules by default (if yes)
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
+mc_VERSION
 
 AM_MAINTAINER_MODE
 
@@ -45,7 +56,15 @@ if test "x$enable_werror" = xyes; then
     mc_CHECK_ONE_CFLAG([-Werror])
 fi
 
-AC_PROG_LIBTOOL
+dnl Compiler can generate warnings for unrecognized flags added to CFLAGS
+dnl which causes attribute checks to fail
+ax_gcc_func_attribute_save_flags=$[]_AC_LANG_PREFIX[]FLAGS
+_AC_LANG_PREFIX[]FLAGS=
+AX_GCC_FUNC_ATTRIBUTE([fallthrough])
+_AC_LANG_PREFIX[]FLAGS=$ax_gcc_func_attribute_save_flags
+unset ax_gcc_func_attribute_save_flags
+
+LT_INIT
 
 
 dnl ############################################################################
@@ -55,9 +74,7 @@ dnl ############################################################################
 PKG_PROG_PKG_CONFIG
 AC_PROG_INSTALL
 AC_PROG_LN_S
-AC_PATH_PROG([PERL], [perl], [/usr/bin/perl])
-AC_PATH_PROG([PYTHON], [python], [/usr/bin/python])
-AC_PATH_PROG([RUBY], [ruby], [/usr/bin/ruby])
+dnl See also the "OS specific stuff" section below.
 
 dnl Check nroff and the options it supports
 AC_CHECK_PROG(HAVE_nroff, nroff, true, false)
@@ -109,23 +126,65 @@ fi
 AC_SUBST(MANDOC)
 AC_SUBST(MAN_FLAGS)
 
-dnl Check for -L option to file
+dnl Check for -z, -L, and -S options to file
 AC_CHECK_PROG(HAVE_FILECMD, file, true, false)
 if $HAVE_FILECMD; then
-    AC_MSG_CHECKING([for -L option to file command])
-    AC_CACHE_VAL(mc_cv_filel, [
-    file -L . > /dev/null 2>&1
-    if test $? = 0; then
-	mc_cv_filel=yes
-    else
-	mc_cv_filel=no
-    fi
+    dnl Don't use the file command if it doesn't accept the -z option
+    AC_MSG_CHECKING([for -z option to file command])
+    AC_CACHE_VAL(mc_cv_file_z, [
+        file -z . > /dev/null 2>&1
+        if test $? = 0; then
+            mc_cv_file_z=yes
+        else
+            mc_cv_file_z=no
+        fi
     ])
-    if test x$mc_cv_filel = xyes; then
-	AC_DEFINE(FILE_L, 1, [Define if the file command accepts the -L option])
+    AC_MSG_RESULT([$mc_cv_file_z])
+
+    if test x$mc_cv_file_z = xyes; then
+        AC_DEFINE(USE_FILE_CMD, 1, [Define if the file command accepts the -z option])
+    else
+        AC_MSG_WARN([The file command doesn't accept the -z option and will not be used])
     fi
-    filel=$mc_cv_filel
-    AC_MSG_RESULT([$filel])
+
+    if test x$mc_cv_file_z = xyes; then
+        dnl file is used; check -L and -S options
+
+        AC_MSG_CHECKING([for -L option to file command])
+        AC_CACHE_VAL(mc_cv_file_L, [
+            file -L . > /dev/null 2>&1
+            if test $? = 0; then
+                mc_cv_file_L=yes
+            else
+                mc_cv_file_L=no
+            fi
+        ])
+        AC_MSG_RESULT([$mc_cv_file_L])
+
+        if test x$mc_cv_file_L = xyes; then
+            AC_DEFINE(FILE_L, "-L ", [Define if the file command accepts the -L option])
+        else
+            AC_DEFINE(FILE_L, "", [Define if the file command accepts the -L option])
+        fi
+
+        dnl The file command accepts the -S option since 5.33
+        AC_MSG_CHECKING([for -S option to file command])
+        AC_CACHE_VAL(mc_cv_file_S, [
+            file -S . > /dev/null 2>&1
+            if test $? = 0; then
+                mc_cv_file_S=yes
+            else
+                mc_cv_file_S=no
+            fi
+        ])
+        AC_MSG_RESULT([$mc_cv_file_S])
+
+        if test x$mc_cv_file_S = xyes; then
+            AC_DEFINE(FILE_S, "-S ", [Define if file command accepts the -S option])
+        else
+            AC_DEFINE(FILE_S, "", [Define if file command accepts the -S option])
+        fi
+    fi
 fi
 
 dnl Only list browsers here that can be run in background (i.e. with `&')
@@ -160,6 +219,8 @@ AC_CHECK_HEADERS([string.h memory.h limits.h malloc.h \
 	utime.h sys/statfs.h sys/vfs.h \
 	sys/select.h sys/ioctl.h stropts.h arpa/inet.h \
 	sys/socket.h])
+dnl This macro is redefined in m4.include/gnulib/sys_types_h.m4
+dnl   to work around a buggy version in autoconf <= 2.69.
 AC_HEADER_MAJOR
 
 
@@ -181,7 +242,7 @@ AC_TYPE_PID_T
 AC_TYPE_UID_T
 
 AC_STRUCT_ST_BLOCKS
-AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_rdev])
+AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_rdev, struct stat.st_mtim])
 gl_STAT_SIZE
 
 AH_TEMPLATE([sig_atomic_t],
@@ -229,9 +290,6 @@ AC_CHECK_FUNCS([\
 	realpath
 ])
 
-dnl utimensat is supported since glibc 2.6 and specified in POSIX.1-2008
-AC_CHECK_FUNCS([utimensat])
-
 dnl getpt is a GNU Extension (glibc 2.1.x)
 AC_CHECK_FUNCS(posix_openpt, , [AC_CHECK_FUNCS(getpt)])
 AC_CHECK_FUNCS(grantpt, , [AC_CHECK_LIB(pt, grantpt)])
@@ -260,21 +318,35 @@ AC_CHECK_LIB(seq, get_process_stats, [
 		  [Define if you have function `get_process_stats' and
 have to use that instead of gettimeofday])])
 
-mc_AC_GET_FS_INFO
+mc_GET_FS_INFO
 
 
 dnl ############################################################################
 dnl Internationalization
 dnl ############################################################################
 
-AM_GNU_GETTEXT([no-libtool], [need-ngettext])
-AM_GNU_GETTEXT_VERSION([0.18.1])
+AC_CHECK_FUNCS([setlocale])
+
+AM_GNU_GETTEXT([external], [need-ngettext])
+AM_GNU_GETTEXT_VERSION([0.18.2])
 
 mc_I18N
 
 dnl ############################################################################
-dnl OS specific flags
+dnl OS specific stuff
 dnl ############################################################################
+
+case $host_os in
+*os400)
+    AC_PATH_PROG([PERL], [perl], [/QOpenSys/pkgs/bin/perl])
+    AC_PATH_PROG([PYTHON], [python], [/QOpenSys/pkgs/bin/python2])
+    AC_PATH_PROG([RUBY], [ruby], [/QOpenSys/pkgs/bin/ruby])
+    ;;
+*)
+    AC_PATH_PROG([PERL], [perl], [/usr/bin/perl])
+    AC_PATH_PROG([PYTHON], [python], [/usr/bin/python])
+    AC_PATH_PROG([RUBY], [ruby], [/usr/bin/ruby])
+esac
 
 case $host_os in
 aux*)
@@ -299,6 +371,27 @@ AC_EGREP_CPP([yes],
     [
         AC_MSG_RESULT(no)
     ])
+
+dnl utimensat is supported since glibc 2.6 and specified in POSIX.1-2008
+dnl utimensat() causes different timespec structures to cause failures on IBM i and AIX
+case $host_os in
+*os400 | aix*)
+    ;;
+*)
+    AC_CHECK_FUNCS([utimensat])
+    ;;
+esac
+
+case $host_os in
+*os400)
+    AC_DEFINE([PTY_ZEROREAD], [1], [read(1) can return 0 for a non-closed fd])
+esac
+
+dnl Check linux/fs.h for FICLONE to support BTRFS's file clone operation
+case $host_os in
+linux*)
+    AC_CHECK_HEADERS([linux/fs.h])
+esac
 
 dnl Check if the OS is supported by the console saver.
 cons_saver=""
@@ -360,31 +453,6 @@ AM_CONDITIONAL([ENABLE_MCLIB], [test x$enable_mclib = xyes])
 
 
 dnl ############################################################################
-dnl Where config files should be placed
-dnl ############################################################################
-
-AC_ARG_WITH([homedir],
-    AS_HELP_STRING([--with-homedir],
-                   [Choose any place of user settings relative to home dir, or XDG for respect XDG standards @<:@XDG@:>@]),
-    [
-	if test "x$withval" = "xXDG"; then
-	    with_homedir=XDG
-	else
-	    with_homedir=$withval
-	fi
-    ],
-    [with_homedir=XDG])
-
-
-if test x$with_homedir = xXDG; then
-    AC_DEFINE(MC_HOMEDIR_XDG, 1, [Define to enable XDG standard support])
-else
-    AC_DEFINE(MC_HOMEDIR_XDG, 0, [Define to disable XDG standard support])
-    AC_DEFINE_UNQUOTED([MC_USERCONF_DIR], ["$with_homedir"], [Where configs will be placed relative to $HOME])
-fi
-
-
-dnl ############################################################################
 dnl MC options
 dnl ############################################################################
 
@@ -407,6 +475,7 @@ fi
 
 mc_SUBSHELL
 mc_BACKGROUND
+mc_EXT2FS_ATTR
 mc_VFS_CHECKS
 
 dnl ############################################################################
@@ -494,7 +563,13 @@ dnl Clarify do we really need GModule
 AM_CONDITIONAL([HAVE_GMODULE], [test -n "$g_module_supported" && \
                                 test x"$textmode_x11_support" = x"yes" -o x"$enable_aspell" = x"yes"])
 
-AC_DEFINE_UNQUOTED([MC_CONFIGURE_ARGS], ["$ac_configure_args"], [MC configure arguments])
+AC_ARG_ENABLE([configure-args],
+    AS_HELP_STRING([--enable-configure-args], [Handle all compiler warnings as errors]))
+if test "x$enable_configure_args" != xno; then
+    AC_DEFINE([ENABLE_CONFIGURE_ARGS], 1, [Define to enable showing configure arguments in help])
+    AC_DEFINE_UNQUOTED([MC_CONFIGURE_ARGS], ["$ac_configure_args"], [MC configure arguments])
+fi
+
 
 AC_CONFIG_FILES(
 [
@@ -508,14 +583,9 @@ AC_CONFIG_FILES([
 Makefile
 
 contrib/Makefile
-contrib/dist/Makefile
-contrib/dist/gentoo/Makefile
-contrib/dist/redhat/Makefile
-contrib/dist/redhat/mc.spec
-contrib/dist/pkginfo
-contrib/dist/prototype
 
 misc/Makefile
+misc/mc.charsets
 misc/mc.menu
 misc/mcedit.menu
 misc/skins/Makefile
@@ -561,12 +631,13 @@ src/vfs/extfs/helpers/ualz
 src/vfs/extfs/helpers/uar
 src/vfs/extfs/helpers/uarc
 src/vfs/extfs/helpers/uarj
-src/vfs/extfs/helpers/uc1541
 src/vfs/extfs/helpers/ucab
 src/vfs/extfs/helpers/uha
 src/vfs/extfs/helpers/ulha
 src/vfs/extfs/helpers/ulib
+src/vfs/extfs/helpers/unar
 src/vfs/extfs/helpers/urar
+src/vfs/extfs/helpers/uwim
 src/vfs/extfs/helpers/uzip
 src/vfs/extfs/helpers/uzoo
 
@@ -580,8 +651,6 @@ src/vfs/sftpfs/Makefile
 src/vfs/local/Makefile
 
 src/vfs/sfs/Makefile
-
-src/vfs/smbfs/Makefile
 
 src/vfs/tar/Makefile
 
@@ -624,7 +693,6 @@ doc/hlp/pl/Makefile
 doc/hlp/ru/Makefile
 doc/hlp/sr/Makefile
 
-intl/Makefile
 po/Makefile.in
 ])
 
@@ -645,6 +713,7 @@ tests/src/vfs/extfs/Makefile
 tests/src/vfs/extfs/helpers-list/Makefile
 tests/src/vfs/extfs/helpers-list/data/config.sh
 tests/src/vfs/extfs/helpers-list/misc/Makefile
+tests/src/vfs/ftpfs/Makefile
 ])
 
 AC_OUTPUT
@@ -653,22 +722,23 @@ AC_MSG_NOTICE([
 
 Configuration:
 
-  Source code location:       ${srcdir}
-  Compiler:                   ${CC}
-  Compiler flags:             ${CFLAGS}
-  Assertions:                 ${enable_assert}
-  Unit tests:                 ${tests_msg}
-  File system:                ${vfs_type}
-                              ${vfs_flags}
-  Screen library:             ${screen_msg}
-  Mouse support:              ${mouse_lib}
-  X11 events support:         ${textmode_x11_support}
-  With subshell support:      ${subshell}
-  With background operations: ${enable_background}
-  Internal editor:            ${edit_msg}
-  Diff viewer:                ${diff_msg}
-  Support for charset:        ${charset_msg}
-  Search type:                ${SEARCH_TYPE}
+  Source code location:           ${srcdir}
+  Compiler:                       ${CC}
+  Compiler flags:                 ${CFLAGS}
+  Assertions:                     ${enable_assert}
+  Unit tests:                     ${tests_msg}
+  File system:                    ${vfs_type}
+                                  ${vfs_flags}
+  Screen library:                 ${screen_msg}
+  Mouse support:                  ${mouse_lib}
+  X11 events support:             ${textmode_x11_support}
+  With subshell support:          ${subshell}
+  With background operations:     ${enable_background}
+  With ext2fs attributes support: ${ext2fs_attr_msg}
+  Internal editor:                ${edit_msg}
+  Diff viewer:                    ${diff_msg}
+  Support for charset:            ${charset_msg}
+  Search type:                    ${SEARCH_TYPE}
 ])
 
 dnl option checking is disable by default due to AC_CONFIG_SUBDIRS

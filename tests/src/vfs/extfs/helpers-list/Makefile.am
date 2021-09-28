@@ -10,6 +10,10 @@ AM_LDFLAGS = @TESTS_LDFLAGS@
 
 LIBS = $(top_builddir)/lib/libmc.la
 
+if ENABLE_MCLIB
+LIBS += $(GLIB_LIBS)
+endif
+
 # Programs/scripts to build on 'make check'.
 check_PROGRAMS = mc_parse_ls_l
 check_SCRIPTS = run
@@ -68,9 +72,9 @@ data_files_to_distribute = \
 	data/urar.v4,v3.env_vars \
 	data/urar.v4,v3.input \
 	data/urar.v4,v3.output \
-	data/urar.v5.env_vars \
-	data/urar.v5.input \
-	data/urar.v5.output \
+	data/urar.v6,v5.env_vars \
+	data/urar.v6,v5.input \
+	data/urar.v6,v5.output \
 	data/uzip.README \
 	data/uzip.with-zipinfo.env_vars \
 	data/uzip.with-zipinfo.input \

@@ -3,15 +3,17 @@
 # This file is distributed under the same license as the mc package.
 #
 # Translators:
+# Kimmo Kujansuu <mrkujansuu@gmail.com>, 2021
+# Nikolay Korotkiy <sikmir@gmail.com>, 2017-2019
 # Slava Zanko <slavazanko@gmail.com>, 2011
-# Kasvain <kasvain@gmail.com>, 2015
+# hondakassi <kasvain@gmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: Midnight Commander\n"
 "Report-Msgid-Bugs-To: http://www.midnight-commander.org/\n"
-"POT-Creation-Date: 2017-05-02 21:10+0200\n"
-"PO-Revision-Date: 2017-04-15 09:35+0000\n"
-"Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
+"POT-Creation-Date: 2021-09-26 10:06+0300\n"
+"PO-Revision-Date: 2021-07-26 20:16+0000\n"
+"Last-Translator: Transifex Bot <>\n"
 "Language-Team: Finnish (http://www.transifex.com/mc/mc/language/fi/)\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
@@ -31,20 +33,20 @@ msgid "Cannot translate from %s to %s"
 msgstr "Kääntäminen kielestä %s kieleen %s epäonnistui"
 
 msgid "Event system already initialized"
-msgstr ""
+msgstr "Tapahtumat on jo alustettu"
 
 msgid "Failed to initialize event system"
-msgstr ""
+msgstr "Tapahtumien alustaminen epäonnistui"
 
 msgid "Event system not initialized"
-msgstr ""
+msgstr "Tapahtumia ei ole alustettu"
 
 msgid "Check input data! Some of parameters are NULL!"
-msgstr ""
+msgstr "Tarkista syöttötiedot! Jotkin parametrit ovat NULL!"
 
 #, c-format
 msgid "Unable to create group '%s' for events!"
-msgstr ""
+msgstr "Ryhmää '%s' ei voi luoda tapahtumille!"
 
 #, c-format
 msgid "Unable to create event '%s'!"
@@ -74,70 +76,56 @@ msgid "Cannot create %s directory"
 msgstr "Hakemiston %s luonti epäonnistui"
 
 msgid "FATAL: not a directory:"
-msgstr ""
-
-#, c-format
-msgid "An error occurred while migrating user settings: %s"
-msgstr ""
-
-#, c-format
-msgid ""
-"Your old settings were migrated from %s\n"
-"to Freedesktop recommended dirs.\n"
-"To get more info, please visit\n"
-"http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html"
-msgstr ""
-
-#, c-format
-msgid ""
-"Your old settings were migrated from %s\n"
-"to %s\n"
-msgstr ""
+msgstr "FATAL: ei hakemistoa:"
 
 msgid ""
 "Number out of range (should be in byte range, 0 <= n <= 0xFF, expressed in "
 "hex)"
 msgstr ""
+"Luku alueen ulkopuolella (pitäisi olla tavualueella, 0 <= n <= 0xFF, "
+"ilmaistuna heksalla)"
 
 msgid "Invalid character"
-msgstr ""
+msgstr "Virheellinen merkki"
 
 msgid "Unmatched quotes character"
-msgstr ""
+msgstr "Ei vastaa lainausmerkkeihin"
 
 #, c-format
 msgid ""
 "Hex pattern error at position %d:\n"
 "%s."
 msgstr ""
+"Hex-kaavan virhe paikassa  %d:\n"
+"%s."
 
 msgid "Search string not found"
 msgstr "Etsittyä merkkijonoa ei löydy"
 
 msgid "Not implemented yet"
-msgstr ""
+msgstr "Ei ole vielä toteutettu"
 
 msgid "Num of replace tokens not equal to num of found tokens"
-msgstr ""
+msgstr "Korvaavien tunnusten lukumäärä ei ole sama kuin löydettyjen määrä"
 
 #, c-format
 msgid "Invalid token number %d"
 msgstr "Token %d ei ole validi"
 
 msgid "Regular expression error"
-msgstr ""
+msgstr "Säännöllisen lausekkeen virhe"
 
 msgid "No&rmal"
 msgstr "Ta&vallinen"
 
 msgid "Re&gular expression"
-msgstr ""
+msgstr "&Säännöllinen lauseke"
 
 msgid "He&xadecimal"
-msgstr ""
+msgstr "He&xadesimaali"
 
 msgid "Wil&dcard search"
-msgstr ""
+msgstr "Merkki&haku"
 
 #, c-format
 msgid ""
@@ -161,6 +149,9 @@ msgid ""
 "%s\n"
 "Default skin has been loaded"
 msgstr ""
+"Ei voi käyttää '%s' ulkoasua täydellä värikartalla:\n"
+"%s\n"
+"Oletus ulkoasu on ladattu"
 
 #, c-format
 msgid ""
@@ -168,21 +159,25 @@ msgid ""
 "on non-256 colors terminal.\n"
 "Default skin has been loaded"
 msgstr ""
+"Ei voi käyttää '%s' ulkoasua 256 värlillä\n"
+"terminaalissa joka ei tue värikarttaa-256\n"
+"Oletus ulkoasu on ladattu"
 
 msgid "True color not supported with ncurses."
-msgstr ""
-
-msgid "True color not supported in this slang version."
-msgstr ""
+msgstr "Täyttä värikarttaa ei ncurses tue."
 
 msgid "Your terminal doesn't even seem to support 256 colors."
-msgstr ""
+msgstr "Päätteesi ei näytä edes tukevan 256 värikarttaa."
+
+msgid "True color not supported in this slang version."
+msgstr "Täyttä värikarttaa ei tueta tässä slang versiossa."
 
 msgid "Set COLORTERM=truecolor if your terminal really supports true colors."
 msgstr ""
+"Aseta COLORTERM=truecolor, jos pääte todella tukee täydellistä värikarttaa."
 
 msgid "Escape"
-msgstr ""
+msgstr "Esc"
 
 msgid "Function key 1"
 msgstr "Funktio 1"
@@ -251,37 +246,37 @@ msgid "BackTab/S-tab"
 msgstr ""
 
 msgid "Backspace"
-msgstr ""
+msgstr "Askelpalautin"
 
 msgid "Up arrow"
-msgstr ""
+msgstr "Ylänuoli"
 
 msgid "Down arrow"
-msgstr ""
+msgstr "Alanuoli"
 
 msgid "Left arrow"
-msgstr ""
+msgstr "Vasen nuoli"
 
 msgid "Right arrow"
-msgstr ""
+msgstr "Oikea nuoli"
 
 msgid "Insert"
-msgstr ""
+msgstr "Insert"
 
 msgid "Delete"
-msgstr ""
+msgstr "Delete"
 
 msgid "Home"
-msgstr ""
+msgstr "Home"
 
 msgid "End key"
 msgstr "End"
 
 msgid "Page Up"
-msgstr ""
+msgstr "Page Up"
 
 msgid "Page Down"
-msgstr ""
+msgstr "Page Down"
 
 msgid "/ on keypad"
 msgstr "/ keypadilla"
@@ -371,13 +366,13 @@ msgid "Comma"
 msgstr "Pilkku"
 
 msgid "Apostrophe"
-msgstr ""
+msgstr "Heittomerkki"
 
 msgid "Colon"
-msgstr ""
+msgstr "Kaksoispiste"
 
 msgid "Semicolon"
-msgstr ""
+msgstr "Puolipiste"
 
 msgid "Exclamation mark"
 msgstr "Varoitus-merkki"
@@ -386,7 +381,7 @@ msgid "Question mark"
 msgstr "Kysymysmerkki"
 
 msgid "Ampersand"
-msgstr ""
+msgstr "Et-merkki"
 
 msgid "Dollar sign"
 msgstr "Dollarin merkki"
@@ -398,13 +393,13 @@ msgid "Percent sign"
 msgstr "Prosenttimerkki"
 
 msgid "Caret"
-msgstr ""
+msgstr "Kursori"
 
 msgid "Tilda"
 msgstr "Tilde"
 
 msgid "Prime"
-msgstr ""
+msgstr "Heittomerkki"
 
 msgid "Underline"
 msgstr "Alleviivaus"
@@ -416,10 +411,10 @@ msgid "Pipe"
 msgstr "Putki"
 
 msgid "Left parenthesis"
-msgstr ""
+msgstr "Sulku vasen"
 
 msgid "Right parenthesis"
-msgstr ""
+msgstr "Sulku oikea"
 
 msgid "Left bracket"
 msgstr "Vasen sarake"
@@ -428,10 +423,10 @@ msgid "Right bracket"
 msgstr "Oikea sarake"
 
 msgid "Left brace"
-msgstr ""
+msgstr "Hakasulku vasen"
 
 msgid "Right brace"
-msgstr ""
+msgstr "Hakasulku oikea"
 
 msgid "Enter"
 msgstr "Enter"
@@ -465,7 +460,34 @@ msgid "Shift"
 msgstr "Vaihto"
 
 msgid "The TERM environment variable is unset!\n"
+msgstr "TERM-ympäristön muuttujaa ei ole asetettu!\n"
+
+msgid "Cannot check SIGWINCH pipe"
+msgstr "Ei voi tarkistaa SIGWINCH -putkea"
+
+#, c-format
+msgid ""
+"\n"
+"Cannot create pipe for SIGWINCH: %s (%d)\n"
 msgstr ""
+"\n"
+"Ei voi luoda putkea SIGWINCH: %s (%d)\n"
+
+#, c-format
+msgid ""
+"\n"
+"Cannot configure write end of SIGWINCH pipe: %s (%d)\n"
+msgstr ""
+"\n"
+"Ei voitu määrittää kirjoituksen loppua SIGWINCH putkessa: %s (%d)\n"
+
+#, c-format
+msgid ""
+"\n"
+"Cannot configure read end of SIGWINCH pipe: %s (%d)\n"
+msgstr ""
+"\n"
+"Ei voitu määrittää lukemisen loppua SIGWINCH putkessa: %s (%d)\n"
 
 #, c-format
 msgid ""
@@ -476,55 +498,47 @@ msgstr ""
 "Tarkista TERM.\n"
 
 msgid "B"
-msgstr ""
+msgstr "t"
 
 msgid "kB"
-msgstr ""
+msgstr "kt"
 
 msgid "KiB"
-msgstr ""
+msgstr "KiB"
 
 msgid "MB"
-msgstr ""
+msgstr "Mt"
 
 msgid "MiB"
-msgstr ""
+msgstr "MiB"
 
 msgid "GB"
-msgstr ""
+msgstr "Gt"
 
 msgid "GiB"
-msgstr ""
+msgstr "GiB"
 
 msgid "Cannot create pipe descriptor"
-msgstr ""
+msgstr "Putken kuvausta ei voi luoda"
 
 msgid "Cannot create pipe streams"
-msgstr ""
+msgstr "Ei voitu luoda putken virtausta"
 
 #, c-format
 msgid ""
 "Unexpected error in select() reading data from a child process:\n"
 "%s"
 msgstr ""
+"Odottamaton virhe select() luettaessa dataa aliprosessista:\n"
+"%s"
 
 #, c-format
 msgid ""
 "Unexpected error in waitpid():\n"
 "%s"
 msgstr ""
-
-msgid "Warning"
-msgstr "Varoitus"
-
-msgid "Pipe failed"
-msgstr "Virheellinen putki"
-
-msgid "Dup failed"
-msgstr ""
-
-msgid "Error dup'ing old error pipe"
-msgstr ""
+"Odottamaton virhe waitpid():\n"
+"%s"
 
 #, c-format
 msgid "Directory cache expired for %s"
@@ -532,11 +546,11 @@ msgstr "Hakemiston polku yliajoittui %s"
 
 #, c-format
 msgid "%s: %s: %s %3d%% (%lld) bytes transferred"
-msgstr ""
+msgstr "%s: %s: %s %3d%% (%lld) tavua siirretty"
 
 #, c-format
 msgid "%s: %s: %s %lld bytes transferred"
-msgstr ""
+msgstr "%s: %s: %s %lld tavua siirretty"
 
 msgid "Starting linear transfer..."
 msgstr "Aloitetaan lineaarinen transferrointi..."
@@ -545,7 +559,7 @@ msgid "Getting file"
 msgstr "Tuodaan tiedostoa"
 
 msgid "Changes to file lost"
-msgstr ""
+msgstr "Muutokset tiedostoon menetetty"
 
 #, c-format
 msgid "%s is not a directory\n"
@@ -571,15 +585,14 @@ msgstr "Väliaikaistiedostoja ei ole luotu kohteeseen %s\n"
 msgid "Temporary files will not be created\n"
 msgstr "Väliaikais tiedosta ei ole luotu\n"
 
-#, c-format
 msgid "Press any key to continue..."
 msgstr "Paina mitä tahansa näppäintä jatkaaksesi"
 
 msgid "Cannot parse:"
-msgstr ""
+msgstr "Ei voi jäsentää:"
 
 msgid "More parsing errors will be ignored."
-msgstr ""
+msgstr "Lisää jäsentämisen virheitä ei oteta huomioon."
 
 msgid "Internal error:"
 msgstr "Sisäinen virhe:"
@@ -595,7 +608,7 @@ msgstr "Historia"
 
 #. TRANSLATORS: no need to translate 'DialogTitle', it's just a context prefix
 msgid "DialogTitle|History cleanup"
-msgstr ""
+msgstr "DialogTitle|Historian puhdistus"
 
 msgid "Do you want clean this history?"
 msgstr "Haluatko pyyhkiä tämän historian?"
@@ -620,43 +633,46 @@ msgstr "Virhe"
 
 #, c-format
 msgid "%s (%d)"
-msgstr ""
+msgstr "%s (%d)"
 
 msgid "&Abort"
 msgstr "&Keskeytä"
 
 msgid "Displays the current version"
-msgstr ""
+msgstr "Näyttää nykyisen version"
 
 msgid "Print data directory"
-msgstr ""
+msgstr "Tulosta hakemistoon"
 
 msgid "Print extended info about used data directories"
-msgstr ""
+msgstr "Tulosta lisätietoja kuten hakemiston käyttämä tila"
 
 msgid "Print configure options"
-msgstr ""
+msgstr "Tulosta määrityksen vaihtoehdot"
 
 msgid "Print last working directory to specified file"
-msgstr ""
+msgstr "Tulosta viimeinen työhakemisto määrättyyn tiedostoon"
+
+msgid "<file>"
+msgstr "<file>"
 
 msgid "Enables subshell support (default)"
-msgstr ""
+msgstr "Ottaa subshell tuen käyttöön (oletus) "
 
 msgid "Disables subshell support"
-msgstr ""
+msgstr "Poistaa subshell tuen käytöstä"
 
 msgid "Log ftp dialog to specified file"
-msgstr ""
-
-msgid "Set debug level"
-msgstr "Aseta debug-taso"
+msgstr "Kirjaa ftp kyselyt tiedostoon"
 
 msgid "Launches the file viewer on a file"
-msgstr ""
+msgstr "Käynnistää tiedoston katseluohjelman"
 
 msgid "Edit files"
 msgstr "Muokkaa tiedostoja"
+
+msgid "<file> ..."
+msgstr "<file> ..."
 
 msgid "Forces xterm features"
 msgstr "Pakottaa xterm-ominaisuudet"
@@ -665,19 +681,19 @@ msgid "Disable X11 support"
 msgstr "Ota X11-tuki pois käytöstä"
 
 msgid "Tries to use an old highlight mouse tracking"
-msgstr ""
+msgstr "Yrittää käyttää seurantaan vanhaa hiiren korostusta"
 
 msgid "Disable mouse support in text version"
 msgstr "Ota hiirituki pois käytöstä tekstiversiossa"
 
 msgid "Tries to use termcap instead of terminfo"
-msgstr ""
+msgstr "Yrittään käyttää termcap, terminfo:n sijaan"
 
 msgid "To run on slow terminals"
-msgstr ""
+msgstr "Hitaissa päätteissä ajaminen"
 
 msgid "Use stickchars to draw"
-msgstr ""
+msgstr "Käytä pylväitä piirtämiseen"
 
 msgid "Resets soft keys on HP terminals"
 msgstr ""
@@ -696,6 +712,9 @@ msgstr "Pyytää ajettavaksi värillisenä"
 
 msgid "Specifies a color configuration"
 msgstr "Määrittää värikonfiguraation"
+
+msgid "<string>"
+msgstr "<string>"
 
 msgid "Show mc with specified skin"
 msgstr "Näytä mc määritetyllä ulkoasulla"
@@ -746,7 +765,7 @@ msgid "file"
 msgstr "tiedosto"
 
 msgid "file1 file2"
-msgstr ""
+msgstr "tiedosto1 tiedosto2"
 
 msgid "[this_dir] [other_panel_dir]"
 msgstr "[this_dir] [other_panel_dir]"
@@ -768,16 +787,16 @@ msgid "Terminal options"
 msgstr "Terminaalin asetukset"
 
 msgid "Arguments parse error!"
-msgstr ""
+msgstr "Argumenttien rakennevirhe!"
 
 msgid "No arguments given to the viewer."
-msgstr ""
+msgstr "Katseluohjelmalle ei annettu argumentteja."
 
 msgid "Two files are required to envoke the diffviewer."
-msgstr ""
+msgstr "Kaksi tiedostoa tarvitaan diffviewerin käynnistämiseksi."
 
 msgid "Background protocol error"
-msgstr ""
+msgstr "Taustaprosessin protokollavirhe"
 
 msgid "Reading failed"
 msgstr "Luku epäonnistui"
@@ -786,15 +805,17 @@ msgid "Background process error"
 msgstr "Taustaprosessin virhe"
 
 msgid "Unknown error in child"
-msgstr ""
+msgstr "Tuntematon virhe aliprosessissa"
 
 msgid "Child died unexpectedly"
-msgstr ""
+msgstr "Aliprosessi kuoli yllättäin"
 
 msgid ""
 "Background process sent us a request for more arguments\n"
 "than we can handle."
 msgstr ""
+"Taustaprosessi lähetti meille pyynnön lisätä argumentteja\n"
+"enemmän kuin pystymme käsittelemään."
 
 msgid "&Dismiss"
 msgstr "&Kuittaa"
@@ -812,7 +833,7 @@ msgid "&Whole words"
 msgstr "&Kokonaiset sanat"
 
 msgid "&All charsets"
-msgstr ""
+msgstr "&Kaikki merkistöt"
 
 msgid "Search"
 msgstr "Etsi"
@@ -825,6 +846,8 @@ msgid ""
 "Cannot create temporary diff file\n"
 "%s"
 msgstr ""
+"Väliaikaista diff-tiedostoa ei voi luoda\n"
+"%s"
 
 #, c-format
 msgid ""
@@ -832,24 +855,29 @@ msgid ""
 "%s%s\n"
 "%s"
 msgstr ""
+"Ei voi luoda varmuuskopion tiedostoa\n"
+"%s%s\n"
+"%s"
 
 #, c-format
 msgid ""
 "Cannot create temporary merge file\n"
 "%s"
 msgstr ""
+"Väliaikaista merge-tiedostoa ei voi luoda\n"
+"%s"
 
 msgid "&Fastest (Assume large files)"
-msgstr ""
+msgstr "&Nopein (oleta suuria tiedostoja)"
 
 msgid "&Minimal (Find a smaller set of change)"
-msgstr ""
+msgstr "&Minimaalinen (etsi pieniä muutoksia)"
 
 msgid "Diff algorithm"
-msgstr ""
+msgstr "Diff-algoritmi"
 
 msgid "Diff extra options"
-msgstr ""
+msgstr "Diff lisäominaisuudet"
 
 msgid "&Ignore case"
 msgstr ""
@@ -867,7 +895,7 @@ msgid "Strip &trailing carriage return"
 msgstr ""
 
 msgid "Diff Options"
-msgstr ""
+msgstr "Diff asetukset"
 
 msgid "Edit"
 msgstr "Muokkaa"
@@ -876,13 +904,13 @@ msgid "Edit is disabled"
 msgstr "Muokkaus on pois käytöstä"
 
 msgid "Goto line (left)"
-msgstr ""
+msgstr "Mene riville (vasen)"
 
 msgid "Goto line (right)"
-msgstr ""
+msgstr "Mene riville (oikea)"
 
 msgid "Enter line:"
-msgstr ""
+msgstr "Anna rivi:"
 
 msgid "ButtonBar|Help"
 msgstr ""
@@ -909,19 +937,21 @@ msgid "Quit"
 msgstr "Poistu"
 
 msgid "File(s) was modified. Save with exit?"
-msgstr ""
+msgstr "Tiedostot ovat muuttuneet. Tallenna ja poistu?"
 
 msgid ""
 "Midnight Commander is being shut down.\n"
 "Save modified file(s)?"
 msgstr ""
+"Midnight Commander suljetaan.\n"
+"Tallenna muuttuneet tiedostot?"
 
 msgid "Diff:"
-msgstr ""
+msgstr "Diff:"
 
 #, c-format
 msgid "\"%s\" is a directory"
-msgstr ""
+msgstr "\"%s\" on hakemisto"
 
 #, c-format
 msgid ""
@@ -930,19 +960,10 @@ msgid ""
 msgstr ""
 
 msgid "Diff viewer: invalid mode"
-msgstr ""
+msgstr "Diff viewer: virheellinen tila"
 
 msgid "Two files are needed to compare"
-msgstr ""
-
-msgid "Choose syntax highlighting"
-msgstr ""
-
-msgid "< Auto >"
-msgstr ""
-
-msgid "< Reload Current Syntax >"
-msgstr ""
+msgstr "Vertailuun tarvitaan kaksi tiedostoa"
 
 #, c-format
 msgid "Loading: %3d%%"
@@ -964,176 +985,139 @@ msgstr "Virhe lukiessa %s"
 
 #, c-format
 msgid "Cannot get size/permissions for %s"
-msgstr ""
+msgstr "Ei saada kohteen %s kokoa/käyttöoikeuksia"
 
 #, c-format
 msgid "\"%s\" is not a regular file"
-msgstr ""
+msgstr "\"%s\" ei ole tavallinen tiedosto"
 
 #, c-format
 msgid ""
 "File \"%s\" is too large.\n"
 "Open it anyway?"
 msgstr ""
+"tiedosto \"%s\" on liian iso.\n"
+"Avataanko silti?"
+
+msgid "Warning"
+msgstr "Varoitus"
 
 #, c-format
 msgid "Error reading from pipe: %s"
-msgstr ""
+msgstr "Virhe luettaessa putkesta: %s"
 
 #, c-format
 msgid "Cannot open pipe for reading: %s"
-msgstr ""
-
-#, c-format
-msgid "Searching %s: %3d%%"
-msgstr "Etsitään %s: %3d%%"
-
-#, c-format
-msgid "Searching %s"
-msgstr "Etsitään %s"
+msgstr "Putki ei avaudu lukemista varten: %s"
 
 msgid "File has hard-links. Detach before saving?"
-msgstr ""
+msgstr "Tiedostossa on kovia linkkejä. Irrota ennen tallennusta?"
 
 msgid "The file has been modified in the meantime. Save anyway?"
-msgstr ""
+msgstr "Tiedosto on muuttunut tällä välin. Tallenna kuitenkin?"
 
 #, c-format
 msgid "Error writing to pipe: %s"
-msgstr ""
+msgstr "Virhe kirjoitettaessa putkeen: %s"
 
 #, c-format
 msgid "Cannot open pipe for writing: %s"
-msgstr ""
+msgstr "Putki ei avaudu kirjoitusta varten: %s"
 
 #, c-format
 msgid "Cannot open file for writing: %s"
-msgstr ""
+msgstr "Ei voida avata %s kirjoitusta varten"
 
 msgid "The file you are saving does not end with a newline."
-msgstr ""
+msgstr "Tallentamasi tiedosto ei pääty uuteen riviin."
 
 msgid "C&ontinue"
-msgstr ""
+msgstr "J&atka"
 
 msgid "&Do not change"
-msgstr ""
+msgstr "&Älä tee muutoksia"
 
 msgid "&Unix format (LF)"
-msgstr ""
+msgstr "&Unix formaatti (LF)"
 
 msgid "&Windows/DOS format (CR LF)"
-msgstr ""
+msgstr "&Windows/DOS formaatti (CR LF)"
 
 msgid "&Macintosh format (CR)"
-msgstr ""
+msgstr "&Macintosh formaatti (CR)"
 
 msgid "Enter file name:"
-msgstr ""
+msgstr "Anna tiedostonimi:"
 
 msgid "Change line breaks to:"
-msgstr ""
+msgstr "Muuta rivinvaihdot:"
 
 msgid "Save As"
-msgstr ""
-
-msgid "Block is large, you may not be able to undo this action"
-msgstr ""
-
-msgid "Collect completions"
-msgstr ""
+msgstr "Tallenna nimellä"
 
 msgid "&Quick save"
-msgstr ""
+msgstr "&Nopea tallennus"
 
 msgid "&Safe save"
-msgstr ""
+msgstr "&Turvallinen tallennus"
 
 msgid "&Do backups with following extension:"
-msgstr ""
+msgstr "&Tee varmuuskopiot seuraavalla laajennuksella:"
 
 msgid "Check &POSIX new line"
-msgstr ""
+msgstr "Tarkista &POSIX uusi rivi"
 
 msgid "Edit Save Mode"
-msgstr ""
+msgstr "Muokkaa tallennustilaa"
 
 msgid "Save as"
-msgstr ""
+msgstr "Tallenna nimellä"
 
 msgid "Cannot save: destination is not a regular file"
-msgstr ""
+msgstr "Ei voi tallentaa: kohde ei ole tavallinen tiedosto"
 
 msgid "A file already exists with this name"
-msgstr ""
+msgstr "Nimellä on jo tiedosto olemassa"
 
 msgid "&Overwrite"
-msgstr ""
+msgstr "&Ylikirjoita"
 
 msgid "Cannot save file"
-msgstr ""
-
-msgid "Delete macro"
-msgstr ""
-
-msgid "Press macro hotkey:"
-msgstr ""
-
-msgid "Macro not deleted"
-msgstr ""
-
-msgid "Save macro"
-msgstr ""
-
-msgid "Press the macro's new hotkey:"
-msgstr ""
-
-msgid "Repeat last commands"
-msgstr ""
-
-msgid "Repeat times:"
-msgstr ""
+msgstr "Tiedostoa ei voi tallentaa"
 
 #, c-format
 msgid "Confirm save file: \"%s\""
-msgstr ""
+msgstr "Vahvista tiedoston tallennus: \"%s\""
 
 msgid "Save file"
-msgstr ""
+msgstr "Tallenna tiedosto"
 
 msgid "&Save"
-msgstr ""
+msgstr "&Tallenna"
 
 msgid "Load"
-msgstr ""
+msgstr "Lataa"
 
 msgid "Syntax file edit"
-msgstr ""
+msgstr "Syntaksitiedoston muokkaus"
 
 msgid "Which syntax file you want to edit?"
-msgstr ""
+msgstr "Mitä syntaksia haluat muuttaa?"
 
 msgid "&User"
 msgstr "&Käyttäjä"
 
 msgid "&System wide"
-msgstr ""
+msgstr "&Järjestelmän laajuinen"
 
 msgid "Menu edit"
-msgstr ""
+msgstr "Valikon muokkaus"
 
 msgid "Which menu file do you want to edit?"
-msgstr ""
+msgstr "Mitä valikkoa haluat muuttaa?"
 
 msgid "&Local"
 msgstr "&Paikallinen"
-
-msgid "Replace"
-msgstr ""
-
-#, c-format
-msgid "%ld replacements made"
-msgstr ""
 
 msgid "[NoName]"
 msgstr ""
@@ -1143,167 +1127,171 @@ msgid ""
 "File %s was modified.\n"
 "Save before close?"
 msgstr ""
+"Tiedosto %s muuttunut.\n"
+"Tallenna ennen sulkemista?"
 
 msgid "Close file"
-msgstr ""
+msgstr "Sulje tiedosto"
 
 #, c-format
 msgid ""
 "Midnight Commander is being shut down.\n"
 "Save modified file %s?"
 msgstr ""
+"Midnight Commander suljetaan.\n"
+"Tallenna muuttunut tiedosto %s?"
 
 msgid "This function is not implemented"
-msgstr ""
+msgstr "Tätä toimintoa ei ole otettu käyttöön"
 
 msgid "Copy to clipboard"
-msgstr ""
+msgstr "Kopioi leikepöydälle"
 
 msgid "Unable to save to file"
-msgstr ""
+msgstr "Tiedostoon tallentaminen epäonnistui "
 
 msgid "Cut to clipboard"
-msgstr ""
+msgstr "Leikkaa leikepöydälle"
 
 msgid "Goto line"
-msgstr ""
+msgstr "Mene riville"
 
 msgid "Save block"
-msgstr ""
+msgstr "Tallenna alue"
 
 msgid "Insert file"
-msgstr ""
+msgstr "Lisää tiedosto"
 
 msgid "Cannot insert file"
-msgstr ""
+msgstr "Tiedostoa ei voi lisätä"
 
 msgid "Sort block"
-msgstr ""
+msgstr "Lajittele alue"
 
 msgid "You must first highlight a block of text"
-msgstr ""
+msgstr "Sinun pitää ensin korostaa tekstin alue"
 
 msgid "Run sort"
-msgstr ""
+msgstr "Suorita lajittelu"
 
 msgid "Enter sort options (see manpage) separated by whitespace:"
 msgstr ""
 
 msgid "Sort"
-msgstr ""
+msgstr "Lajittelu"
 
 msgid "Cannot execute sort command"
-msgstr ""
+msgstr "Komentoa sort ei voi suorittaa"
 
 #, c-format
 msgid "Sort returned non-zero: %s"
 msgstr ""
 
 msgid "Paste output of external command"
-msgstr ""
+msgstr "Liitä ulkoinen komento"
 
 msgid "Enter shell command(s):"
-msgstr ""
+msgstr "Anna shell komento:"
 
 msgid "External command"
-msgstr ""
+msgstr "Ulkoinen komento"
 
 msgid "Cannot execute command"
-msgstr ""
+msgstr "Komentoa voi suorittaa"
 
 msgid "mail -s <subject> -c <cc> <to>"
-msgstr ""
+msgstr "mail -s <subject> -c <cc> <to>"
 
 msgid "To"
-msgstr ""
+msgstr "Vastaanottaja"
 
 msgid "Subject"
-msgstr ""
+msgstr "Aihe"
 
 msgid "Copies to"
-msgstr ""
+msgstr "Kopiona"
 
 msgid "Mail"
-msgstr ""
+msgstr "Viesti"
 
 msgid "Insert literal"
-msgstr ""
+msgstr "Lisää teksti"
 
 msgid "Press any key:"
-msgstr ""
-
-msgid ""
-"Current text was modified without a file save.\n"
-"Continue discards these changes"
-msgstr ""
-
-msgid "In se&lection"
-msgstr ""
-
-msgid "&Find all"
-msgstr ""
-
-msgid "Enter replacement string:"
-msgstr ""
-
-msgid "Replace with:"
-msgstr ""
-
-msgid "&Replace"
-msgstr "&Korvaa"
-
-msgid "A&ll"
-msgstr "K&aikki"
-
-msgid "&Skip"
-msgstr "&Ohita"
-
-msgid "Confirm replace"
-msgstr ""
-
-msgid "Cancel"
-msgstr "Peruuta"
+msgstr "Paina mitä tahansa näppäintä:"
 
 msgid ""
 "Current text was modified without a file save.\n"
 "Continue discards these changes."
 msgstr ""
+"Nykyistä tekstiä muokattiin tallentamatta tiedostoa.\n"
+"Jatkamalla hylkäät nämä muutokset."
+
+msgid "Cancel"
+msgstr "Peruuta"
+
+msgid "Collect completions"
+msgstr ""
 
 msgid "NoName"
-msgstr ""
+msgstr "Nimetön"
+
+msgid "Save macro"
+msgstr "Tallenna makro"
+
+msgid "Press the macro's new hotkey:"
+msgstr "Paina makron uudet pikanäppäimet:"
+
+msgid "Delete macro"
+msgstr "Poista makro"
+
+msgid "Press macro hotkey:"
+msgstr "Paina makro pikanäppäintä:"
+
+msgid "Macro not deleted"
+msgstr "Makroa ei poistettu"
+
+msgid "Repeat last commands"
+msgstr "Edellinen komento uudestaan"
+
+msgid "Repeat times:"
+msgstr "Toistokerrat:"
 
 msgid "&Open file..."
-msgstr ""
+msgstr "&Avaa tiedosto..."
 
 msgid "&New"
-msgstr ""
+msgstr "&Uusi"
 
 msgid "&Close"
-msgstr ""
+msgstr "&Sulje"
+
+msgid "&History..."
+msgstr "&Historia..."
 
 msgid "Save &as..."
-msgstr ""
+msgstr "Tallenna &nimellä..."
 
 msgid "&Insert file..."
-msgstr ""
+msgstr "&Lisää tiedosto..."
 
 msgid "Cop&y to file..."
-msgstr ""
+msgstr "Kop&ioi tiedostoon..."
 
 msgid "&User menu..."
-msgstr ""
+msgstr "&Käyttäjän valikko..."
 
 msgid "A&bout..."
 msgstr ""
 
 msgid "&Quit"
-msgstr ""
+msgstr "&Lopeta"
 
 msgid "&Undo"
-msgstr ""
+msgstr "&Kumoa"
 
 msgid "&Redo"
-msgstr ""
+msgstr "&Uudelleen"
 
 msgid "&Toggle ins/overw"
 msgstr ""
@@ -1312,22 +1300,22 @@ msgid "To&ggle mark"
 msgstr ""
 
 msgid "&Mark columns"
-msgstr ""
+msgstr "&Merkitse sarakkeet"
 
 msgid "Mark &all"
-msgstr ""
+msgstr "Merkitse k&aikki"
 
 msgid "Unmar&k"
-msgstr ""
+msgstr "Poista mer&kintä"
 
 msgid "Cop&y"
-msgstr ""
+msgstr "&Kopioi"
 
 msgid "Mo&ve"
-msgstr ""
+msgstr "Sii&rrä"
 
 msgid "&Delete"
-msgstr ""
+msgstr "&Poista"
 
 msgid "Co&py to clipfile"
 msgstr ""
@@ -1339,37 +1327,37 @@ msgid "Pa&ste from clipfile"
 msgstr ""
 
 msgid "&Beginning"
-msgstr ""
+msgstr "&Alku"
 
 msgid "&End"
-msgstr ""
+msgstr "&Loppu"
 
 msgid "&Search..."
-msgstr ""
+msgstr "&Haku..."
 
 msgid "Search &again"
-msgstr ""
+msgstr "Hae &uudelleen"
 
 msgid "&Replace..."
-msgstr ""
+msgstr "&Korvaa..."
 
 msgid "&Toggle bookmark"
-msgstr ""
+msgstr "&Vaihda kirjanmerkki"
 
 msgid "&Next bookmark"
-msgstr ""
+msgstr "&Seuraava kirjanmerkki"
 
 msgid "&Prev bookmark"
-msgstr ""
+msgstr "&Edellinen kirjanmerkki"
 
 msgid "&Flush bookmarks"
-msgstr ""
+msgstr "&Tyhjennä kirjanmerkit"
 
 msgid "&Go to line..."
-msgstr ""
+msgstr "&Mene riville..."
 
 msgid "&Toggle line state"
-msgstr ""
+msgstr "&Vaihda rivin tilaa"
 
 msgid "Go to matching &bracket"
 msgstr ""
@@ -1423,7 +1411,7 @@ msgid "&Format paragraph"
 msgstr ""
 
 msgid "&Sort..."
-msgstr ""
+msgstr "&Järjestys..."
 
 msgid "&Paste output of..."
 msgstr ""
@@ -1432,22 +1420,22 @@ msgid "&External formatter"
 msgstr ""
 
 msgid "&Move"
-msgstr ""
+msgstr "&Siirrä"
 
 msgid "&Resize"
-msgstr ""
+msgstr "&Muuta kokoa"
 
 msgid "&Toggle fullscreen"
-msgstr ""
+msgstr "&Vaihda kokoruutuun"
 
 msgid "&Next"
-msgstr ""
+msgstr "&Seuraava"
 
 msgid "&Previous"
-msgstr ""
+msgstr "&Edellinen"
 
 msgid "&List..."
-msgstr ""
+msgstr "&Lista..."
 
 msgid "&General..."
 msgstr ""
@@ -1471,10 +1459,10 @@ msgid "&Save setup"
 msgstr ""
 
 msgid "&File"
-msgstr ""
+msgstr "&Tiedosto"
 
 msgid "&Edit"
-msgstr ""
+msgstr "&Muokkaa"
 
 msgid "&Search"
 msgstr ""
@@ -1486,10 +1474,10 @@ msgid "For&mat"
 msgstr ""
 
 msgid "&Window"
-msgstr ""
+msgstr "&Ikkuna"
 
 msgid "&Options"
-msgstr ""
+msgstr "&Valinnat"
 
 msgid "&None"
 msgstr ""
@@ -1504,7 +1492,7 @@ msgid "Wrap mode"
 msgstr "Kieromoodi"
 
 msgid "Tabulation"
-msgstr ""
+msgstr "Taulukko"
 
 msgid "&Fake half tabs"
 msgstr "valepuolikas&Tabit"
@@ -1516,10 +1504,10 @@ msgid "Fill tabs with &spaces"
 msgstr "täytä tabit &Välilyönnein"
 
 msgid "Tab spacing:"
-msgstr ""
+msgstr "Välilehtien väli:"
 
 msgid "Other options"
-msgstr ""
+msgstr "Muut asetukset"
 
 msgid "&Return does autoindent"
 msgstr "&Rivinvaihto sisentää"
@@ -1540,7 +1528,7 @@ msgid "Synta&x highlighting"
 msgstr "syntaks&Ikorostus"
 
 msgid "C&ursor after inserted block"
-msgstr ""
+msgstr "K&ohdistin lisätyn alueen jälkeen"
 
 msgid "Pers&istent selection"
 msgstr ""
@@ -1552,27 +1540,68 @@ msgid "&Group undo"
 msgstr ""
 
 msgid "Word wrap line length:"
-msgstr ""
+msgstr "Sanan rivityksen pituus:"
 
 msgid "Editor options"
+msgstr "Editorin asetukset"
+
+msgid "In se&lection"
 msgstr ""
+
+msgid "&Find all"
+msgstr "&Etsi kaikki"
+
+msgid "Enter replacement string:"
+msgstr "Anna korvaava merkkijono:"
+
+msgid "Replace"
+msgstr "Korvaa"
+
+msgid "Replace with:"
+msgstr "Korvaa:"
+
+msgid "&Replace"
+msgstr "&Korvaa"
+
+msgid "A&ll"
+msgstr "K&aikki"
+
+msgid "&Skip"
+msgstr "&Ohita"
+
+msgid "Confirm replace"
+msgstr "Vahvista vaihto"
+
+#, c-format
+msgid "Searching %s: %3d%%"
+msgstr "Etsitään %s: %3d%%"
+
+#, c-format
+msgid "Searching %s"
+msgstr "Etsitään %s"
+
+#, c-format
+msgid "%ld replacements made"
+msgstr "%ld korvaaminen tehty"
 
 msgid ""
 "A user friendly text editor\n"
 "written for the Midnight Commander."
 msgstr ""
+"Midnight Commanderille kirjoitettu\n"
+"käyttäjäystävällinen tekstieditori."
 
-msgid "Copyright (C) 1996-2016 the Free Software Foundation"
-msgstr ""
+msgid "Copyright (C) 1996-2021 the Free Software Foundation"
+msgstr "Copyright (C) 1996-2021 the Free Software Foundation"
 
 msgid "About"
-msgstr ""
+msgstr "Tietoja"
 
 msgid "Open files"
-msgstr ""
+msgstr "Avaa tiedostot"
 
 msgid "Edit: "
-msgstr ""
+msgstr "Muokkaa:"
 
 msgid "ButtonBar|Mark"
 msgstr ""
@@ -1593,107 +1622,118 @@ msgid "ButtonBar|PullDn"
 msgstr ""
 
 msgid "Breton"
-msgstr ""
+msgstr "bretoni"
 
 msgid "Czech"
-msgstr ""
+msgstr "tšekki"
 
 msgid "Welsh"
-msgstr ""
+msgstr "wales"
 
 msgid "Danish"
-msgstr ""
+msgstr "tanska"
 
 msgid "German"
-msgstr ""
+msgstr "saksa"
 
 msgid "Greek"
-msgstr ""
+msgstr "kreikka"
 
 msgid "English"
-msgstr ""
+msgstr "englanti"
 
 msgid "British English"
-msgstr ""
+msgstr "britannianenglanti"
 
 msgid "Canadian English"
-msgstr ""
+msgstr "kanadanenglanti"
 
 msgid "American English"
-msgstr ""
+msgstr "amerikanenglanti"
 
 msgid "Esperanto"
-msgstr ""
+msgstr "esperanto"
 
 msgid "Spanish"
-msgstr ""
+msgstr "espanja"
 
 msgid "Faroese"
-msgstr ""
+msgstr "fääri"
 
 msgid "French"
-msgstr ""
+msgstr "ranska"
 
 msgid "Italian"
-msgstr ""
+msgstr "italia"
 
 msgid "Dutch"
-msgstr ""
+msgstr "hollanti"
 
 msgid "Norwegian"
-msgstr ""
+msgstr "norja"
 
 msgid "Polish"
-msgstr ""
+msgstr "puola"
 
 msgid "Portuguese"
-msgstr ""
+msgstr "portugali"
 
 msgid "Romanian"
-msgstr ""
+msgstr "romania"
 
 msgid "Russian"
-msgstr ""
+msgstr "venäjä"
 
 msgid "Slovak"
-msgstr ""
+msgstr "slovakki"
 
 msgid "Swedish"
-msgstr ""
+msgstr "ruotsi"
 
 msgid "Ukrainian"
-msgstr ""
+msgstr "ukraina"
 
 msgid "&Add word"
-msgstr ""
+msgstr "&Lisää sana"
 
 msgid "Language"
-msgstr ""
+msgstr "Kieli"
 
 msgid "Misspelled"
-msgstr ""
+msgstr "Kirjoitusvirhe"
 
 msgid "Check word"
-msgstr ""
+msgstr "Tarkista sana"
 
 msgid "Suggest"
-msgstr ""
+msgstr "Ehdota"
 
 msgid "Select language"
-msgstr ""
+msgstr "Valitse kieli"
+
+msgid "Choose syntax highlighting"
+msgstr "Valitse syntaksin korostus"
+
+msgid "< Auto >"
+msgstr "< Automaatti >"
+
+msgid "< Reload Current Syntax >"
+msgstr "< Lataa syntaksi uudelleen >"
 
 msgid "Load syntax file"
-msgstr ""
+msgstr "Lataa syntaksi tiedosto"
 
 #, c-format
 msgid ""
 "Cannot open file %s\n"
 "%s"
 msgstr ""
+"Ei voi avata tiedostoa %s\n"
+"%s"
 
 #, c-format
 msgid "Error in file %s on line %d"
-msgstr ""
+msgstr "Virhe tiedostossa %s rivillä %d"
 
 msgid ""
 "The Commander can't change to the directory that\n"
@@ -1704,12 +1744,16 @@ msgstr ""
 
 #, c-format
 msgid "Cannot fetch a local copy of %s"
-msgstr ""
+msgstr "Paikallista kopiota %s ei voi noutaa "
 
 msgid "The shell is already running a command"
+msgstr "Shell suorittaa jo komentoa"
+
+msgid ""
+"Not an xterm or Linux console;\n"
+"the subshell cannot be toggled."
 msgstr ""
 
-#, c-format
 msgid "Type 'exit' to return to the Midnight Commander"
 msgstr ""
 
@@ -1734,6 +1778,10 @@ msgstr "muut"
 msgid "Flag"
 msgstr "Lippo"
 
+#, c-format
+msgid "Permissions (octal): %o"
+msgstr ""
+
 msgid "Chown advanced command"
 msgstr ""
 
@@ -1743,6 +1791,15 @@ msgid ""
 "%s"
 msgstr ""
 
+msgid "&Ignore"
+msgstr "&Ohita"
+
+msgid "Ignore &all"
+msgstr "Ohita &kaikki"
+
+msgid "&Retry"
+msgstr "&Uudelleen"
+
 #, c-format
 msgid ""
 "Cannot chown \"%s\"\n"
@@ -1750,31 +1807,31 @@ msgid ""
 msgstr ""
 
 msgid "< Default >"
-msgstr ""
+msgstr "<Oletus>"
 
 msgid "Skins"
-msgstr ""
+msgstr "Ulkoasuteemat"
 
 msgid "Other 8 bit"
-msgstr ""
+msgstr "Muut 8-bittiset"
 
 msgid "Running"
-msgstr ""
+msgstr "Käynnissä"
 
 msgid "Stopped"
 msgstr "Pysäytetty"
 
 msgid "&Never"
-msgstr ""
+msgstr "&Koskaan"
 
 msgid "On dum&b terminals"
 msgstr ""
 
 msgid "Alwa&ys"
-msgstr ""
+msgstr "Ai&na"
 
 msgid "File operations"
-msgstr ""
+msgstr "Tiedostojen toiminnot"
 
 msgid "&Verbose operation"
 msgstr ""
@@ -1798,10 +1855,10 @@ msgid "S&ingle press"
 msgstr ""
 
 msgid "Timeout:"
-msgstr ""
+msgstr "Aikakatkaisu:"
 
 msgid "Pause after run"
-msgstr ""
+msgstr "Tauko ajon jälkeen"
 
 msgid "Use internal edi&t"
 msgstr ""
@@ -1833,6 +1890,9 @@ msgstr ""
 msgid "Sa&fe delete"
 msgstr ""
 
+msgid "Safe overwrite"
+msgstr ""
+
 msgid "A&uto save setup"
 msgstr ""
 
@@ -1840,10 +1900,13 @@ msgid "Configure options"
 msgstr ""
 
 msgid "Skin:"
+msgstr "Ulkoasuteema:"
+
+msgid "&Shadows"
 msgstr ""
 
 msgid "Appearance"
-msgstr ""
+msgstr "Ulkoasu"
 
 msgid "Case &insensitive"
 msgstr ""
@@ -1912,7 +1975,7 @@ msgid "Panel options"
 msgstr ""
 
 msgid "Information"
-msgstr ""
+msgstr "Informaatio"
 
 msgid ""
 "Using the fast reload option may not reflect the exact\n"
@@ -1934,14 +1997,13 @@ msgid "&User defined:"
 msgstr "&Oma tiedostolista:"
 
 msgid "columns"
-msgstr ""
+msgstr "sarakkeet"
 
 msgid "User &mini status"
 msgstr ""
 
-#, fuzzy
 msgid "Listing format"
-msgstr "Listausmoodi"
+msgstr "Luettelon muoto"
 
 msgid "Executable &first"
 msgstr ""
@@ -1975,13 +2037,13 @@ msgid "Confirmation"
 msgstr ""
 
 msgid "&UTF-8 output"
-msgstr ""
+msgstr "&UTF-8 ulostulo"
 
 msgid "&Full 8 bits output"
-msgstr ""
+msgstr "&Täysi 8-bittinen ulostulo"
 
 msgid "&ISO 8859-1"
-msgstr ""
+msgstr "&ISO 8859-1"
 
 msgid "7 &bits"
 msgstr ""
@@ -2047,19 +2109,114 @@ msgid "&Kill"
 msgstr "&Tapa"
 
 msgid "Background jobs"
+msgstr "Taustatyöt"
+
+#, c-format
+msgid ""
+"Cannot chdir to \"%s\"\n"
+"%s"
+msgstr ""
+
+msgid "Secure deletion"
+msgstr "Turvallinen poistaminen"
+
+msgid "Undelete"
+msgstr "Kumoa poisto"
+
+msgid "Synchronous updates"
+msgstr "Synkroniset päivitykset"
+
+msgid "Synchronous directory updates"
+msgstr "Synkroniset hakemiston päivitykset"
+
+msgid "Immutable"
+msgstr "Muuttumaton"
+
+msgid "Append only"
+msgstr "Vain liitä"
+
+msgid "No dump"
+msgstr "Ei hylätä"
+
+msgid "No update atime"
+msgstr ""
+
+msgid "Compress"
+msgstr "Pakkaus"
+
+msgid "Compressed clusters"
+msgstr "Pakatut klusterit"
+
+msgid "Compressed dirty file"
+msgstr ""
+
+msgid "Compression raw access"
+msgstr ""
+
+msgid "Encrypted inode"
+msgstr ""
+
+msgid "Journaled data"
+msgstr ""
+
+msgid "Indexed directory"
+msgstr ""
+
+msgid "No tail merging"
+msgstr ""
+
+msgid "Top of directory hierarchies"
+msgstr ""
+
+msgid "Inode uses extents"
+msgstr ""
+
+msgid "Huge_file"
+msgstr ""
+
+msgid "No COW"
+msgstr ""
+
+msgid "Direct access for files"
+msgstr ""
+
+msgid "Casefolded file"
+msgstr ""
+
+msgid "Inode has inline data"
+msgstr ""
+
+msgid "Project hierarchy"
+msgstr ""
+
+msgid "Verity protected inode"
+msgstr ""
+
+msgid "&Marked all"
+msgstr "&Kaikki merkityt"
+
+msgid "S&et marked"
+msgstr "&Aseta merkityt"
+
+msgid "C&lear marked"
+msgstr "&Tyhjennä merkityt"
+
+msgid "Chattr command"
 msgstr ""
 
 #, c-format
-msgid "Password for \\\\%s\\%s"
+msgid ""
+"Cannot chattr \"%s\"\n"
+"%s"
 msgstr ""
 
-msgid "Domain:"
+msgid "Cannot change attributes on non-local filesystems"
 msgstr ""
 
-msgid "Username:"
-msgstr ""
-
-msgid "SMB authentication"
+#, c-format
+msgid ""
+"Cannot get flags of \"%s\"\n"
+"%s"
 msgstr ""
 
 msgid "set &user ID on execution"
@@ -2099,7 +2256,7 @@ msgid "execute/searc&h by others"
 msgstr ""
 
 msgid "Name:"
-msgstr ""
+msgstr "Nimi:"
 
 msgid "Permissions (octal):"
 msgstr ""
@@ -2110,15 +2267,6 @@ msgstr ""
 msgid "Group name:"
 msgstr ""
 
-msgid "&Marked all"
-msgstr "&Kaikki merkityt"
-
-msgid "S&et marked"
-msgstr "&Aseta merkityt"
-
-msgid "C&lear marked"
-msgstr "&Tyhjennä merkityt"
-
 msgid "Chmod command"
 msgstr "Chmod-komento"
 
@@ -2126,7 +2274,7 @@ msgid "Permission"
 msgstr "Oikeudet"
 
 msgid "File"
-msgstr ""
+msgstr "Tiedosto"
 
 msgid "Set &groups"
 msgstr "Aseta &ryhmät"
@@ -2168,7 +2316,7 @@ msgid "Cannot change directory"
 msgstr "Ei voitu vaihtaa hakemistoa"
 
 msgid "Filter"
-msgstr ""
+msgstr "Suodata"
 
 msgid "Set expression for filtering filenames"
 msgstr ""
@@ -2196,7 +2344,7 @@ msgid "View file"
 msgstr ""
 
 msgid "Filename:"
-msgstr ""
+msgstr "Tiedostonimi:"
 
 msgid "Filtered view"
 msgstr ""
@@ -2205,7 +2353,7 @@ msgid "Filter command and arguments:"
 msgstr ""
 
 msgid "Edit file"
-msgstr ""
+msgstr "Muokkaa tiedostoa"
 
 msgid "Create a new Directory"
 msgstr "Luo uusi hakemisto"
@@ -2248,11 +2396,6 @@ msgid ""
 "to use this command"
 msgstr ""
 
-msgid ""
-"Not an xterm or Linux console;\n"
-"the panels cannot be toggled."
-msgstr ""
-
 #, c-format
 msgid "'%s' is not a symbolic link"
 msgstr ""
@@ -2281,9 +2424,6 @@ msgstr ""
 msgid "Shell link to machine"
 msgstr ""
 
-msgid "SMB link to machine"
-msgstr ""
-
 msgid "Undelete files on an ext2 file system"
 msgstr ""
 
@@ -2309,15 +2449,6 @@ msgstr ""
 msgid "Cannot execute commands on non-local filesystems"
 msgstr ""
 
-#, c-format
-msgid ""
-"Cannot chdir to \"%s\"\n"
-"%s"
-msgstr ""
-
-msgid "Cannot read directory contents"
-msgstr ""
-
 msgid "Parameter"
 msgstr ""
 
@@ -2326,6 +2457,9 @@ msgid ""
 "Cannot create temporary command file\n"
 "%s"
 msgstr ""
+
+msgid "Pipe failed"
+msgstr "Virheellinen putki"
 
 #, c-format
 msgid " %s%s file error"
@@ -2375,7 +2509,7 @@ msgid "%o %d %f%m"
 msgstr ""
 
 msgid "files"
-msgstr ""
+msgstr "tiedostot"
 
 msgid "directory"
 msgstr ""
@@ -2390,7 +2524,20 @@ msgstr ""
 msgid " with source mask:"
 msgstr ""
 
-msgid "Cannot make the hardlink"
+#, c-format
+msgid ""
+"Cannot stat hardlink source file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot create target hardlink \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid "Cannot create target hardlink \"%s\""
 msgstr ""
 
 #, c-format
@@ -2411,10 +2558,23 @@ msgid ""
 "%s"
 msgstr ""
 
-msgid "Ski&p all"
+#, c-format
+msgid ""
+"\"%s\"\n"
+"and\n"
+"\"%s\"\n"
+"are the same directory"
 msgstr ""
 
-msgid "&Retry"
+#, c-format
+msgid ""
+"\"%s\"\n"
+"and\n"
+"\"%s\"\n"
+"are the same file"
+msgstr ""
+
+msgid "Ski&p all"
 msgstr ""
 
 #, c-format
@@ -2435,81 +2595,106 @@ msgstr ""
 
 #, c-format
 msgid ""
-"Cannot stat file \"%s\"\n"
+"Cannot remove file \"%s\"\n"
 "%s"
 msgstr ""
+"Tiedostoa \"%s\" ei voi poistaa\n"
+"%s"
 
 #, c-format
 msgid ""
-"\"%s\"\n"
-"and\n"
-"\"%s\"\n"
-"are the same file"
+"Cannot stat file \"%s\"\n"
+"%s"
 msgstr ""
+"Tiedostoa \"%s\" ei voi lisätä\n"
+"%s"
 
 #, c-format
 msgid "Cannot overwrite directory \"%s\""
-msgstr ""
+msgstr "Kansiota \"%s\" ei voi ylikirjoittaa"
 
 #, c-format
 msgid ""
 "Cannot move file \"%s\" to \"%s\"\n"
 "%s"
 msgstr ""
-
-#, c-format
-msgid ""
-"Cannot remove file \"%s\"\n"
+"Tiedostoa ei voi siirtää \"%s\" - \"%s\"\n"
 "%s"
-msgstr ""
-
-#, c-format
-msgid ""
-"Cannot delete file \"%s\"\n"
-"%s"
-msgstr ""
 
 #, c-format
 msgid ""
 "Cannot remove directory \"%s\"\n"
 "%s"
 msgstr ""
+"Kansiota \"%s\" ei voi poistaa\n"
+"%s"
 
 #, c-format
 msgid ""
 "Cannot overwrite directory \"%s\"\n"
 "%s"
 msgstr ""
+"Kansiota \"%s\" ei voi ylikirjoittaa\n"
+"%s"
+
+#, c-format
+msgid ""
+"Cannot overwrite file \"%s\"\n"
+"%s"
+msgstr ""
+"Tiedostoa \"%s\" ei voi ylikirjoittaa\n"
+"%s"
+
+#, c-format
+msgid ""
+"Cannot move directory \"%s\" to \"%s\"\n"
+"%s"
+msgstr ""
+"Kansiota ei voi siirtää \"%s\" - \"%s\"\n"
+"%s"
+
+msgid "Cannot operate on \"..\"!"
+msgstr "Ei voi käyttää \"..\"!"
 
 #, c-format
 msgid ""
 "Cannot stat source file \"%s\"\n"
 "%s"
 msgstr ""
+"Lähdetiedostoa ei voi lisätä \"%s\"\n"
+"%s"
 
 #, c-format
 msgid ""
 "Cannot create special file \"%s\"\n"
 "%s"
 msgstr ""
+"Erikoistiedostoa ei voi luoda \"%s\"\n"
+"%s"
 
 #, c-format
 msgid ""
 "Cannot chown target file \"%s\"\n"
 "%s"
 msgstr ""
+"Ei onnistu chown kohdetiedostoon \"%s\"\n"
+"%s"
 
 #, c-format
 msgid ""
 "Cannot chmod target file \"%s\"\n"
 "%s"
 msgstr ""
+"Ei onnistu chmod kohdetiedostoon \"%s\"\n"
+"%s"
 
 #, c-format
 msgid ""
 "Cannot open source file \"%s\"\n"
 "%s"
 msgstr ""
+"Lähdetiedostoa ei voi avata \"%s\"\n"
+"%s"
 
 msgid "Reget failed, about to overwrite file"
 msgstr ""
@@ -2519,36 +2704,48 @@ msgid ""
 "Cannot fstat source file \"%s\"\n"
 "%s"
 msgstr ""
+"Ei onnistu fstat lähdetiedostoon \"%s\"\n"
+"%s"
 
 #, c-format
 msgid ""
 "Cannot create target file \"%s\"\n"
 "%s"
 msgstr ""
+"Kohdetiedostoa ei voi luoda \"%s\"\n"
+"%s"
 
 #, c-format
 msgid ""
 "Cannot fstat target file \"%s\"\n"
 "%s"
 msgstr ""
+"Ei onnistu fstat kohdetiedostoon \"%s\"\n"
+"%s"
 
 #, c-format
 msgid ""
 "Cannot preallocate space for target file \"%s\"\n"
 "%s"
 msgstr ""
+"Ei voitu varata tilaa kohdetiedostolle \"%s\"\n"
+"%s"
 
 #, c-format
 msgid ""
 "Cannot read source file \"%s\"\n"
 "%s"
 msgstr ""
+"Lähdetiedostoa ei voi lukea \"%s\"\n"
+"%s"
 
 #, c-format
 msgid ""
 "Cannot write target file \"%s\"\n"
 "%s"
 msgstr ""
+"Kohdetiedostoa ei voi kirjoittaa \"%s\"\n"
+"%s"
 
 msgid "(stalled)"
 msgstr ""
@@ -2558,30 +2755,38 @@ msgid ""
 "Cannot close source file \"%s\"\n"
 "%s"
 msgstr ""
+"Lähdetiedostoa ei voi sulkea \"%s\"\n"
+"%s"
 
 #, c-format
 msgid ""
 "Cannot close target file \"%s\"\n"
 "%s"
 msgstr ""
+"Kohdetiedostoa ei voi sulkea \"%s\"\n"
+"%s"
 
 msgid "Incomplete file was retrieved. Keep it?"
 msgstr ""
 
 msgid "&Keep"
-msgstr ""
+msgstr "&Pidä"
 
 #, c-format
 msgid ""
 "Cannot stat source directory \"%s\"\n"
 "%s"
 msgstr ""
+"Kohdekansiota ei voi lisätä \"%s\"\n"
+"%s"
 
 #, c-format
 msgid ""
 "Source \"%s\" is not a directory\n"
 "%s"
 msgstr ""
+"Lähde \"%s\" ei ole kansio\n"
+"%s"
 
 #, c-format
 msgid ""
@@ -2594,48 +2799,31 @@ msgid ""
 "Destination \"%s\" must be a directory\n"
 "%s"
 msgstr ""
+"Kohteen \"%s\" on oltava kansio\n"
+"%s"
 
 #, c-format
 msgid ""
 "Cannot create target directory \"%s\"\n"
 "%s"
 msgstr ""
+"Kohdekansiota ei voi luoda \"%s\"\n"
+"%s"
 
 #, c-format
 msgid ""
 "Cannot chown target directory \"%s\"\n"
 "%s"
 msgstr ""
-
-#, c-format
-msgid ""
-"\"%s\"\n"
-"and\n"
-"\"%s\"\n"
-"are the same directory"
-msgstr ""
-
-#, c-format
-msgid ""
-"Cannot overwrite file \"%s\"\n"
+"Ei onnistu chown kohdekansioon \"%s\"\n"
 "%s"
-msgstr ""
-
-#, c-format
-msgid ""
-"Cannot move directory \"%s\" to \"%s\"\n"
-"%s"
-msgstr ""
 
 #, c-format
 msgid "Directories: %zu, total size: %s"
-msgstr ""
-
-msgid "Cannot operate on \"..\"!"
-msgstr ""
+msgstr "Kansioiden: %zu, koko yhteensä: %s"
 
 msgid "Sorry, I could not put the job in background"
-msgstr ""
+msgstr "Anteeksi, en voinut laittaa työtä taustalle"
 
 msgid "S&uspend"
 msgstr ""
@@ -2645,123 +2833,340 @@ msgstr ""
 
 #, c-format
 msgid "%d:%02d.%02d"
-msgstr ""
+msgstr "%d:%02d.%02d"
 
 #, c-format
 msgid "ETA %s"
-msgstr ""
+msgstr "ETA %s"
 
 #, c-format
 msgid "%.2f MB/s"
-msgstr ""
+msgstr "%.2f MB/s"
 
 #, c-format
 msgid "%.2f KB/s"
-msgstr ""
+msgstr "%.2f Kt/s"
 
 #, c-format
 msgid "%ld B/s"
-msgstr ""
+msgstr "%ld B/s"
 
-msgid "Target file already exists!"
-msgstr ""
+msgid "New     :"
+msgstr "Uusi    :"
 
-#, c-format
-msgid "New     : %s, size %s"
-msgstr ""
+msgid "Existing:"
+msgstr "Nykyinen:"
 
-#, c-format
-msgid "Existing: %s, size %s"
-msgstr ""
-
-msgid "Overwrite this target?"
-msgstr ""
+msgid "Overwrite this file?"
+msgstr "Korvataanko tämä tiedosto?"
 
 msgid "A&ppend"
-msgstr ""
+msgstr "&Lisää"
 
 msgid "&Reget"
-msgstr ""
+msgstr "&Uudelleen"
 
-msgid "Overwrite all targets?"
-msgstr ""
+msgid "Overwrite all files?"
+msgstr "Korvataanko kaikki tiedostot?"
 
-msgid "&Update"
-msgstr ""
+msgid "Don't overwrite with &zero length file"
+msgstr "Älä korvaa &nollan pituisella tiedostolla "
 
-msgid "If &size differs"
-msgstr ""
+msgid "&Older"
+msgstr "&Vanhin"
+
+msgid "S&maller"
+msgstr "Piene&mpi"
+
+msgid "&Size differs"
+msgstr "&Koko eroaa"
 
 msgid "File exists"
-msgstr ""
+msgstr "Tiedosto saatavilla"
 
 msgid "Background process: File exists"
-msgstr ""
+msgstr "Taustaprosessi: Tiedosto saatavilla"
 
 #, c-format
 msgid "Files processed: %zu/%zu"
-msgstr ""
+msgstr "Käsitellyt tiedostot: %zu/%zu"
 
 #, c-format
 msgid "Files processed: %zu"
-msgstr ""
+msgstr "Käsitellyt tiedostot: %zu"
 
 #, c-format
 msgid "Time: %s %s"
-msgstr ""
+msgstr "Aika: %s %s"
 
 #, c-format
 msgid "Time: %s %s (%s)"
-msgstr ""
+msgstr "Aika: %s %s (%s)"
 
 #, c-format
 msgid "Time: %s"
-msgstr ""
+msgstr "Aika: %s"
 
 #, c-format
 msgid "Time: %s (%s)"
-msgstr ""
+msgstr "Aika: %s (%s)"
 
 #, c-format
 msgid " Total: %s "
-msgstr ""
+msgstr " Yhteensä: %s "
 
 #, c-format
 msgid " Total: %s/%s "
-msgstr ""
+msgstr " Yhteensä: %s/%s "
 
 msgid "Source"
-msgstr ""
+msgstr "Lähde"
 
 msgid "Target"
-msgstr ""
+msgstr "Kohde"
 
 msgid "Deleting"
-msgstr ""
+msgstr "Poistetaan"
 
 msgid "&Using shell patterns"
 msgstr ""
 
 msgid "to:"
-msgstr ""
+msgstr "kohde:"
 
 msgid "Follow &links"
-msgstr ""
+msgstr "Seuraa &linkkejä"
 
 msgid "Preserve &attributes"
 msgstr ""
 
 msgid "Di&ve into subdir if exists"
-msgstr ""
+msgstr "Si&irry alihakemistoon, jos sellainen on "
 
 msgid "&Stable symlinks"
-msgstr ""
+msgstr "Vakaa &symlinkki"
 
 msgid "&Background"
-msgstr ""
+msgstr "&Tausta"
 
 #, c-format
 msgid "Invalid source pattern '%s'"
+msgstr ""
+
+msgid "File listin&g"
+msgstr "Tiedosto lista&us"
+
+msgid "&Quick view"
+msgstr "&Pikanäkymä"
+
+msgid "&Info"
+msgstr "&Tiedot"
+
+msgid "&Tree"
+msgstr "&Puu"
+
+msgid "&Listing format..."
+msgstr "&Luettelomuoto..."
+
+msgid "&Sort order..."
+msgstr "&Järjestys"
+
+msgid "&Filter..."
+msgstr "&Suodata..."
+
+msgid "&Encoding..."
+msgstr "&Pakkaa..."
+
+msgid "FT&P link..."
+msgstr "FT&P linkki..."
+
+msgid "S&hell link..."
+msgstr "S&hell linkki..."
+
+msgid "S&FTP link..."
+msgstr "S&FTP linkki..."
+
+msgid "Paneli&ze"
+msgstr ""
+
+msgid "&Rescan"
+msgstr "&Virkistä"
+
+msgid "&View"
+msgstr "&Näytä"
+
+msgid "Vie&w file..."
+msgstr "Näy&tä tiedosto..."
+
+msgid "&Filtered view"
+msgstr "&Suodatettu näkymä"
+
+msgid "&Copy"
+msgstr "&Kopioi"
+
+msgid "C&hmod"
+msgstr "C&hmod"
+
+msgid "&Link"
+msgstr "&Linkki"
+
+msgid "&Symlink"
+msgstr "&Symlinkki"
+
+msgid "Relative symlin&k"
+msgstr ""
+
+msgid "Edit s&ymlink"
+msgstr "Muokkaa s&ymlinkkiä"
+
+msgid "Ch&own"
+msgstr "Ch&own"
+
+msgid "&Advanced chown"
+msgstr ""
+
+msgid "Cha&ttr"
+msgstr ""
+
+msgid "&Rename/Move"
+msgstr "&Nimeä/Siirrä"
+
+msgid "&Mkdir"
+msgstr "&Luo hakemisto"
+
+msgid "&Quick cd"
+msgstr "&Nopea cd"
+
+msgid "Select &group"
+msgstr "Valitse &ryhmään"
+
+msgid "U&nselect group"
+msgstr "Poista &ryhmästä"
+
+msgid "&Invert selection"
+msgstr "&Käänteinen valinta"
+
+msgid "E&xit"
+msgstr "P&oistu"
+
+msgid "&User menu"
+msgstr "&Käyttäjän valikko"
+
+msgid "&Directory tree"
+msgstr "&Hakemistopuu"
+
+msgid "&Find file"
+msgstr "&Etsi tiedosto"
+
+msgid "S&wap panels"
+msgstr "V&aihda paneelit "
+
+msgid "Switch &panels on/off"
+msgstr "Vaihda &paneelit on/off"
+
+msgid "&Compare directories"
+msgstr ""
+
+msgid "C&ompare files"
+msgstr ""
+
+msgid "E&xternal panelize"
+msgstr ""
+
+msgid "Show directory s&izes"
+msgstr "Näytä hakem&iston koot"
+
+msgid "Command &history"
+msgstr "Komentojen &historia"
+
+msgid "Viewed/edited files hi&story"
+msgstr ""
+
+msgid "Di&rectory hotlist"
+msgstr ""
+
+msgid "&Active VFS list"
+msgstr ""
+
+msgid "&Background jobs"
+msgstr ""
+
+msgid "Screen lis&t"
+msgstr ""
+
+msgid "&Undelete files (ext2fs only)"
+msgstr ""
+
+msgid "&Listing format edit"
+msgstr ""
+
+msgid "Edit &extension file"
+msgstr ""
+
+msgid "Edit &menu file"
+msgstr ""
+
+msgid "Edit hi&ghlighting group file"
+msgstr ""
+
+msgid "&Configuration..."
+msgstr "&Asetukset..."
+
+msgid "&Layout..."
+msgstr "&Muotoilu..."
+
+msgid "&Panel options..."
+msgstr "&Paneelin asetukset..."
+
+msgid "C&onfirmation..."
+msgstr ""
+
+msgid "&Appearance..."
+msgstr "&Ulkoasu..."
+
+msgid "&Display bits..."
+msgstr ""
+
+msgid "&Virtual FS..."
+msgstr ""
+
+msgid "Panels:"
+msgstr "Paneelit:"
+
+#, c-format
+msgid "You have %zu opened screen. Quit anyway?"
+msgid_plural "You have %zu opened screens. Quit anyway?"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "The Midnight Commander"
+msgstr "Midnight Commander"
+
+msgid "Do you really want to quit the Midnight Commander?"
+msgstr "Haluatko sulkea Midnight Commanderin?"
+
+msgid "&Above"
+msgstr ""
+
+msgid "&Left"
+msgstr "&Vasen"
+
+msgid "&Below"
+msgstr ""
+
+msgid "&Right"
+msgstr "&Oikea"
+
+msgid "ButtonBar|Menu"
+msgstr ""
+
+msgid "ButtonBar|View"
+msgstr ""
+
+msgid "ButtonBar|RenMov"
+msgstr ""
+
+msgid "ButtonBar|Mkdir"
 msgstr ""
 
 msgid "&Chdir"
@@ -2777,7 +3182,7 @@ msgid "&View - F3"
 msgstr ""
 
 msgid "&Edit - F4"
-msgstr ""
+msgstr "&Muokkaa - F4"
 
 #, c-format
 msgid "Found: %lu"
@@ -2787,16 +3192,19 @@ msgid "Malformed regular expression"
 msgstr ""
 
 msgid "File name:"
-msgstr ""
+msgstr "Tiedostonimi:"
 
 msgid "&Find recursively"
+msgstr ""
+
+msgid "Follow s&ymlinks"
 msgstr ""
 
 msgid "S&kip hidden"
 msgstr ""
 
 msgid "Content:"
-msgstr ""
+msgstr "Sisältö:"
 
 msgid "Sea&rch for content"
 msgstr ""
@@ -2805,12 +3213,9 @@ msgid "Case sens&itive"
 msgstr ""
 
 msgid "A&ll charsets"
-msgstr ""
+msgstr "Kai&kki merkistöt"
 
 msgid "Fir&st hit"
-msgstr ""
-
-msgid "&Tree"
 msgstr ""
 
 msgid "Find File"
@@ -2834,6 +3239,14 @@ msgid "Finished (ignored %zu directory)"
 msgid_plural "Finished (ignored %zu directories)"
 msgstr[0] ""
 msgstr[1] ""
+
+#, c-format
+msgid "Find File: \"%s\". Content: \"%s\""
+msgstr ""
+
+#, c-format
+msgid "Find File: \"%s\""
+msgstr ""
 
 msgid "Searching"
 msgstr ""
@@ -2937,7 +3350,7 @@ msgstr ""
 
 #, c-format
 msgid "File: %s"
-msgstr ""
+msgstr "Tiedosto: %s"
 
 msgid "No node information"
 msgstr ""
@@ -2954,14 +3367,14 @@ msgstr ""
 
 #, c-format
 msgid "Type:       %s"
-msgstr ""
+msgstr "Tyyppi:     %s"
 
 msgid "non-local vfs"
 msgstr ""
 
 #, c-format
 msgid "Device:     %s"
-msgstr ""
+msgstr "Laite:      %s"
 
 #, c-format
 msgid "Filesystem: %s"
@@ -2986,7 +3399,7 @@ msgstr ""
 
 #, c-format
 msgid "Size:       %s"
-msgstr ""
+msgstr "Koko:       %s"
 
 #, c-format
 msgid " (%lu block)"
@@ -3000,6 +3413,16 @@ msgstr ""
 
 #, c-format
 msgid "Links:      %d"
+msgstr ""
+
+msgid "Attributes: not supported"
+msgstr ""
+
+#, c-format
+msgid "Attributes: %s"
+msgstr ""
+
+msgid "Attributes: unavailable"
 msgstr ""
 
 #, c-format
@@ -3049,217 +3472,6 @@ msgstr ""
 msgid "Layout"
 msgstr ""
 
-msgid "File listin&g"
-msgstr ""
-
-msgid "&Quick view"
-msgstr ""
-
-msgid "&Info"
-msgstr ""
-
-#, fuzzy
-msgid "&Listing format..."
-msgstr "Listausmoodi"
-
-msgid "&Sort order..."
-msgstr ""
-
-msgid "&Filter..."
-msgstr ""
-
-msgid "&Encoding..."
-msgstr ""
-
-msgid "FT&P link..."
-msgstr ""
-
-msgid "S&hell link..."
-msgstr ""
-
-msgid "S&FTP link..."
-msgstr ""
-
-msgid "SM&B link..."
-msgstr ""
-
-msgid "Paneli&ze"
-msgstr ""
-
-msgid "&Rescan"
-msgstr ""
-
-msgid "&View"
-msgstr ""
-
-msgid "Vie&w file..."
-msgstr ""
-
-msgid "&Filtered view"
-msgstr ""
-
-msgid "&Copy"
-msgstr ""
-
-msgid "C&hmod"
-msgstr ""
-
-msgid "&Link"
-msgstr ""
-
-msgid "&Symlink"
-msgstr ""
-
-msgid "Relative symlin&k"
-msgstr ""
-
-msgid "Edit s&ymlink"
-msgstr ""
-
-msgid "Ch&own"
-msgstr ""
-
-msgid "&Advanced chown"
-msgstr ""
-
-msgid "&Rename/Move"
-msgstr ""
-
-msgid "&Mkdir"
-msgstr ""
-
-msgid "&Quick cd"
-msgstr ""
-
-msgid "Select &group"
-msgstr ""
-
-msgid "U&nselect group"
-msgstr ""
-
-msgid "&Invert selection"
-msgstr ""
-
-msgid "E&xit"
-msgstr ""
-
-msgid "&User menu"
-msgstr ""
-
-msgid "&Directory tree"
-msgstr ""
-
-msgid "&Find file"
-msgstr ""
-
-msgid "S&wap panels"
-msgstr ""
-
-msgid "Switch &panels on/off"
-msgstr ""
-
-msgid "&Compare directories"
-msgstr ""
-
-msgid "C&ompare files"
-msgstr ""
-
-msgid "E&xternal panelize"
-msgstr ""
-
-msgid "Show directory s&izes"
-msgstr ""
-
-msgid "Command &history"
-msgstr ""
-
-msgid "Di&rectory hotlist"
-msgstr ""
-
-msgid "&Active VFS list"
-msgstr ""
-
-msgid "&Background jobs"
-msgstr ""
-
-msgid "Screen lis&t"
-msgstr ""
-
-msgid "&Undelete files (ext2fs only)"
-msgstr ""
-
-msgid "&Listing format edit"
-msgstr ""
-
-msgid "Edit &extension file"
-msgstr ""
-
-msgid "Edit &menu file"
-msgstr ""
-
-msgid "Edit hi&ghlighting group file"
-msgstr ""
-
-msgid "&Configuration..."
-msgstr ""
-
-msgid "&Layout..."
-msgstr "&Muotoilu..."
-
-msgid "&Panel options..."
-msgstr ""
-
-msgid "C&onfirmation..."
-msgstr ""
-
-msgid "&Appearance..."
-msgstr ""
-
-msgid "&Display bits..."
-msgstr ""
-
-msgid "&Virtual FS..."
-msgstr ""
-
-msgid "Panels:"
-msgstr ""
-
-#, c-format
-msgid "You have %zu opened screen. Quit anyway?"
-msgid_plural "You have %zu opened screens. Quit anyway?"
-msgstr[0] ""
-msgstr[1] ""
-
-msgid "The Midnight Commander"
-msgstr ""
-
-msgid "Do you really want to quit the Midnight Commander?"
-msgstr ""
-
-msgid "&Above"
-msgstr ""
-
-msgid "&Left"
-msgstr ""
-
-msgid "&Below"
-msgstr ""
-
-msgid "&Right"
-msgstr ""
-
-msgid "ButtonBar|Menu"
-msgstr ""
-
-msgid "ButtonBar|View"
-msgstr ""
-
-msgid "ButtonBar|RenMov"
-msgstr ""
-
-msgid "ButtonBar|Mkdir"
-msgstr ""
-
 msgid "Memory exhausted!"
 msgstr ""
 
@@ -3285,7 +3497,7 @@ msgid "sort|v"
 msgstr ""
 
 msgid "&Version"
-msgstr ""
+msgstr "&Versio"
 
 #. TRANSLATORS: one single character to represent 'extension' sort mode
 #. TRANSLATORS: no need to translate 'sort', it's just a context prefix
@@ -3304,7 +3516,7 @@ msgid "&Size"
 msgstr "&Koko"
 
 msgid "Block Size"
-msgstr ""
+msgstr "Alueen koko"
 
 #. TRANSLATORS: one single character to represent 'Modify time' sort mode
 #. TRANSLATORS: no need to translate 'sort', it's just a context prefix
@@ -3345,10 +3557,10 @@ msgid "&Inode"
 msgstr "&Inode"
 
 msgid "UID"
-msgstr ""
+msgstr "UID"
 
 msgid "GID"
-msgstr ""
+msgstr "GID"
 
 msgid "Owner"
 msgstr "Omistaja"
@@ -3390,7 +3602,7 @@ msgid "&Case sensitive"
 msgstr ""
 
 msgid "Select"
-msgstr ""
+msgstr "Valitse"
 
 msgid "Unselect"
 msgstr ""
@@ -3398,11 +3610,14 @@ msgstr ""
 msgid "Do you really want to execute?"
 msgstr ""
 
+msgid "Cannot read directory contents"
+msgstr ""
+
 msgid "User supplied format looks invalid, reverting to default."
 msgstr ""
 
 msgid "&Add new"
-msgstr ""
+msgstr "&Lisää uusi"
 
 msgid "External panelize"
 msgstr ""
@@ -3419,10 +3634,17 @@ msgstr ""
 msgid "Enter command label:"
 msgstr ""
 
-msgid "Cannot invoke command."
+#, c-format
+msgid ""
+"External panelize:\n"
+"%s"
 msgstr ""
 
-msgid "Pipe close failed"
+#, c-format
+msgid ""
+"External panelize:\n"
+"failed to read data from child stdout:\n"
+"%s"
 msgstr ""
 
 msgid "Cannot run external panelize in a non-local directory"
@@ -3483,48 +3705,6 @@ msgstr ""
 msgid ""
 "Cannot write to the %s file:\n"
 "%s\n"
-msgstr ""
-
-msgid "Debug"
-msgstr ""
-
-msgid "ERROR:"
-msgstr ""
-
-msgid "True:"
-msgstr ""
-
-msgid "False:"
-msgstr ""
-
-msgid "Error calling program"
-msgstr ""
-
-msgid "Warning -- ignoring file"
-msgstr ""
-
-#, c-format
-msgid ""
-"File %s is not owned by root or you or is world writable.\n"
-"Using it may compromise your security"
-msgstr ""
-
-msgid "Format error on file Extensions File"
-msgstr ""
-
-#, c-format
-msgid "The %%var macro has no default"
-msgstr ""
-
-#, c-format
-msgid "The %%var macro has no variable"
-msgstr ""
-
-#, c-format
-msgid "No suitable entries found in %s"
-msgstr ""
-
-msgid "User menu"
 msgstr ""
 
 msgid "Help file format error\n"
@@ -3603,6 +3783,12 @@ msgstr ""
 msgid "Home directory path is not absolute"
 msgstr ""
 
+msgid ""
+"GNU Midnight Commander\n"
+"is already running on this terminal.\n"
+"Subshell support will be disabled."
+msgstr ""
+
 #, c-format
 msgid ""
 "\n"
@@ -3611,27 +3797,21 @@ msgid ""
 msgstr ""
 
 msgid "Choose codepage"
-msgstr ""
+msgstr "Valitse koodisivu"
 
 msgid "-  < No translation >"
 msgstr ""
 
 msgid "%b %e  %Y"
-msgstr ""
+msgstr "%b %e  %Y"
 
 msgid "%b %e %H:%M"
-msgstr ""
+msgstr "%b %e %H:%M"
 
 #, c-format
 msgid ""
 "Cannot save file %s:\n"
 "%s"
-msgstr ""
-
-msgid ""
-"GNU Midnight Commander is already\n"
-"running on this terminal.\n"
-"Subshell support will be disabled."
 msgstr ""
 
 #, c-format
@@ -3645,40 +3825,37 @@ msgstr ""
 msgid "Warning: Cannot change to %s.\n"
 msgstr ""
 
-msgid "Using the S-Lang library with terminfo database\n"
+msgid "With builtin Editor and Aspell support"
 msgstr ""
 
-msgid "Using the ncurses library\n"
+msgid "With builtin Editor"
 msgstr ""
 
-msgid "Using the ncursesw library\n"
+msgid "With optional subshell support"
 msgstr ""
 
-msgid "With builtin Editor\n"
+msgid "With subshell support as default"
 msgstr ""
 
-msgid "With optional subshell support\n"
+msgid "With support for background operations"
 msgstr ""
 
-msgid "With subshell support as default\n"
+msgid "With mouse support on xterm and Linux console"
 msgstr ""
 
-msgid "With support for background operations\n"
+msgid "With mouse support on xterm"
 msgstr ""
 
-msgid "With mouse support on xterm and Linux console\n"
+msgid "With support for X11 events"
 msgstr ""
 
-msgid "With mouse support on xterm\n"
+msgid "With internationalization support"
 msgstr ""
 
-msgid "With support for X11 events\n"
+msgid "With multiple codepages support"
 msgstr ""
 
-msgid "With internationalization support\n"
-msgstr ""
-
-msgid "With multiple codepages support\n"
+msgid "With ext2fs attributes support"
 msgstr ""
 
 #, c-format
@@ -3686,10 +3863,26 @@ msgid "Built with GLib %d.%d.%d\n"
 msgstr ""
 
 #, c-format
-msgid "Virtual File Systems:"
+msgid "Built with S-Lang %s with terminfo database\n"
 msgstr ""
 
 #, c-format
+msgid "Built with ncurses %s\n"
+msgstr " Luotu ncurses %s\n"
+
+msgid "Built with ncurses (unknown version)"
+msgstr "Luotu ncurses (tuntematon versio)"
+
+#, c-format
+msgid "Built with ncursesw %s\n"
+msgstr " Luotu ncursesw %s\n"
+
+msgid "Built with ncursesw (unknown version)"
+msgstr "Luotu ncursesw (tuntematon versio)"
+
+msgid "Virtual File Systems:"
+msgstr ""
+
 msgid "Data types:"
 msgstr ""
 
@@ -3718,6 +3911,48 @@ msgid "User data"
 msgstr ""
 
 msgid "Cache directory:"
+msgstr ""
+
+msgid "Debug"
+msgstr ""
+
+msgid "ERROR:"
+msgstr "VIRHE:"
+
+msgid "True:"
+msgstr ""
+
+msgid "False:"
+msgstr ""
+
+msgid "Error calling program"
+msgstr ""
+
+msgid "Warning -- ignoring file"
+msgstr ""
+
+#, c-format
+msgid ""
+"File %s is not owned by root or you or is world writable.\n"
+"Using it may compromise your security"
+msgstr ""
+
+msgid "Format error on file Extensions File"
+msgstr ""
+
+#, c-format
+msgid "The %%var macro has no default"
+msgstr ""
+
+#, c-format
+msgid "The %%var macro has no variable"
+msgstr ""
+
+#, c-format
+msgid "No suitable entries found in %s"
+msgstr ""
+
+msgid "User menu"
 msgstr ""
 
 #, c-format
@@ -3759,10 +3994,14 @@ msgstr "Odottaminen päättyminen tiedostossa %s"
 #, c-format
 msgid ""
 "Cannot open %s archive\n"
+"%s:\n"
 "%s"
 msgstr ""
 
-msgid "Inconsistent extfs archive"
+#, c-format
+msgid ""
+"EXTFS virtual file system:\n"
+"%s"
 msgstr ""
 
 #, c-format
@@ -3931,6 +4170,12 @@ msgid ""
 msgstr ""
 
 #, c-format
+msgid ""
+"SFS virtual file system:\n"
+"%s"
+msgstr ""
+
+#, c-format
 msgid "%s: Warning: file %s not found\n"
 msgstr ""
 
@@ -3962,6 +4207,9 @@ msgstr ""
 
 #, c-format
 msgid "sftp: %s"
+msgstr "sftp: %s"
+
+msgid "sftp: failed to convert remote host IP address into text form"
 msgstr ""
 
 #, c-format
@@ -3973,6 +4221,50 @@ msgstr ""
 
 #, c-format
 msgid "sftp: connection to server failed: %s"
+msgstr ""
+
+msgid "sftp: found host key of unsupported type: RSA1"
+msgstr ""
+
+msgid "sftp: unknown host key type:"
+msgstr ""
+
+#, c-format
+msgid ""
+"Permanently added\n"
+"%s (%s)\n"
+"to the list of known hosts."
+msgstr ""
+
+msgid "sftp: cannot get the remote host key"
+msgstr ""
+
+msgid "sftp: unsupported key type, can't check remote host key"
+msgstr ""
+
+msgid "sftp: can't compute host key fingerprint hash"
+msgstr ""
+
+#, c-format
+msgid ""
+"The authenticity of host\n"
+"%s (%s)\n"
+"can't be established!\n"
+"%s key fingerprint hash is\n"
+"SHA1:%s.\n"
+"Do you want to add it to the list of known hosts and continue connecting?"
+msgstr ""
+
+#, c-format
+msgid ""
+"%s (%s)\n"
+"is found in the list of known hosts but\n"
+"KEYS DO NOT MATCH! THIS COULD BE A MITM ATTACK!\n"
+"Are you sure you want to add it to the list of known hosts and continue "
+"connecting?"
+msgstr ""
+
+msgid "sftp: host key verification failed"
 msgstr ""
 
 #, c-format
@@ -3989,10 +4281,14 @@ msgstr ""
 msgid "sftp: Password is empty."
 msgstr ""
 
-msgid "sftp: Failure establishing SSH session"
+msgid "sftp: failure establishing SSH session"
 msgstr ""
 
 msgid "sftp: No file handler data present for reading file"
+msgstr ""
+
+#, c-format
+msgid "sftp: socket error: %s"
 msgstr ""
 
 #, c-format
@@ -4001,33 +4297,6 @@ msgstr ""
 
 msgid "sftp: Listing done."
 msgstr ""
-
-#, c-format
-msgid "reconnect to %s failed"
-msgstr "uudelleenyritys kohteeseen %s epäonnistui"
-
-msgid "Authentication failed"
-msgstr "Authenkaatio epäonnistui"
-
-#, c-format
-msgid "Error %s creating directory %s"
-msgstr "Virhe %s luotaessa kansiota %s"
-
-#, c-format
-msgid "Error %s removing directory %s"
-msgstr "Virhe %s poistaessa hakemistoa %s"
-
-#, c-format
-msgid "%s opening remote file %s"
-msgstr "%s avautuva palvelintiedosto %s"
-
-#, c-format
-msgid "%s removing remote file %s"
-msgstr "%s poistaa palvelintiedostoa %s"
-
-#, c-format
-msgid "%s renaming files\n"
-msgstr "%s uudelleennimeää tiedostoja\n"
 
 #, c-format
 msgid ""
@@ -4054,7 +4323,7 @@ msgid "not enough memory"
 msgstr ""
 
 msgid "while allocating block buffer"
-msgstr ""
+msgstr "samalla kun valitaan alueen puskuria"
 
 #, c-format
 msgid "open_inode_scan: %d"
@@ -4221,3 +4490,52 @@ msgstr ""
 
 msgid "Cannot fetch a local copy of /ftp://some.host/editme.txt"
 msgstr ""
+
+#~ msgid "Set debug level"
+#~ msgstr "Aseta debug-taso"
+
+#~ msgid "<integer>"
+#~ msgstr "<integer>"
+
+#, c-format
+#~ msgid "Password for \\\\%s\\%s"
+#~ msgstr "Salasana käyttäjälle \\\\%s\\%s"
+
+#~ msgid "Domain:"
+#~ msgstr "Verkkotunnus:"
+
+#~ msgid "Username:"
+#~ msgstr "Käyttäjätunnus:"
+
+#~ msgid "SMB authentication"
+#~ msgstr "SMB-todennus"
+
+#~ msgid "SM&B link..."
+#~ msgstr "SM&B linkki..."
+
+#, c-format
+#~ msgid "reconnect to %s failed"
+#~ msgstr "uudelleenyritys kohteeseen %s epäonnistui"
+
+#~ msgid "Authentication failed"
+#~ msgstr "Authenkaatio epäonnistui"
+
+#, c-format
+#~ msgid "Error %s creating directory %s"
+#~ msgstr "Virhe %s luotaessa kansiota %s"
+
+#, c-format
+#~ msgid "Error %s removing directory %s"
+#~ msgstr "Virhe %s poistaessa hakemistoa %s"
+
+#, c-format
+#~ msgid "%s opening remote file %s"
+#~ msgstr "%s avautuva palvelintiedosto %s"
+
+#, c-format
+#~ msgid "%s removing remote file %s"
+#~ msgstr "%s poistaa palvelintiedostoa %s"
+
+#, c-format
+#~ msgid "%s renaming files\n"
+#~ msgstr "%s uudelleennimeää tiedostoja\n"

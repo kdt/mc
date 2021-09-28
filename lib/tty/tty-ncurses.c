@@ -2,7 +2,7 @@
    Interface to the terminal controlling library.
    Ncurses wrapper.
 
-   Copyright (C) 2005-2017
+   Copyright (C) 2005-2021
    Free Software Foundation, Inc.
 
    Written by:
@@ -48,6 +48,7 @@
 
 #include "tty-internal.h"       /* mc_tty_normalize_from_utf8() */
 #include "tty.h"
+#include "color.h"              /* tty_setcolor */
 #include "color-internal.h"
 #include "key.h"
 #include "mouse.h"
@@ -102,6 +103,8 @@ tty_setup_sigwinch (void (*handler) (int))
 #endif /* SA_RESTART */
     sigaction (SIGWINCH, &act, &oact);
 #endif /* SIGWINCH */
+
+    tty_create_winch_pipe ();
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -109,9 +112,57 @@ tty_setup_sigwinch (void (*handler) (int))
 static void
 sigwinch_handler (int dummy)
 {
+    ssize_t n = 0;
+
     (void) dummy;
 
-    mc_global.tty.winch_flag = 1;
+    n = write (sigwinch_pipe[1], "", 1);
+    (void) n;
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+/**
+ * Get visible part of area.
+ *
+ * @returns TRUE if any part of area is in screen bounds, FALSE otherwise.
+ */
+static gboolean
+tty_clip (int *y, int *x, int *rows, int *cols)
+{
+    if (*y < 0)
+    {
+        *rows += *y;
+
+        if (*rows <= 0)
+            return FALSE;
+
+        *y = 0;
+    }
+
+    if (*x < 0)
+    {
+        *cols += *x;
+
+        if (*cols <= 0)
+            return FALSE;
+
+        *x = 0;
+    }
+
+    if (*y + *rows > LINES)
+        *rows = LINES - *y;
+
+    if (*rows <= 0)
+        return FALSE;
+
+    if (*x + *cols > COLS)
+        *cols = COLS - *x;
+
+    if (*cols <= 0)
+        return FALSE;
+
+    return TRUE;
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -225,6 +276,7 @@ tty_init (gboolean mouse_enable, gboolean is_xterm)
 void
 tty_shutdown (void)
 {
+    tty_destroy_winch_pipe ();
     tty_reset_shell_mode ();
     tty_noraw_mode ();
     tty_keypad (FALSE);
@@ -488,30 +540,8 @@ tty_fill_region (int y, int x, int rows, int cols, unsigned char ch)
 {
     int i;
 
-    if (y < 0)
-    {
-        rows += y;
-
-        if (rows <= 0)
-            return;
-
-        y = 0;
-    }
-
-    if (x < 0)
-    {
-        cols += x;
-
-        if (cols <= 0)
-            return;
-
-        x = 0;
-    }
-
-    if (y + rows > LINES)
-        rows = LINES - y;
-    if (x + cols > COLS)
-        cols = COLS - x;
+    if (!tty_clip (&y, &x, &rows, &cols))
+        return;
 
     for (i = 0; i < rows; i++)
     {
@@ -523,6 +553,46 @@ tty_fill_region (int y, int x, int rows, int cols, unsigned char ch)
 
     mc_curs_row = y;
     mc_curs_col = x;
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+void
+tty_colorize_area (int y, int x, int rows, int cols, int color)
+{
+#ifdef ENABLE_SHADOWS
+    cchar_t *ctext;
+    wchar_t wch[10];            /* TODO not sure if the length is correct */
+    attr_t attrs;
+    short color_pair;
+
+    if (!use_colors || !tty_clip (&y, &x, &rows, &cols))
+        return;
+
+    tty_setcolor (color);
+    ctext = g_malloc (sizeof (cchar_t) * (cols + 1));
+
+    for (int row = 0; row < rows; row++)
+    {
+        mvin_wchnstr (y + row, x, ctext, cols);
+
+        for (int col = 0; col < cols; col++)
+        {
+            getcchar (&ctext[col], wch, &attrs, &color_pair, NULL);
+            setcchar (&ctext[col], wch, attrs, color, NULL);
+        }
+
+        mvadd_wchnstr (y + row, x, ctext, cols);
+    }
+
+    g_free (ctext);
+#else
+    (void) y;
+    (void) x;
+    (void) rows;
+    (void) cols;
+    (void) color;
+#endif /* ENABLE_SHADOWS */
 }
 
 /* --------------------------------------------------------------------------------------------- */

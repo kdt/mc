@@ -1,7 +1,7 @@
 /*
    Widget based utility functions.
 
-   Copyright (C) 1994-2017
+   Copyright (C) 1994-2021
    Free Software Foundation, Inc.
 
    Authors:
@@ -441,7 +441,7 @@ quick_dialog_skip (quick_dialog_t * quick_dlg, int nskip)
                     break;
                 }
             }
-            /* fall through */
+            MC_FALLTHROUGH;
         case quick_checkbox:
         case quick_radio:
             if (item->widget->x != x1)
@@ -564,14 +564,19 @@ quick_dialog_skip (quick_dialog_t * quick_dlg, int nskip)
             /* add widget into dialog */
             item->widget->options |= item->quick_widget->options;       /* FIXME: cannot reset flags, setup only */
             item->widget->state |= item->quick_widget->state;   /* FIXME: cannot reset flags, setup only */
-            id = add_widget_autopos (dd, item->widget, item->quick_widget->pos_flags, NULL);
+            id = group_add_widget_autopos (GROUP (dd), item->widget, item->quick_widget->pos_flags,
+                                           NULL);
             if (item->quick_widget->id != NULL)
                 *item->quick_widget->id = id;
         }
     }
 
+    /* skip frame widget */
+    if (dd->bg != NULL)
+        nskip++;
+
     while (nskip-- != 0)
-        dlg_set_current_widget_next (dd);
+        group_set_current_widget_next (GROUP (dd));
 
     return_val = dlg_run (dd);
 
@@ -590,7 +595,7 @@ quick_dialog_skip (quick_dialog_t * quick_dlg, int nskip)
                 break;
 
             case quick_input:
-                if ((quick_widget->u.input.completion_flags & INPUT_COMPLETE_CD) != 0)
+                if ((item->quick_widget->u.input.completion_flags & INPUT_COMPLETE_CD) != 0)
                     *item->quick_widget->u.input.result =
                         tilde_expand (INPUT (item->widget)->buffer);
                 else
@@ -606,7 +611,7 @@ quick_dialog_skip (quick_dialog_t * quick_dlg, int nskip)
             }
         }
 
-    dlg_destroy (dd);
+    widget_destroy (WIDGET (dd));
 
     g_list_free_full (input_labels, g_free);    /* destroy input labels created before */
     g_array_free (widgets, TRUE);

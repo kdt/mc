@@ -1,7 +1,7 @@
 /*
    lib/vfs - vfs_path_t charset recode functions
 
-   Copyright (C) 2011-2017
+   Copyright (C) 2011-2021
    Free Software Foundation, Inc.
 
    Written by:
@@ -68,7 +68,7 @@ test_init_vfs (const char *encoding)
     str_init_strings (encoding);
 
     vfs_init ();
-    init_localfs ();
+    vfs_init_localfs ();
     vfs_setup_work_dir ();
 
     mc_global.sysconfig_dir = (char *) TEST_SHARE_DIR;
@@ -154,7 +154,7 @@ START_PARAMETRIZED_TEST (test_path_recode, test_path_recode_ds)
     mctest_assert_str_eq (element->path, data->expected_element_path);
     mctest_assert_str_eq (vpath_str, data->expected_recoded_path);
 
-    vfs_path_free (vpath);
+    vfs_path_free (vpath, TRUE);
     test_deinit_vfs ();
 }
 /* *INDENT-OFF* */
@@ -164,9 +164,7 @@ END_PARAMETRIZED_TEST
 
 /* --------------------------------------------------------------------------------------------- */
 
-static struct vfs_s_subclass test_subclass1;
 static struct vfs_class vfs_test_ops1;
-
 
 /* @DataSource("test_path_to_str_flags_ds") */
 /* *INDENT-OFF* */
@@ -246,11 +244,7 @@ START_PARAMETRIZED_TEST (test_path_to_str_flags, test_path_to_str_flags_ds)
 
     test_init_vfs ("UTF-8");
 
-    test_subclass1.flags = VFS_S_REMOTE;
-    vfs_s_init_class (&vfs_test_ops1, &test_subclass1);
-    vfs_test_ops1.name = "testfs1";
-    vfs_test_ops1.flags = VFSF_NOLINKS;
-    vfs_test_ops1.prefix = "test1";
+    vfs_init_class (&vfs_test_ops1, "testfs1", VFSF_NOLINKS | VFSF_REMOTE, "test1");
     vfs_register_class (&vfs_test_ops1);
 
     /* when */
@@ -262,7 +256,7 @@ START_PARAMETRIZED_TEST (test_path_to_str_flags, test_path_to_str_flags_ds)
     mctest_assert_str_eq (str_path, data->expected_path);
 
     g_free (str_path);
-    vfs_path_free (vpath);
+    vfs_path_free (vpath, TRUE);
     test_deinit_vfs ();
 }
 /* *INDENT-OFF* */
@@ -274,11 +268,9 @@ END_PARAMETRIZED_TEST
 int
 main (void)
 {
-    int number_failed;
+    TCase *tc_core;
 
-    Suite *s = suite_create (TEST_SUITE_NAME);
-    TCase *tc_core = tcase_create ("Core");
-    SRunner *sr;
+    tc_core = tcase_create ("Core");
 
     tcase_add_checked_fixture (tc_core, setup, teardown);
 
@@ -287,13 +279,7 @@ main (void)
     mctest_add_parameterized_test (tc_core, test_path_to_str_flags, test_path_to_str_flags_ds);
     /* *********************************** */
 
-    suite_add_tcase (s, tc_core);
-    sr = srunner_create (s);
-    srunner_set_log (sr, "path_recode.log");
-    srunner_run_all (sr, CK_ENV);
-    number_failed = srunner_ntests_failed (sr);
-    srunner_free (sr);
-    return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    return mctest_run_all (tc_core);
 }
 
 /* --------------------------------------------------------------------------------------------- */

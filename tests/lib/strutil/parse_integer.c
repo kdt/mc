@@ -1,7 +1,7 @@
 /*
    lib/strutil - tests for lib/strutil/parse_integer function.
 
-   Copyright (C) 2013-2017
+   Copyright (C) 2013-2021
    Free Software Foundation, Inc.
 
    Written by:
@@ -49,7 +49,7 @@ teardown (void)
 
 /* --------------------------------------------------------------------------------------------- */
 
-/* @DataSource("str_replace_all_test_ds") */
+/* @DataSource("parse_integer_test_ds") */
 /* *INDENT-OFF* */
 static const struct parse_integer_test_ds
 {
@@ -117,26 +117,25 @@ static const struct parse_integer_test_ds
 };
 /* *INDENT-ON* */
 
-/* @Test(dataSource = "str_replace_all_test_ds") */
+/* @Test(dataSource = "parse_integer_test_ds") */
 /* *INDENT-OFF* */
-START_TEST (parse_integer_test)
+START_PARAMETRIZED_TEST (parse_integer_test, parse_integer_test_ds)
 /* *INDENT-ON* */
 {
     /* given */
     uintmax_t actual_result;
     gboolean invalid = FALSE;
-    const struct parse_integer_test_ds *data = &parse_integer_test_ds[_i];
 
     /* when */
     actual_result = parse_integer (data->haystack, &invalid);
 
     /* then */
-    fail_unless (invalid == data->invalid && actual_result == data->expected_result,
-                 "actial ( %" PRIuMAX ") not equal to\nexpected (%" PRIuMAX ")",
-                 actual_result, data->expected_result);
+    ck_assert_msg (invalid == data->invalid && actual_result == data->expected_result,
+                   "actial ( %" PRIuMAX ") not equal to\nexpected (%" PRIuMAX ")",
+                   actual_result, data->expected_result);
 }
 /* *INDENT-OFF* */
-END_TEST
+END_PARAMETRIZED_TEST
 /* *INDENT-ON* */
 
 /* --------------------------------------------------------------------------------------------- */
@@ -144,25 +143,17 @@ END_TEST
 int
 main (void)
 {
-    int number_failed;
+    TCase *tc_core;
 
-    Suite *s = suite_create (TEST_SUITE_NAME);
-    TCase *tc_core = tcase_create ("Core");
-    SRunner *sr;
+    tc_core = tcase_create ("Core");
 
     tcase_add_checked_fixture (tc_core, setup, teardown);
 
     /* Add new tests here: *************** */
-    tcase_add_loop_test (tc_core, parse_integer_test, 0, G_N_ELEMENTS (parse_integer_test_ds));
+    mctest_add_parameterized_test (tc_core, parse_integer_test, parse_integer_test_ds);
     /* *********************************** */
 
-    suite_add_tcase (s, tc_core);
-    sr = srunner_create (s);
-    srunner_set_log (sr, "parse_integer.log");
-    srunner_run_all (sr, CK_ENV);
-    number_failed = srunner_ntests_failed (sr);
-    srunner_free (sr);
-    return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    return mctest_run_all (tc_core);
 }
 
 /* --------------------------------------------------------------------------------------------- */

@@ -6,15 +6,15 @@
 # Efstathios Iosifidis <iefstathios@gmail.com>, 2015
 # Panos Bouklis <panos@echidna-band.com>, 2012
 # Slava Zanko <slavazanko@gmail.com>, 2011
-# Thodoris Arvanitidis <inactive+watchdog@transifex.com>, 2015
-# Γιάννης Ανθυμίδης, 2014
+# 779c708ac0843f43a54f0695e3271fdc_a60cce1 <746f1f7083ae1685f297c8b639879e77_312742>, 2015
+# Yannis Anthymidis, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: Midnight Commander\n"
 "Report-Msgid-Bugs-To: http://www.midnight-commander.org/\n"
-"POT-Creation-Date: 2017-05-02 21:10+0200\n"
-"PO-Revision-Date: 2017-04-15 09:35+0000\n"
-"Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
+"POT-Creation-Date: 2021-09-26 10:06+0300\n"
+"PO-Revision-Date: 2021-07-26 20:16+0000\n"
+"Last-Translator: Transifex Bot <>\n"
 "Language-Team: Greek (http://www.transifex.com/mc/mc/language/el/)\n"
 "Language: el\n"
 "MIME-Version: 1.0\n"
@@ -78,30 +78,6 @@ msgstr "Αδυναμία δημιουργία καταλόγου %s"
 
 msgid "FATAL: not a directory:"
 msgstr ""
-
-#, c-format
-msgid "An error occurred while migrating user settings: %s"
-msgstr ""
-
-#, c-format
-msgid ""
-"Your old settings were migrated from %s\n"
-"to Freedesktop recommended dirs.\n"
-"To get more info, please visit\n"
-"http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html"
-msgstr ""
-"Οι παλιές σας ρυθμίσεις μετακινήθηκαν από %s\n"
-"στους προτεινόμενους καταλόγους του Freedesktop.\n"
-"Για να λάβετε περισσότερες πληροφορίες, παρακαλούμε επισκεφτείτε το\n"
-"http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html"
-
-#, c-format
-msgid ""
-"Your old settings were migrated from %s\n"
-"to %s\n"
-msgstr ""
-"Οι παλιές σας ρυθμίσεις μετακινήθηκαν από %s\n"
-"σε %s\n"
 
 msgid ""
 "Number out of range (should be in byte range, 0 <= n <= 0xFF, expressed in "
@@ -181,10 +157,10 @@ msgstr ""
 msgid "True color not supported with ncurses."
 msgstr ""
 
-msgid "True color not supported in this slang version."
+msgid "Your terminal doesn't even seem to support 256 colors."
 msgstr ""
 
-msgid "Your terminal doesn't even seem to support 256 colors."
+msgid "True color not supported in this slang version."
 msgstr ""
 
 msgid "Set COLORTERM=truecolor if your terminal really supports true colors."
@@ -476,6 +452,27 @@ msgstr "Shift"
 msgid "The TERM environment variable is unset!\n"
 msgstr ""
 
+msgid "Cannot check SIGWINCH pipe"
+msgstr ""
+
+#, c-format
+msgid ""
+"\n"
+"Cannot create pipe for SIGWINCH: %s (%d)\n"
+msgstr ""
+
+#, c-format
+msgid ""
+"\n"
+"Cannot configure write end of SIGWINCH pipe: %s (%d)\n"
+msgstr ""
+
+#, c-format
+msgid ""
+"\n"
+"Cannot configure read end of SIGWINCH pipe: %s (%d)\n"
+msgstr ""
+
 #, c-format
 msgid ""
 "Screen size %dx%d is not supported.\n"
@@ -519,18 +516,6 @@ msgstr ""
 msgid ""
 "Unexpected error in waitpid():\n"
 "%s"
-msgstr ""
-
-msgid "Warning"
-msgstr "Προειδοποίηση"
-
-msgid "Pipe failed"
-msgstr ""
-
-msgid "Dup failed"
-msgstr ""
-
-msgid "Error dup'ing old error pipe"
 msgstr ""
 
 #, c-format
@@ -578,7 +563,6 @@ msgstr "Τα προσωρινά αρχεία θα δημιουργηθούν σ�
 msgid "Temporary files will not be created\n"
 msgstr "Δε θα δημιουργηθούν προσωρινά αρχεία\n"
 
-#, c-format
 msgid "Press any key to continue..."
 msgstr "Πατήστε οποιοδήποτε κουμπί για να συνεχίσετε..."
 
@@ -649,6 +633,9 @@ msgstr "Εκτύπωση επιλογών ρυθμίσεων"
 msgid "Print last working directory to specified file"
 msgstr "Εκτύπωση του τελευταίου καταλόγου εργασίας στο καθορισμένο αρχείο"
 
+msgid "<file>"
+msgstr ""
+
 msgid "Enables subshell support (default)"
 msgstr ""
 
@@ -658,14 +645,14 @@ msgstr ""
 msgid "Log ftp dialog to specified file"
 msgstr ""
 
-msgid "Set debug level"
-msgstr "Ρύθμιση επιπέδου αποσφαλμάτωσης"
-
 msgid "Launches the file viewer on a file"
 msgstr "Εκτελεί τον προβολέα αρχείων σε ένα αρχείο"
 
 msgid "Edit files"
 msgstr "&Επεξεργασία αρχείων"
+
+msgid "<file> ..."
+msgstr ""
 
 msgid "Forces xterm features"
 msgstr "Εξαναγκάζει λειτουργίες xterm"
@@ -705,6 +692,9 @@ msgstr "Αίτημα να τρέχει σε λειτουργία χρωμάτω�
 
 msgid "Specifies a color configuration"
 msgstr "Καθορίζει τις ρυθμίσεις χρωμάτων"
+
+msgid "<string>"
+msgstr ""
 
 msgid "Show mc with specified skin"
 msgstr ""
@@ -951,15 +941,6 @@ msgstr ""
 msgid "Two files are needed to compare"
 msgstr "Χρειάζονται δύο αρχεία για σύγκριση"
 
-msgid "Choose syntax highlighting"
-msgstr "Επιλογή συντακτικού τονισμού"
-
-msgid "< Auto >"
-msgstr "< Αυτόματο >"
-
-msgid "< Reload Current Syntax >"
-msgstr "< Επαναφόρτωση τρέχοντος συντακτικού >"
-
 #, c-format
 msgid "Loading: %3d%%"
 msgstr ""
@@ -992,6 +973,9 @@ msgid ""
 "Open it anyway?"
 msgstr ""
 
+msgid "Warning"
+msgstr "Προειδοποίηση"
+
 #, c-format
 msgid "Error reading from pipe: %s"
 msgstr ""
@@ -999,14 +983,6 @@ msgstr ""
 #, c-format
 msgid "Cannot open pipe for reading: %s"
 msgstr ""
-
-#, c-format
-msgid "Searching %s: %3d%%"
-msgstr ""
-
-#, c-format
-msgid "Searching %s"
-msgstr "Αναζήτηση %s"
 
 msgid "File has hard-links. Detach before saving?"
 msgstr ""
@@ -1053,12 +1029,6 @@ msgstr ""
 msgid "Save As"
 msgstr "Αποθήκευση ως"
 
-msgid "Block is large, you may not be able to undo this action"
-msgstr ""
-
-msgid "Collect completions"
-msgstr ""
-
 msgid "&Quick save"
 msgstr "&Γρήγορη αποθήκευση"
 
@@ -1088,27 +1058,6 @@ msgstr "&Αντικατάσταση"
 
 msgid "Cannot save file"
 msgstr "Δεν ήταν δυνατή η αποθήκευση του αρχείου"
-
-msgid "Delete macro"
-msgstr ""
-
-msgid "Press macro hotkey:"
-msgstr ""
-
-msgid "Macro not deleted"
-msgstr ""
-
-msgid "Save macro"
-msgstr ""
-
-msgid "Press the macro's new hotkey:"
-msgstr ""
-
-msgid "Repeat last commands"
-msgstr "Επανάληψη τελευταίων εντολών"
-
-msgid "Repeat times:"
-msgstr "Επαναλήψεις:"
 
 #, c-format
 msgid "Confirm save file: \"%s\""
@@ -1143,13 +1092,6 @@ msgstr "Ποιο αρχείου μενού θέλετε να επεξεργασ�
 
 msgid "&Local"
 msgstr "&Τοπικό"
-
-msgid "Replace"
-msgstr "Αντικατάσταση"
-
-#, c-format
-msgid "%ld replacements made"
-msgstr "Έγιναν %ld αντικαταστάσεις"
 
 msgid "[NoName]"
 msgstr "[ΧωρίςΌνομα]"
@@ -1254,43 +1196,38 @@ msgstr "Πατήστε οποιοδήποτε πλήκτρο:"
 
 msgid ""
 "Current text was modified without a file save.\n"
-"Continue discards these changes"
+"Continue discards these changes."
 msgstr ""
-
-msgid "In se&lection"
-msgstr ""
-
-msgid "&Find all"
-msgstr "&Εύρεση όλων"
-
-msgid "Enter replacement string:"
-msgstr ""
-
-msgid "Replace with:"
-msgstr "Αντικατάσταση με:"
-
-msgid "&Replace"
-msgstr "&Αντικατάσταση"
-
-msgid "A&ll"
-msgstr "Ό&λα"
-
-msgid "&Skip"
-msgstr "&Παράβλεψη"
-
-msgid "Confirm replace"
-msgstr "Επιβεβαίωση αντικατάστασης"
 
 msgid "Cancel"
 msgstr "Άκυρο"
 
-msgid ""
-"Current text was modified without a file save.\n"
-"Continue discards these changes."
+msgid "Collect completions"
 msgstr ""
 
 msgid "NoName"
 msgstr "ΧωρίςΌνομα"
+
+msgid "Save macro"
+msgstr ""
+
+msgid "Press the macro's new hotkey:"
+msgstr ""
+
+msgid "Delete macro"
+msgstr ""
+
+msgid "Press macro hotkey:"
+msgstr ""
+
+msgid "Macro not deleted"
+msgstr ""
+
+msgid "Repeat last commands"
+msgstr "Επανάληψη τελευταίων εντολών"
+
+msgid "Repeat times:"
+msgstr "Επαναλήψεις:"
 
 msgid "&Open file..."
 msgstr "&Άνοιγμα αρχείου"
@@ -1300,6 +1237,9 @@ msgstr "&Νέο"
 
 msgid "&Close"
 msgstr "&Κλείσιμο"
+
+msgid "&History..."
+msgstr ""
 
 msgid "Save &as..."
 msgstr "Αποθήκευση &ως..."
@@ -1577,12 +1517,51 @@ msgstr ""
 msgid "Editor options"
 msgstr "Επιλογές επεξεργαστή"
 
+msgid "In se&lection"
+msgstr ""
+
+msgid "&Find all"
+msgstr "&Εύρεση όλων"
+
+msgid "Enter replacement string:"
+msgstr ""
+
+msgid "Replace"
+msgstr "Αντικατάσταση"
+
+msgid "Replace with:"
+msgstr "Αντικατάσταση με:"
+
+msgid "&Replace"
+msgstr "&Αντικατάσταση"
+
+msgid "A&ll"
+msgstr "Ό&λα"
+
+msgid "&Skip"
+msgstr "&Παράβλεψη"
+
+msgid "Confirm replace"
+msgstr "Επιβεβαίωση αντικατάστασης"
+
+#, c-format
+msgid "Searching %s: %3d%%"
+msgstr ""
+
+#, c-format
+msgid "Searching %s"
+msgstr "Αναζήτηση %s"
+
+#, c-format
+msgid "%ld replacements made"
+msgstr "Έγιναν %ld αντικαταστάσεις"
+
 msgid ""
 "A user friendly text editor\n"
 "written for the Midnight Commander."
 msgstr ""
 
-msgid "Copyright (C) 1996-2016 the Free Software Foundation"
+msgid "Copyright (C) 1996-2021 the Free Software Foundation"
 msgstr ""
 
 msgid "About"
@@ -1702,6 +1681,15 @@ msgstr ""
 msgid "Select language"
 msgstr "Επιλογή γλώσσας"
 
+msgid "Choose syntax highlighting"
+msgstr "Επιλογή συντακτικού τονισμού"
+
+msgid "< Auto >"
+msgstr "< Αυτόματο >"
+
+msgid "< Reload Current Syntax >"
+msgstr "< Επαναφόρτωση τρέχοντος συντακτικού >"
+
 msgid "Load syntax file"
 msgstr "Φόρτωμα αρχείου συντακτικού"
 
@@ -1731,7 +1719,11 @@ msgstr ""
 msgid "The shell is already running a command"
 msgstr "Το κέλυφος τρέχει ήδη μια εντολή"
 
-#, c-format
+msgid ""
+"Not an xterm or Linux console;\n"
+"the subshell cannot be toggled."
+msgstr ""
+
 msgid "Type 'exit' to return to the Midnight Commander"
 msgstr ""
 
@@ -1756,6 +1748,10 @@ msgstr "άλλοι"
 msgid "Flag"
 msgstr "Σημαία"
 
+#, c-format
+msgid "Permissions (octal): %o"
+msgstr ""
+
 msgid "Chown advanced command"
 msgstr "Προχωρημένη εντολή chown"
 
@@ -1766,6 +1762,15 @@ msgid ""
 msgstr ""
 "Αδυναμία chmod \"%s\"\n"
 "%s"
+
+msgid "&Ignore"
+msgstr ""
+
+msgid "Ignore &all"
+msgstr ""
+
+msgid "&Retry"
+msgstr "&Επαναπροσπάθεια"
 
 #, c-format
 msgid ""
@@ -1859,6 +1864,9 @@ msgstr "Το cd ακολουθεί τους δεσμούς"
 msgid "Sa&fe delete"
 msgstr "Ασ&φαλής διαγραφή"
 
+msgid "Safe overwrite"
+msgstr ""
+
 msgid "A&uto save setup"
 msgstr ""
 
@@ -1866,6 +1874,9 @@ msgid "Configure options"
 msgstr ""
 
 msgid "Skin:"
+msgstr ""
+
+msgid "&Shadows"
 msgstr ""
 
 msgid "Appearance"
@@ -1965,9 +1976,8 @@ msgstr "στήλες"
 msgid "User &mini status"
 msgstr ""
 
-#, fuzzy
 msgid "Listing format"
-msgstr "Λειτουργία λίστας"
+msgstr ""
 
 msgid "Executable &first"
 msgstr "&Εκτελέσιμα πρώτα"
@@ -2076,16 +2086,113 @@ msgid "Background jobs"
 msgstr ""
 
 #, c-format
-msgid "Password for \\\\%s\\%s"
-msgstr "Κωδικός πρόσβασης για \\\\%s\\%s"
+msgid ""
+"Cannot chdir to \"%s\"\n"
+"%s"
+msgstr ""
+"Αδυναμία chdir σε \"%s\"\n"
+"%s"
 
-msgid "Domain:"
+msgid "Secure deletion"
 msgstr ""
 
-msgid "Username:"
-msgstr "Όνομα χρήστη:"
+msgid "Undelete"
+msgstr ""
 
-msgid "SMB authentication"
+msgid "Synchronous updates"
+msgstr ""
+
+msgid "Synchronous directory updates"
+msgstr ""
+
+msgid "Immutable"
+msgstr ""
+
+msgid "Append only"
+msgstr ""
+
+msgid "No dump"
+msgstr ""
+
+msgid "No update atime"
+msgstr ""
+
+msgid "Compress"
+msgstr ""
+
+msgid "Compressed clusters"
+msgstr ""
+
+msgid "Compressed dirty file"
+msgstr ""
+
+msgid "Compression raw access"
+msgstr ""
+
+msgid "Encrypted inode"
+msgstr ""
+
+msgid "Journaled data"
+msgstr ""
+
+msgid "Indexed directory"
+msgstr ""
+
+msgid "No tail merging"
+msgstr ""
+
+msgid "Top of directory hierarchies"
+msgstr ""
+
+msgid "Inode uses extents"
+msgstr ""
+
+msgid "Huge_file"
+msgstr ""
+
+msgid "No COW"
+msgstr ""
+
+msgid "Direct access for files"
+msgstr ""
+
+msgid "Casefolded file"
+msgstr ""
+
+msgid "Inode has inline data"
+msgstr ""
+
+msgid "Project hierarchy"
+msgstr ""
+
+msgid "Verity protected inode"
+msgstr ""
+
+msgid "&Marked all"
+msgstr "&Επιλογή όλων"
+
+msgid "S&et marked"
+msgstr "&Ρύθμιση επιλεγμένων"
+
+msgid "C&lear marked"
+msgstr "&Καθαρισμός επιλεγμένων"
+
+msgid "Chattr command"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot chattr \"%s\"\n"
+"%s"
+msgstr ""
+
+msgid "Cannot change attributes on non-local filesystems"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot get flags of \"%s\"\n"
+"%s"
 msgstr ""
 
 msgid "set &user ID on execution"
@@ -2135,15 +2242,6 @@ msgstr "Όνομα ιδιοκτήτη:"
 
 msgid "Group name:"
 msgstr "Όνομα ομάδας:"
-
-msgid "&Marked all"
-msgstr "&Επιλογή όλων"
-
-msgid "S&et marked"
-msgstr "&Ρύθμιση επιλεγμένων"
-
-msgid "C&lear marked"
-msgstr "&Καθαρισμός επιλεγμένων"
 
 msgid "Chmod command"
 msgstr "Εντολή chmod"
@@ -2274,11 +2372,6 @@ msgid ""
 "to use this command"
 msgstr ""
 
-msgid ""
-"Not an xterm or Linux console;\n"
-"the panels cannot be toggled."
-msgstr ""
-
 #, c-format
 msgid "'%s' is not a symbolic link"
 msgstr ""
@@ -2307,9 +2400,6 @@ msgstr "SFTP σε μηχάνημα"
 msgid "Shell link to machine"
 msgstr "Δεσμός κελύφους σε μηχάνημα"
 
-msgid "SMB link to machine"
-msgstr "Δεσμός SMB σε μηχάνημα"
-
 msgid "Undelete files on an ext2 file system"
 msgstr "Επαναφορά αρχείων σε  ένα σύστημα αρχείων ext2"
 
@@ -2337,17 +2427,6 @@ msgstr ""
 msgid "Cannot execute commands on non-local filesystems"
 msgstr "Αδυναμία εκτέλεσης εντολών σε μη τοπικά συστήματα αρχείων"
 
-#, c-format
-msgid ""
-"Cannot chdir to \"%s\"\n"
-"%s"
-msgstr ""
-"Αδυναμία chdir σε \"%s\"\n"
-"%s"
-
-msgid "Cannot read directory contents"
-msgstr "Αδυναμία ανάγνωσης περιεχομένων καταλόγου"
-
 msgid "Parameter"
 msgstr "Παράμετρος"
 
@@ -2358,6 +2437,9 @@ msgid ""
 msgstr ""
 "Αδυναμία δημιουργίας προσωρινού αρχείου εντολών\n"
 "%s"
+
+msgid "Pipe failed"
+msgstr ""
 
 #, c-format
 msgid " %s%s file error"
@@ -2428,7 +2510,20 @@ msgstr "αρχεία/κατάλογοι"
 msgid " with source mask:"
 msgstr ""
 
-msgid "Cannot make the hardlink"
+#, c-format
+msgid ""
+"Cannot stat hardlink source file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot create target hardlink \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid "Cannot create target hardlink \"%s\""
 msgstr ""
 
 #, c-format
@@ -2449,11 +2544,32 @@ msgid ""
 "%s"
 msgstr ""
 
+#, c-format
+msgid ""
+"\"%s\"\n"
+"and\n"
+"\"%s\"\n"
+"are the same directory"
+msgstr ""
+"\"%s\"\n"
+"και\n"
+"\"%s\"\n"
+"είναι ο ίδιος κατάλογος"
+
+#, c-format
+msgid ""
+"\"%s\"\n"
+"and\n"
+"\"%s\"\n"
+"are the same file"
+msgstr ""
+"\"%s\"\n"
+"και\n"
+"\"%s\"\n"
+"είναι το ίδιο αρχείο"
+
 msgid "Ski&p all"
 msgstr "&Παράβλεψη όλων"
-
-msgid "&Retry"
-msgstr "&Επαναπροσπάθεια"
 
 #, c-format
 msgid ""
@@ -2473,21 +2589,17 @@ msgstr "&Κανένα"
 
 #, c-format
 msgid ""
-"Cannot stat file \"%s\"\n"
+"Cannot remove file \"%s\"\n"
 "%s"
 msgstr ""
+"Αδυναμία αφαίρεσης αρχείου \"%s\"\n"
+"%s"
 
 #, c-format
 msgid ""
-"\"%s\"\n"
-"and\n"
-"\"%s\"\n"
-"are the same file"
+"Cannot stat file \"%s\"\n"
+"%s"
 msgstr ""
-"\"%s\"\n"
-"και\n"
-"\"%s\"\n"
-"είναι το ίδιο αρχείο"
 
 #, c-format
 msgid "Cannot overwrite directory \"%s\""
@@ -2499,22 +2611,6 @@ msgid ""
 "%s"
 msgstr ""
 "Αδυναμία μετακίνησης αρχείου \"%s\" στο \"%s\"\n"
-"%s"
-
-#, c-format
-msgid ""
-"Cannot remove file \"%s\"\n"
-"%s"
-msgstr ""
-"Αδυναμία αφαίρεσης αρχείου \"%s\"\n"
-"%s"
-
-#, c-format
-msgid ""
-"Cannot delete file \"%s\"\n"
-"%s"
-msgstr ""
-"Αδυναμία διαγραφής αρχείου \"%s\"\n"
 "%s"
 
 #, c-format
@@ -2532,6 +2628,25 @@ msgid ""
 msgstr ""
 "Αδυναμία αντικατάστασης καταλόγου \"%s\"\n"
 "%s"
+
+#, c-format
+msgid ""
+"Cannot overwrite file \"%s\"\n"
+"%s"
+msgstr ""
+"Αδυναμία αντικατάστασης αρχείου \"%s\"\n"
+"%s"
+
+#, c-format
+msgid ""
+"Cannot move directory \"%s\" to \"%s\"\n"
+"%s"
+msgstr ""
+"Αδυναμία μετακίνησης καταλόγου \"%s\" to \"%s\"\n"
+"%s"
+
+msgid "Cannot operate on \"..\"!"
+msgstr "Αδυναμία λειτουργίας σε \"..\"!"
 
 #, c-format
 msgid ""
@@ -2684,39 +2799,8 @@ msgstr ""
 "%s"
 
 #, c-format
-msgid ""
-"\"%s\"\n"
-"and\n"
-"\"%s\"\n"
-"are the same directory"
-msgstr ""
-"\"%s\"\n"
-"και\n"
-"\"%s\"\n"
-"είναι ο ίδιος κατάλογος"
-
-#, c-format
-msgid ""
-"Cannot overwrite file \"%s\"\n"
-"%s"
-msgstr ""
-"Αδυναμία αντικατάστασης αρχείου \"%s\"\n"
-"%s"
-
-#, c-format
-msgid ""
-"Cannot move directory \"%s\" to \"%s\"\n"
-"%s"
-msgstr ""
-"Αδυναμία μετακίνησης καταλόγου \"%s\" to \"%s\"\n"
-"%s"
-
-#, c-format
 msgid "Directories: %zu, total size: %s"
 msgstr ""
-
-msgid "Cannot operate on \"..\"!"
-msgstr "Αδυναμία λειτουργίας σε \"..\"!"
 
 msgid "Sorry, I could not put the job in background"
 msgstr "Λυπούμαστε, η εργασία δεν μπορεί να μπει στο παρασκήνιο"
@@ -2747,19 +2831,14 @@ msgstr "%.2f KB/s"
 msgid "%ld B/s"
 msgstr "%ld B/s"
 
-msgid "Target file already exists!"
-msgstr "Το αρχείο στόχος υπάρχει ήδη!"
-
-#, c-format
-msgid "New     : %s, size %s"
+msgid "New     :"
 msgstr ""
 
-#, c-format
-msgid "Existing: %s, size %s"
+msgid "Existing:"
 msgstr ""
 
-msgid "Overwrite this target?"
-msgstr "Αντικατάσταση αυτού του στόχου;"
+msgid "Overwrite this file?"
+msgstr ""
 
 msgid "A&ppend"
 msgstr ""
@@ -2767,14 +2846,20 @@ msgstr ""
 msgid "&Reget"
 msgstr ""
 
-msgid "Overwrite all targets?"
-msgstr "Αντικατάσταση όλων των στόχων;"
+msgid "Overwrite all files?"
+msgstr ""
 
-msgid "&Update"
-msgstr "&Ενημέρωση"
+msgid "Don't overwrite with &zero length file"
+msgstr ""
 
-msgid "If &size differs"
-msgstr "Αν διαφέρει το &μέγεθος"
+msgid "&Older"
+msgstr ""
+
+msgid "S&maller"
+msgstr ""
+
+msgid "&Size differs"
+msgstr ""
 
 msgid "File exists"
 msgstr "Το αρχείο υπάρχει"
@@ -2848,6 +2933,222 @@ msgstr "&Παρασκήνιο"
 msgid "Invalid source pattern '%s'"
 msgstr ""
 
+msgid "File listin&g"
+msgstr ""
+
+msgid "&Quick view"
+msgstr "&Γρήγορη προβολή"
+
+msgid "&Info"
+msgstr "&Πληροφορίες"
+
+msgid "&Tree"
+msgstr "&Δέντρο"
+
+msgid "&Listing format..."
+msgstr ""
+
+msgid "&Sort order..."
+msgstr "&Σειρά ταξινόμησης..."
+
+msgid "&Filter..."
+msgstr "&Φίλτρο..."
+
+msgid "&Encoding..."
+msgstr "&Κωδικοποίηση..."
+
+msgid "FT&P link..."
+msgstr "Δεσμος FT&P..."
+
+msgid "S&hell link..."
+msgstr "Δεσμος κε&λύφους..."
+
+msgid "S&FTP link..."
+msgstr "Δεσμός S&FTP..."
+
+msgid "Paneli&ze"
+msgstr ""
+
+msgid "&Rescan"
+msgstr "&Επανασάρωση"
+
+msgid "&View"
+msgstr "&Προβολή"
+
+msgid "Vie&w file..."
+msgstr "Π&ροβολή αρχείου..."
+
+msgid "&Filtered view"
+msgstr "&Φιλτραρισμένη προβολή"
+
+msgid "&Copy"
+msgstr "&Αντιγραφή"
+
+msgid "C&hmod"
+msgstr "C&hmod"
+
+msgid "&Link"
+msgstr "Δεσμό&ς"
+
+msgid "&Symlink"
+msgstr ""
+
+msgid "Relative symlin&k"
+msgstr ""
+
+msgid "Edit s&ymlink"
+msgstr ""
+
+msgid "Ch&own"
+msgstr "Ch&own"
+
+msgid "&Advanced chown"
+msgstr "&Προχωρημένο chown"
+
+msgid "Cha&ttr"
+msgstr ""
+
+msgid "&Rename/Move"
+msgstr "&Μετονομασία/μετακίνηση"
+
+msgid "&Mkdir"
+msgstr "&Mkdir"
+
+msgid "&Quick cd"
+msgstr "&Γρήγορο cd"
+
+msgid "Select &group"
+msgstr "Επιλογή &ομάδας"
+
+msgid "U&nselect group"
+msgstr "&Αποεπιλογή ομάδας"
+
+msgid "&Invert selection"
+msgstr "&Αντιστροφή επιλογής"
+
+msgid "E&xit"
+msgstr "Έ&ξοδος"
+
+msgid "&User menu"
+msgstr "Μενού &χρήστη"
+
+msgid "&Directory tree"
+msgstr "&Δέντρο καταλόγου"
+
+msgid "&Find file"
+msgstr "&Εύρεση αρχείου"
+
+msgid "S&wap panels"
+msgstr ""
+
+msgid "Switch &panels on/off"
+msgstr ""
+
+msgid "&Compare directories"
+msgstr "&Σύγκριση καταλόγων"
+
+msgid "C&ompare files"
+msgstr "&Σύγκριση αρχείων"
+
+msgid "E&xternal panelize"
+msgstr ""
+
+msgid "Show directory s&izes"
+msgstr "Εμ&φάνιση μεγεθών καταλόγων"
+
+msgid "Command &history"
+msgstr "&Ιστορικό εντολών"
+
+msgid "Viewed/edited files hi&story"
+msgstr ""
+
+msgid "Di&rectory hotlist"
+msgstr ""
+
+msgid "&Active VFS list"
+msgstr "Λίστα &ενεργών VFS"
+
+msgid "&Background jobs"
+msgstr "&Εργασίες παρασκηνίες"
+
+msgid "Screen lis&t"
+msgstr "&Λίστα οθονών"
+
+msgid "&Undelete files (ext2fs only)"
+msgstr "&Επαναφορά αρχείων (ext2fs μόνο)"
+
+msgid "&Listing format edit"
+msgstr ""
+
+msgid "Edit &extension file"
+msgstr "Επεξεργασία α&ρχείου επέκτασης"
+
+msgid "Edit &menu file"
+msgstr "Επεξεργασία αρχείου &μενού"
+
+msgid "Edit hi&ghlighting group file"
+msgstr ""
+
+msgid "&Configuration..."
+msgstr "&Ρυθμίσεις..."
+
+msgid "&Layout..."
+msgstr ""
+
+msgid "&Panel options..."
+msgstr ""
+
+msgid "C&onfirmation..."
+msgstr "Ε&πιβεβαίωση..."
+
+msgid "&Appearance..."
+msgstr ""
+
+msgid "&Display bits..."
+msgstr ""
+
+msgid "&Virtual FS..."
+msgstr "&Εικονικό FS..."
+
+msgid "Panels:"
+msgstr ""
+
+#, c-format
+msgid "You have %zu opened screen. Quit anyway?"
+msgid_plural "You have %zu opened screens. Quit anyway?"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "The Midnight Commander"
+msgstr "Το Midnight Commander"
+
+msgid "Do you really want to quit the Midnight Commander?"
+msgstr "Θέλετε στα αλήθεια να τερματίσετε το Midnight Commander?"
+
+msgid "&Above"
+msgstr "&Πάνω"
+
+msgid "&Left"
+msgstr "&Αριστερά"
+
+msgid "&Below"
+msgstr "&Κάτω"
+
+msgid "&Right"
+msgstr "&Δεξιά"
+
+msgid "ButtonBar|Menu"
+msgstr "ΓραμμήΚουμπιών|Μενού"
+
+msgid "ButtonBar|View"
+msgstr "ΓραμμήΚουμπιών|Προβολή"
+
+msgid "ButtonBar|RenMov"
+msgstr ""
+
+msgid "ButtonBar|Mkdir"
+msgstr "ΓραμμήΚουμπιών|Mkdir"
+
 msgid "&Chdir"
 msgstr "&Chdir"
 
@@ -2876,6 +3177,9 @@ msgstr "Όνομα αρχείου:"
 msgid "&Find recursively"
 msgstr ""
 
+msgid "Follow s&ymlinks"
+msgstr ""
+
 msgid "S&kip hidden"
 msgstr "&Παράβλεψη κρυφών"
 
@@ -2893,9 +3197,6 @@ msgstr ""
 
 msgid "Fir&st hit"
 msgstr ""
-
-msgid "&Tree"
-msgstr "&Δέντρο"
 
 msgid "Find File"
 msgstr "Εύρεση αρχείου"
@@ -2918,6 +3219,14 @@ msgid "Finished (ignored %zu directory)"
 msgid_plural "Finished (ignored %zu directories)"
 msgstr[0] ""
 msgstr[1] ""
+
+#, c-format
+msgid "Find File: \"%s\". Content: \"%s\""
+msgstr ""
+
+#, c-format
+msgid "Find File: \"%s\""
+msgstr ""
 
 msgid "Searching"
 msgstr "Αναζήτηση"
@@ -3088,6 +3397,16 @@ msgstr ""
 msgid "Links:      %d"
 msgstr "Σύνδεσμοι:      %d"
 
+msgid "Attributes: not supported"
+msgstr ""
+
+#, c-format
+msgid "Attributes: %s"
+msgstr ""
+
+msgid "Attributes: unavailable"
+msgstr ""
+
 #, c-format
 msgid "Mode:       %s (%04o)"
 msgstr ""
@@ -3134,217 +3453,6 @@ msgstr "Γραμμές εξόδου:"
 
 msgid "Layout"
 msgstr ""
-
-msgid "File listin&g"
-msgstr ""
-
-msgid "&Quick view"
-msgstr "&Γρήγορη προβολή"
-
-msgid "&Info"
-msgstr "&Πληροφορίες"
-
-#, fuzzy
-msgid "&Listing format..."
-msgstr "&Λίστα..."
-
-msgid "&Sort order..."
-msgstr "&Σειρά ταξινόμησης..."
-
-msgid "&Filter..."
-msgstr "&Φίλτρο..."
-
-msgid "&Encoding..."
-msgstr "&Κωδικοποίηση..."
-
-msgid "FT&P link..."
-msgstr "Δεσμος FT&P..."
-
-msgid "S&hell link..."
-msgstr "Δεσμος κε&λύφους..."
-
-msgid "S&FTP link..."
-msgstr "Δεσμός S&FTP..."
-
-msgid "SM&B link..."
-msgstr "Δεσμός SM&B..."
-
-msgid "Paneli&ze"
-msgstr ""
-
-msgid "&Rescan"
-msgstr "&Επανασάρωση"
-
-msgid "&View"
-msgstr "&Προβολή"
-
-msgid "Vie&w file..."
-msgstr "Π&ροβολή αρχείου..."
-
-msgid "&Filtered view"
-msgstr "&Φιλτραρισμένη προβολή"
-
-msgid "&Copy"
-msgstr "&Αντιγραφή"
-
-msgid "C&hmod"
-msgstr "C&hmod"
-
-msgid "&Link"
-msgstr "Δεσμό&ς"
-
-msgid "&Symlink"
-msgstr ""
-
-msgid "Relative symlin&k"
-msgstr ""
-
-msgid "Edit s&ymlink"
-msgstr ""
-
-msgid "Ch&own"
-msgstr "Ch&own"
-
-msgid "&Advanced chown"
-msgstr "&Προχωρημένο chown"
-
-msgid "&Rename/Move"
-msgstr "&Μετονομασία/μετακίνηση"
-
-msgid "&Mkdir"
-msgstr "&Mkdir"
-
-msgid "&Quick cd"
-msgstr "&Γρήγορο cd"
-
-msgid "Select &group"
-msgstr "Επιλογή &ομάδας"
-
-msgid "U&nselect group"
-msgstr "&Αποεπιλογή ομάδας"
-
-msgid "&Invert selection"
-msgstr "&Αντιστροφή επιλογής"
-
-msgid "E&xit"
-msgstr "Έ&ξοδος"
-
-msgid "&User menu"
-msgstr "Μενού &χρήστη"
-
-msgid "&Directory tree"
-msgstr "&Δέντρο καταλόγου"
-
-msgid "&Find file"
-msgstr "&Εύρεση αρχείου"
-
-msgid "S&wap panels"
-msgstr ""
-
-msgid "Switch &panels on/off"
-msgstr ""
-
-msgid "&Compare directories"
-msgstr "&Σύγκριση καταλόγων"
-
-msgid "C&ompare files"
-msgstr "&Σύγκριση αρχείων"
-
-msgid "E&xternal panelize"
-msgstr ""
-
-msgid "Show directory s&izes"
-msgstr "Εμ&φάνιση μεγεθών καταλόγων"
-
-msgid "Command &history"
-msgstr "&Ιστορικό εντολών"
-
-msgid "Di&rectory hotlist"
-msgstr ""
-
-msgid "&Active VFS list"
-msgstr "Λίστα &ενεργών VFS"
-
-msgid "&Background jobs"
-msgstr "&Εργασίες παρασκηνίες"
-
-msgid "Screen lis&t"
-msgstr "&Λίστα οθονών"
-
-msgid "&Undelete files (ext2fs only)"
-msgstr "&Επαναφορά αρχείων (ext2fs μόνο)"
-
-msgid "&Listing format edit"
-msgstr ""
-
-msgid "Edit &extension file"
-msgstr "Επεξεργασία α&ρχείου επέκτασης"
-
-msgid "Edit &menu file"
-msgstr "Επεξεργασία αρχείου &μενού"
-
-msgid "Edit hi&ghlighting group file"
-msgstr ""
-
-msgid "&Configuration..."
-msgstr "&Ρυθμίσεις..."
-
-msgid "&Layout..."
-msgstr ""
-
-msgid "&Panel options..."
-msgstr ""
-
-msgid "C&onfirmation..."
-msgstr "Ε&πιβεβαίωση..."
-
-msgid "&Appearance..."
-msgstr ""
-
-msgid "&Display bits..."
-msgstr ""
-
-msgid "&Virtual FS..."
-msgstr "&Εικονικό FS..."
-
-msgid "Panels:"
-msgstr ""
-
-#, c-format
-msgid "You have %zu opened screen. Quit anyway?"
-msgid_plural "You have %zu opened screens. Quit anyway?"
-msgstr[0] ""
-msgstr[1] ""
-
-msgid "The Midnight Commander"
-msgstr "Το Midnight Commander"
-
-msgid "Do you really want to quit the Midnight Commander?"
-msgstr "Θέλετε στα αλήθεια να τερματίσετε το Midnight Commander?"
-
-msgid "&Above"
-msgstr "&Πάνω"
-
-msgid "&Left"
-msgstr "&Αριστερά"
-
-msgid "&Below"
-msgstr "&Κάτω"
-
-msgid "&Right"
-msgstr "&Δεξιά"
-
-msgid "ButtonBar|Menu"
-msgstr "ΓραμμήΚουμπιών|Μενού"
-
-msgid "ButtonBar|View"
-msgstr "ΓραμμήΚουμπιών|Προβολή"
-
-msgid "ButtonBar|RenMov"
-msgstr ""
-
-msgid "ButtonBar|Mkdir"
-msgstr "ΓραμμήΚουμπιών|Mkdir"
 
 msgid "Memory exhausted!"
 msgstr "Η μνήμη εξαντλήθηκε!"
@@ -3484,6 +3592,9 @@ msgstr "Αποεπιλογή"
 msgid "Do you really want to execute?"
 msgstr "Σίγουρα θέλετε να γίνει εκτέλεση;"
 
+msgid "Cannot read directory contents"
+msgstr "Αδυναμία ανάγνωσης περιεχομένων καταλόγου"
+
 msgid "User supplied format looks invalid, reverting to default."
 msgstr ""
 
@@ -3505,10 +3616,17 @@ msgstr ""
 msgid "Enter command label:"
 msgstr ""
 
-msgid "Cannot invoke command."
+#, c-format
+msgid ""
+"External panelize:\n"
+"%s"
 msgstr ""
 
-msgid "Pipe close failed"
+#, c-format
+msgid ""
+"External panelize:\n"
+"failed to read data from child stdout:\n"
+"%s"
 msgstr ""
 
 msgid "Cannot run external panelize in a non-local directory"
@@ -3574,48 +3692,6 @@ msgid ""
 msgstr ""
 "Αδυναμία εγγραφής στο αρχείο %s:\n"
 "%s\n"
-
-msgid "Debug"
-msgstr "Αποσφαλμάτωση"
-
-msgid "ERROR:"
-msgstr "ΣΦΑΛΜΑ:"
-
-msgid "True:"
-msgstr "Αληθές:"
-
-msgid "False:"
-msgstr "Ψευδές:"
-
-msgid "Error calling program"
-msgstr "Σφάλμα κατά την κλήση προγράμματος"
-
-msgid "Warning -- ignoring file"
-msgstr "Προειδοποίηση -- παράβλεψη αρχείου"
-
-#, c-format
-msgid ""
-"File %s is not owned by root or you or is world writable.\n"
-"Using it may compromise your security"
-msgstr ""
-
-msgid "Format error on file Extensions File"
-msgstr "Σφάλμα μορφής αρχείου επεκτάσεων"
-
-#, c-format
-msgid "The %%var macro has no default"
-msgstr ""
-
-#, c-format
-msgid "The %%var macro has no variable"
-msgstr ""
-
-#, c-format
-msgid "No suitable entries found in %s"
-msgstr "Δε βρέθηκαν καταχωρήσεις στο %s"
-
-msgid "User menu"
-msgstr "Μενού χρήστη"
 
 msgid "Help file format error\n"
 msgstr "Σφάλμα μορφής αρχείου βοήθειας\n"
@@ -3707,6 +3783,12 @@ msgstr ""
 msgid "Home directory path is not absolute"
 msgstr ""
 
+msgid ""
+"GNU Midnight Commander\n"
+"is already running on this terminal.\n"
+"Subshell support will be disabled."
+msgstr ""
+
 #, c-format
 msgid ""
 "\n"
@@ -3737,12 +3819,6 @@ msgstr ""
 "Αδυναμία αποθήκευσης αρχείου %s:\n"
 "%s"
 
-msgid ""
-"GNU Midnight Commander is already\n"
-"running on this terminal.\n"
-"Subshell support will be disabled."
-msgstr ""
-
 #, c-format
 msgid "Cannot open named pipe %s\n"
 msgstr ""
@@ -3754,40 +3830,37 @@ msgstr "Το κέλυφος είναι ακόμα ενεργό. Έξοδος π�
 msgid "Warning: Cannot change to %s.\n"
 msgstr "Προειδοποίηση: Αδυναμία αλλαγής σε %s.\n"
 
-msgid "Using the S-Lang library with terminfo database\n"
-msgstr "Με χρήση της βιβλιοθήκης S-Lang με βάση δεδομένων terminfo\n"
-
-msgid "Using the ncurses library\n"
-msgstr "Με χρήση της βιβλιοθήκης ncurses\n"
-
-msgid "Using the ncursesw library\n"
-msgstr "Με χρήση της βιβλιοθήκης ncursesw\n"
-
-msgid "With builtin Editor\n"
-msgstr "Με ενσωματωμένο επεξεργαστή\n"
-
-msgid "With optional subshell support\n"
+msgid "With builtin Editor and Aspell support"
 msgstr ""
 
-msgid "With subshell support as default\n"
+msgid "With builtin Editor"
 msgstr ""
 
-msgid "With support for background operations\n"
-msgstr "Με υποστήριξη για λειτουργίες παρασκηνίου\n"
+msgid "With optional subshell support"
+msgstr ""
 
-msgid "With mouse support on xterm and Linux console\n"
-msgstr "Με υποστήριξη ποντικιού σε κονσόλα xterm και Linux\n"
+msgid "With subshell support as default"
+msgstr ""
 
-msgid "With mouse support on xterm\n"
-msgstr "Με υποστήριξη ποντικιού σε xterm\n"
+msgid "With support for background operations"
+msgstr ""
 
-msgid "With support for X11 events\n"
-msgstr "Με υποστήριξη γεγονότων X11\n"
+msgid "With mouse support on xterm and Linux console"
+msgstr ""
 
-msgid "With internationalization support\n"
-msgstr "Με υποστήριξη διεθνοποίησης\n"
+msgid "With mouse support on xterm"
+msgstr ""
 
-msgid "With multiple codepages support\n"
+msgid "With support for X11 events"
+msgstr ""
+
+msgid "With internationalization support"
+msgstr ""
+
+msgid "With multiple codepages support"
+msgstr ""
+
+msgid "With ext2fs attributes support"
 msgstr ""
 
 #, c-format
@@ -3795,10 +3868,26 @@ msgid "Built with GLib %d.%d.%d\n"
 msgstr ""
 
 #, c-format
+msgid "Built with S-Lang %s with terminfo database\n"
+msgstr ""
+
+#, c-format
+msgid "Built with ncurses %s\n"
+msgstr ""
+
+msgid "Built with ncurses (unknown version)"
+msgstr ""
+
+#, c-format
+msgid "Built with ncursesw %s\n"
+msgstr ""
+
+msgid "Built with ncursesw (unknown version)"
+msgstr ""
+
 msgid "Virtual File Systems:"
 msgstr "Εικονικά συστήματα αρχείων:"
 
-#, c-format
 msgid "Data types:"
 msgstr "Τύποι δεδομένων:"
 
@@ -3828,6 +3917,48 @@ msgstr "Δεδομένα χρήστη"
 
 msgid "Cache directory:"
 msgstr "Κατάλογος κρυφής μνήμης:"
+
+msgid "Debug"
+msgstr "Αποσφαλμάτωση"
+
+msgid "ERROR:"
+msgstr "ΣΦΑΛΜΑ:"
+
+msgid "True:"
+msgstr "Αληθές:"
+
+msgid "False:"
+msgstr "Ψευδές:"
+
+msgid "Error calling program"
+msgstr "Σφάλμα κατά την κλήση προγράμματος"
+
+msgid "Warning -- ignoring file"
+msgstr "Προειδοποίηση -- παράβλεψη αρχείου"
+
+#, c-format
+msgid ""
+"File %s is not owned by root or you or is world writable.\n"
+"Using it may compromise your security"
+msgstr ""
+
+msgid "Format error on file Extensions File"
+msgstr "Σφάλμα μορφής αρχείου επεκτάσεων"
+
+#, c-format
+msgid "The %%var macro has no default"
+msgstr ""
+
+#, c-format
+msgid "The %%var macro has no variable"
+msgstr ""
+
+#, c-format
+msgid "No suitable entries found in %s"
+msgstr "Δε βρέθηκαν καταχωρήσεις στο %s"
+
+msgid "User menu"
+msgstr "Μενού χρήστη"
 
 #, c-format
 msgid ""
@@ -3870,13 +4001,15 @@ msgstr ""
 #, c-format
 msgid ""
 "Cannot open %s archive\n"
+"%s:\n"
 "%s"
 msgstr ""
-"Άνοιγμα αρχείου %s ανεπιτυχές\n"
-"%s"
 
-msgid "Inconsistent extfs archive"
-msgstr "Χαλασμένο αρχείο extfs"
+#, c-format
+msgid ""
+"EXTFS virtual file system:\n"
+"%s"
+msgstr ""
 
 #, c-format
 msgid "Warning: cannot open %s directory\n"
@@ -4044,6 +4177,12 @@ msgid ""
 msgstr ""
 
 #, c-format
+msgid ""
+"SFS virtual file system:\n"
+"%s"
+msgstr ""
+
+#, c-format
 msgid "%s: Warning: file %s not found\n"
 msgstr "%s: Προειδοποίηση: το αρχείο %s δε βρέθηκε\n"
 
@@ -4077,6 +4216,9 @@ msgstr ""
 msgid "sftp: %s"
 msgstr "sftp: %s"
 
+msgid "sftp: failed to convert remote host IP address into text form"
+msgstr ""
+
 #, c-format
 msgid "sftp: making connection to %s"
 msgstr ""
@@ -4086,6 +4228,50 @@ msgstr ""
 
 #, c-format
 msgid "sftp: connection to server failed: %s"
+msgstr ""
+
+msgid "sftp: found host key of unsupported type: RSA1"
+msgstr ""
+
+msgid "sftp: unknown host key type:"
+msgstr ""
+
+#, c-format
+msgid ""
+"Permanently added\n"
+"%s (%s)\n"
+"to the list of known hosts."
+msgstr ""
+
+msgid "sftp: cannot get the remote host key"
+msgstr ""
+
+msgid "sftp: unsupported key type, can't check remote host key"
+msgstr ""
+
+msgid "sftp: can't compute host key fingerprint hash"
+msgstr ""
+
+#, c-format
+msgid ""
+"The authenticity of host\n"
+"%s (%s)\n"
+"can't be established!\n"
+"%s key fingerprint hash is\n"
+"SHA1:%s.\n"
+"Do you want to add it to the list of known hosts and continue connecting?"
+msgstr ""
+
+#, c-format
+msgid ""
+"%s (%s)\n"
+"is found in the list of known hosts but\n"
+"KEYS DO NOT MATCH! THIS COULD BE A MITM ATTACK!\n"
+"Are you sure you want to add it to the list of known hosts and continue "
+"connecting?"
+msgstr ""
+
+msgid "sftp: host key verification failed"
 msgstr ""
 
 #, c-format
@@ -4102,10 +4288,14 @@ msgstr ""
 msgid "sftp: Password is empty."
 msgstr ""
 
-msgid "sftp: Failure establishing SSH session"
+msgid "sftp: failure establishing SSH session"
 msgstr ""
 
 msgid "sftp: No file handler data present for reading file"
+msgstr ""
+
+#, c-format
+msgid "sftp: socket error: %s"
 msgstr ""
 
 #, c-format
@@ -4114,33 +4304,6 @@ msgstr ""
 
 msgid "sftp: Listing done."
 msgstr ""
-
-#, c-format
-msgid "reconnect to %s failed"
-msgstr "η επανασύνδεση με %s απέτυχε"
-
-msgid "Authentication failed"
-msgstr "η πιστοποίηση απέτυχε"
-
-#, c-format
-msgid "Error %s creating directory %s"
-msgstr "Σφάλμα %s κατά τη δημιουργία του καταλόγου %s"
-
-#, c-format
-msgid "Error %s removing directory %s"
-msgstr "Σφάλμα %s κατά την αφαίρεση του καταλόγου %s"
-
-#, c-format
-msgid "%s opening remote file %s"
-msgstr "%s ανοίγει το απομακρυσμένο αρχείο %s"
-
-#, c-format
-msgid "%s removing remote file %s"
-msgstr "%s αφαιρεί το απομακρυσμένο αρχείο %s"
-
-#, c-format
-msgid "%s renaming files\n"
-msgstr "%s μετονομάζει αρχεία\n"
 
 #, c-format
 msgid ""
@@ -4347,3 +4510,46 @@ msgstr "Συνέχεια από την αρχή;"
 
 msgid "Cannot fetch a local copy of /ftp://some.host/editme.txt"
 msgstr ""
+
+#~ msgid "Set debug level"
+#~ msgstr "Ρύθμιση επιπέδου αποσφαλμάτωσης"
+
+#, c-format
+#~ msgid "Password for \\\\%s\\%s"
+#~ msgstr "Κωδικός πρόσβασης για \\\\%s\\%s"
+
+#~ msgid "Username:"
+#~ msgstr "Όνομα χρήστη:"
+
+#~ msgid "SMB link to machine"
+#~ msgstr "Δεσμός SMB σε μηχάνημα"
+
+#~ msgid "SM&B link..."
+#~ msgstr "Δεσμός SM&B..."
+
+#, c-format
+#~ msgid "reconnect to %s failed"
+#~ msgstr "η επανασύνδεση με %s απέτυχε"
+
+#~ msgid "Authentication failed"
+#~ msgstr "η πιστοποίηση απέτυχε"
+
+#, c-format
+#~ msgid "Error %s creating directory %s"
+#~ msgstr "Σφάλμα %s κατά τη δημιουργία του καταλόγου %s"
+
+#, c-format
+#~ msgid "Error %s removing directory %s"
+#~ msgstr "Σφάλμα %s κατά την αφαίρεση του καταλόγου %s"
+
+#, c-format
+#~ msgid "%s opening remote file %s"
+#~ msgstr "%s ανοίγει το απομακρυσμένο αρχείο %s"
+
+#, c-format
+#~ msgid "%s removing remote file %s"
+#~ msgstr "%s αφαιρεί το απομακρυσμένο αρχείο %s"
+
+#, c-format
+#~ msgid "%s renaming files\n"
+#~ msgstr "%s μετονομάζει αρχεία\n"

@@ -2,11 +2,7 @@
 #ifndef MC__TTY_SLANG_H
 #define MC__TTY_SLANG_H
 
-#ifdef HAVE_SLANG_SLANG_H
-#include <slang/slang.h>
-#else
 #include <slang.h>
-#endif /* HAVE_SLANG_SLANG_H */
 
 /*** typedefs(not structures) and defined constants **********************************************/
 
@@ -26,6 +22,8 @@
 
 #define COLS  SLtt_Screen_Cols
 #define LINES SLtt_Screen_Rows
+
+#define ENABLE_SHADOWS 1
 
 /*** enums ***************************************************************************************/
 

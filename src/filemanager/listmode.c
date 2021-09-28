@@ -1,7 +1,7 @@
 /*
    Directory panel listing format editor -- for the Midnight Commander
 
-   Copyright (C) 1994-2017
+   Copyright (C) 1994-2021
    Free Software Foundation, Inc.
 
    Written by:
@@ -273,7 +273,7 @@ init_listmode (char *oldlistformat)
 static void
 listmode_done (WDialog * h)
 {
-    dlg_destroy (h);
+    widget_destroy (WIDGET (h));
     if (0)
         update_panels (UP_OPTIMIZE, UP_KEEPSEL);
     repaint_screen ();

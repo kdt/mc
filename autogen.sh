@@ -17,10 +17,7 @@ ${XGETTEXT:-xgettext} --keyword=_ --keyword=N_ --keyword=Q_ --output=- \
 /g;s/ //g;p;}' | \
 	grep -v '^$' | sort | uniq >po/POTFILES.in
 
-cd src/vfs/smbfs/helpers
-date -u >include/stamp-h.in
-
-$srcdir/maint/utils/version.sh "$srcdir"
+$srcdir/version.sh "$srcdir"
 
 if test -x $srcdir/configure.mc; then
   $srcdir/configure.mc "$@"

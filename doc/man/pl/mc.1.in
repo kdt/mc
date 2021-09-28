@@ -1,6 +1,6 @@
 .\" -*- mode: troff; coding: UTF-8 -*-
 .\"Przetłumaczone przez by Macieja Wojciechowskiego    wojciech@staszic.waw.pl
-.TH MC 1 "%DATE_OF_MAN_PAGE%" "MC Version %DISTR_VERSION%" "GNU Midnight Commander"
+.TH MC 1 "%DATE_OF_MAN_PAGE%" "MC Version %MAN_VERSION%" "GNU Midnight Commander"
 .\"SKIP_SECTION"
 .SH NAZWA
 mc \- wizualny interpetator poleceń dla systemów Unixopodobnych
@@ -80,7 +80,7 @@ Włącza tryb powolnego terminala, w którym program nie będzie rysował zbyt
 obciążających znaków graficznych oraz wyłączy opcję weryfikacji.
 .TP
 .I \-t
-Używane tylko jeśli kod był skompilowany przy użyciu Slanga i terminfo:
+Używane tylko jeśli kod był skompilowany przy użyciu S\-Langa i terminfo:
 powoduje, że Midnight Commander będzie używać zmiennej środowiskowej
 .B TERMCAP
 do pokazywania informacji terminala, zamiast informacji w systemowej bazie
@@ -2372,38 +2372,6 @@ dysku scsi Linux, będziesz musiał użyć następującej ścieżki:
 .PP
 Może to chwilkę potrwać zanim pliki zostaną pokazane i będziesz mógł je
 normalnie oglądać.
-.PP
-.\"NODE "  SMB File System"
-.SH "  SMB File System"
-The smbfs allows you to manipulate files on remote machines with SMB
-(or CIFS) protocol.  These include Windows for Workgroups,
-Windows 9x/ME/XP, Windows NT, Windows 2000 and Samba.
-To actually use it, you may try to use the panel command "SMB link..."
-(accessible from the menubar) or you may directly change your current
-directory to it using the cd command to a path name that looks like this:
-.PP
-.I smb://[user@]machine[/service][/remote\-dir]
-.PP
-The
-.IR user ,
-.I service
-and
-.I remote\-dir
-elements are optional.
-The
-.IR user ,
-.I domain
-and
-.I password
-can be specified in an input dialog.
-.PP
-Examples:
-.PP
-.nf
-    smb://machine/Share
-    smb://other_machine
-    smb://guest@machine/Public/Irlex
-.fi
 .\"NODE "  EXTernal File System"
 .SH "  EXTernal File System"
 .B extfs
@@ -2572,7 +2540,7 @@ kolory używając bazy danych terminali. Czasami jest to zmieniane
 przez różne flagi startowe, np. możesz wymusić wyświetlanie czarno\-białe
 lub kolorowe startując z opcją odpowiednio \-b i \-c.
 .PP
-Jeśli program jest skompilowany z menedżerem ekranu Slang zamiast ncurses,
+Jeśli program jest skompilowany z menedżerem ekranu S\-Lang zamiast ncurses,
 sprawdzi on również wartość zmiennej
 .BR COLORTERM .
 Jeśli jest ustawiona, ma takie samo znaczenie jak opcja \-c.
@@ -2590,7 +2558,7 @@ color_terminals=linux,xterm
 color_terminals=terminal\-name1,terminal\-name2...
 .fi
 .PP
-Program może być skompilowany zarówno z bibliotekami slang jak i ncurses.
+Program może być skompilowany zarówno z bibliotekami S\-Lang jak i ncurses.
 Ncurses nie obsługuje metody wymuszania wyświetlania, zawsze sprawdza w bazie danych
 terminali.
 .PP

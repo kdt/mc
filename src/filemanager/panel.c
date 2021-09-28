@@ -1,7 +1,7 @@
 /*
    Panel managing.
 
-   Copyright (C) 1994-2017
+   Copyright (C) 1994-2021
    Free Software Foundation, Inc.
 
    Written by:
@@ -60,10 +60,12 @@
 #ifdef HAVE_CHARSET
 #include "src/selcodepage.h"    /* select_charset (), SELECT_CHARSET_NO_TRANSLATE */
 #endif
-#include "src/keybind-defaults.h"       /* global_keymap_t */
+#include "src/keymap.h"         /* global_keymap_t */
 #ifdef ENABLE_SUBSHELL
 #include "src/subshell/subshell.h"      /* do_subshell_chdir() */
 #endif
+
+#include "src/usermenu.h"
 
 #include "dir.h"
 #include "boxes.h"
@@ -72,8 +74,7 @@
 #include "layout.h"             /* Most layout variables are here */
 #include "cmd.h"
 #include "command.h"            /* cmdline */
-#include "usermenu.h"
-#include "midnight.h"
+#include "filemanager.h"
 #include "mountlist.h"          /* my_statfs */
 
 #include "panel.h"
@@ -84,7 +85,7 @@
 hook_t *select_file_hook = NULL;
 
 /* *INDENT-OFF* */
-panelized_panel_t panelized_panel = { {NULL, 0, -1}, NULL };
+panelized_panel_t panelized_panel = { {NULL, 0, -1, NULL}, NULL };
 /* *INDENT-ON* */
 
 static const char *string_file_name (file_entry_t *, int);
@@ -128,11 +129,10 @@ typedef enum
 
 /*
  * This describes a format item.  The parse_display_format routine parses
- * the user specified format and creates a linked list of format_e structures.
+ * the user specified format and creates a linked list of format_item_t structures.
  */
-typedef struct format_e
+typedef struct format_item_t
 {
-    struct format_e *next;
     int requested_field_len;
     int field_len;
     align_crt_t just_mode;
@@ -140,7 +140,7 @@ typedef struct format_e
     const char *(*string_fn) (file_entry_t *, int len);
     char *title;
     const char *id;
-} format_e;
+} format_item_t;
 
 /* File name scroll states */
 typedef enum
@@ -353,22 +353,24 @@ static panel_field_t panel_fields[] = {
 };
 /* *INDENT-ON* */
 
-static char *panel_sort_up_sign = NULL;
-static char *panel_sort_down_sign = NULL;
+static char *panel_sort_up_char = NULL;
+static char *panel_sort_down_char = NULL;
 
-static char *panel_hiddenfiles_sign_show = NULL;
-static char *panel_hiddenfiles_sign_hide = NULL;
-static char *panel_history_prev_item_sign = NULL;
-static char *panel_history_next_item_sign = NULL;
-static char *panel_history_show_list_sign = NULL;
+static char *panel_hiddenfiles_show_char = NULL;
+static char *panel_hiddenfiles_hide_char = NULL;
+static char *panel_history_prev_item_char = NULL;
+static char *panel_history_next_item_char = NULL;
+static char *panel_history_show_list_char = NULL;
 static char *panel_filename_scroll_left_char = NULL;
 static char *panel_filename_scroll_right_char = NULL;
 
 /* Panel that selection started */
 static WPanel *mouse_mark_panel = NULL;
 
-static int mouse_marking = 0;
+static gboolean mouse_marking = FALSE;
 static int state_mark = 0;
+
+static GString *string_file_name_buffer;
 
 /* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
@@ -384,18 +386,13 @@ set_colors (const WPanel * panel)
 }
 
 /* --------------------------------------------------------------------------------------------- */
-/** Delete format string, it is a linked list */
+/** Delete format_item_t object */
 
 static void
-delete_format (format_e * format)
+format_item_free (format_item_t * format)
 {
-    while (format != NULL)
-    {
-        format_e *next = format->next;
-        g_free (format->title);
-        g_free (format);
-        format = next;
-    }
+    g_free (format->title);
+    g_free (format);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -456,12 +453,12 @@ add_permission_string (const char *dest, int width, file_entry_t * fe, int attr,
 static const char *
 string_file_name (file_entry_t * fe, int len)
 {
-    static char buffer[MC_MAXPATHLEN * MB_LEN_MAX + 1];
-
     (void) len;
 
-    g_strlcpy (buffer, fe->fname, sizeof (buffer));
-    return buffer;
+    g_string_set_size (string_file_name_buffer, 0);
+    g_string_append_len (string_file_name_buffer, fe->fname->str, fe->fname->len);
+
+    return string_file_name_buffer->str;
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -486,10 +483,14 @@ ilog10 (dev_t n)
 static void
 format_device_number (char *buf, size_t bufsize, dev_t dev)
 {
-    dev_t major_dev = major (dev);
-    dev_t minor_dev = minor (dev);
-    unsigned int major_digits = ilog10 (major_dev);
-    unsigned int minor_digits = ilog10 (minor_dev);
+    dev_t major_dev, minor_dev;
+    unsigned int major_digits, minor_digits;
+
+    major_dev = major (dev);
+    major_digits = ilog10 (major_dev);
+
+    minor_dev = minor (dev);
+    minor_digits = ilog10 (minor_dev);
 
     g_assert (bufsize >= 1);
 
@@ -508,7 +509,7 @@ string_file_size (file_entry_t * fe, int len)
     static char buffer[BUF_TINY];
 
     /* Don't ever show size of ".." since we don't calculate it */
-    if (DIR_IS_DOTDOT (fe->fname))
+    if (DIR_IS_DOTDOT (fe->fname->str))
         return _("UP--DIR");
 
 #ifdef HAVE_STRUCT_STAT_ST_RDEV
@@ -530,7 +531,7 @@ string_file_size_brief (file_entry_t * fe, int len)
     if (S_ISLNK (fe->st.st_mode) && !link_isdir (fe))
         return _("SYMLINK");
 
-    if ((S_ISDIR (fe->st.st_mode) || link_isdir (fe)) && !DIR_IS_DOTDOT (fe->fname))
+    if ((S_ISDIR (fe->st.st_mode) || link_isdir (fe)) && !DIR_IS_DOTDOT (fe->fname->str))
         return _("SUB-DIR");
 
     return string_file_size (fe, len);
@@ -792,7 +793,7 @@ format_file (WPanel * panel, int file_index, int width, int attr, gboolean issta
 {
     int color = NORMAL_COLOR;
     int length = 0;
-    format_e *format, *home;
+    GSList *format, *home;
     file_entry_t *fe = NULL;
     filename_scroll_flag_t res = FILENAME_NOSCROLL;
 
@@ -806,9 +807,11 @@ format_file (WPanel * panel, int file_index, int width, int attr, gboolean issta
 
     home = isstatus ? panel->status_format : panel->format;
 
-    for (format = home; format != NULL && length != width; format = format->next)
+    for (format = home; format != NULL && length != width; format = g_slist_next (format))
     {
-        if (format->string_fn != NULL)
+        format_item_t *fi = (format_item_t *) format->data;
+
+        if (fi->string_fn != NULL)
         {
             const char *txt = " ";
             int len, perm = 0;
@@ -816,15 +819,15 @@ format_file (WPanel * panel, int file_index, int width, int attr, gboolean issta
             int name_offset = 0;
 
             if (fe != NULL)
-                txt = format->string_fn (fe, format->field_len);
+                txt = fi->string_fn (fe, fi->field_len);
 
-            len = format->field_len;
+            len = fi->field_len;
             if (len + length > width)
                 len = width - length;
             if (len <= 0)
                 break;
 
-            if (!isstatus && panel->content_shift > -1 && strcmp (format->id, "name") == 0)
+            if (!isstatus && panel->content_shift > -1 && strcmp (fi->id, "name") == 0)
             {
                 int str_len;
                 int i;
@@ -850,9 +853,9 @@ format_file (WPanel * panel, int file_index, int width, int attr, gboolean issta
 
             if (panels_options.permission_mode)
             {
-                if (strcmp (format->id, "perm") == 0)
+                if (strcmp (fi->id, "perm") == 0)
                     perm = 1;
-                else if (strcmp (format->id, "mode") == 0)
+                else if (strcmp (fi->id, "mode") == 0)
                     perm = 2;
             }
 
@@ -862,14 +865,12 @@ format_file (WPanel * panel, int file_index, int width, int attr, gboolean issta
                 tty_lowlevel_setcolor (-color);
 
             if (!isstatus && panel->content_shift > -1)
-                prepared_text =
-                    str_fit_to_term (txt + name_offset, len, HIDE_FIT (format->just_mode));
+                prepared_text = str_fit_to_term (txt + name_offset, len, HIDE_FIT (fi->just_mode));
             else
-                prepared_text = str_fit_to_term (txt, len, format->just_mode);
+                prepared_text = str_fit_to_term (txt, len, fi->just_mode);
 
             if (perm != 0 && fe != NULL)
-                add_permission_string (prepared_text, format->field_len, fe, attr, color,
-                                       perm != 1);
+                add_permission_string (prepared_text, fi->field_len, fe, attr, color, perm != 1);
             else
                 tty_print_string (prepared_text);
 
@@ -900,7 +901,7 @@ format_file (WPanel * panel, int file_index, int width, int attr, gboolean issta
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-repaint_file (WPanel * panel, int file_index, gboolean mv, int attr, gboolean isstatus)
+repaint_file (WPanel * panel, int file_index, int attr, gboolean isstatus)
 {
     Widget *w = WIDGET (panel);
 
@@ -930,7 +931,7 @@ repaint_file (WPanel * panel, int file_index, gboolean mv, int attr, gboolean is
     if (width <= 0)
         return;
 
-    if (mv)
+    if (!isstatus)
     {
         ypos = file_index - panel->top_file;
 
@@ -938,7 +939,7 @@ repaint_file (WPanel * panel, int file_index, gboolean mv, int attr, gboolean is
             ypos %= panel_lines (panel);
 
         ypos += 2;              /* top frame and header */
-        widget_move (w, ypos, offset + 1);
+        widget_gotoyx (w, ypos, offset + 1);
     }
 
     ret_frm = format_file (panel, file_index, width, attr, isstatus, &fln);
@@ -949,7 +950,7 @@ repaint_file (WPanel * panel, int file_index, gboolean mv, int attr, gboolean is
         tty_print_one_vline (TRUE);
     }
 
-    if (ret_frm != FILENAME_NOSCROLL && mv)
+    if (!isstatus && ret_frm != FILENAME_NOSCROLL)
     {
         if (!panel_is_split && fln > 0)
         {
@@ -962,7 +963,7 @@ repaint_file (WPanel * panel, int file_index, gboolean mv, int attr, gboolean is
             }
         }
 
-        widget_move (w, ypos, offset);
+        widget_gotoyx (w, ypos, offset);
         tty_setcolor (NORMAL_COLOR);
         tty_print_string (panel_filename_scroll_left_char);
 
@@ -972,7 +973,7 @@ repaint_file (WPanel * panel, int file_index, gboolean mv, int attr, gboolean is
             if (nth_column + 1 >= panel->list_cols)
                 offset++;
 
-            widget_move (w, ypos, offset);
+            widget_gotoyx (w, ypos, offset);
             tty_setcolor (NORMAL_COLOR);
             tty_print_string (panel_filename_scroll_right_char);
         }
@@ -989,13 +990,13 @@ display_mini_info (WPanel * panel)
     if (!panels_options.show_mini_info)
         return;
 
-    widget_move (w, panel_lines (panel) + 3, 1);
+    widget_gotoyx (w, panel_lines (panel) + 3, 1);
 
-    if (panel->searching)
+    if (panel->quick_search.active)
     {
         tty_setcolor (INPUT_COLOR);
         tty_print_char ('/');
-        tty_print_string (str_fit_to_term (panel->search_buffer, w->cols - 3, J_LEFT));
+        tty_print_string (str_fit_to_term (panel->quick_search.buffer->str, w->cols - 3, J_LEFT));
         return;
     }
 
@@ -1009,10 +1010,10 @@ display_mini_info (WPanel * panel)
         int len;
 
         lc_link_vpath =
-            vfs_path_append_new (panel->cwd_vpath, panel->dir.list[panel->selected].fname,
+            vfs_path_append_new (panel->cwd_vpath, panel->dir.list[panel->selected].fname->str,
                                  (char *) NULL);
         len = mc_readlink (lc_link_vpath, link_target, MC_MAXPATHLEN - 1);
-        vfs_path_free (lc_link_vpath);
+        vfs_path_free (lc_link_vpath, TRUE);
         if (len > 0)
         {
             link_target[len] = 0;
@@ -1022,7 +1023,7 @@ display_mini_info (WPanel * panel)
         else
             tty_print_string (str_fit_to_term (_("<readlink failed>"), w->cols - 2, J_LEFT));
     }
-    else if (DIR_IS_DOTDOT (panel->dir.list[panel->selected].fname))
+    else if (DIR_IS_DOTDOT (panel->dir.list[panel->selected].fname->str))
     {
         /* FIXME:
          * while loading directory (dir_list_load() and dir_list_reload()),
@@ -1032,7 +1033,7 @@ display_mini_info (WPanel * panel)
     }
     else
         /* Default behavior */
-        repaint_file (panel, panel->selected, FALSE, STATUS, TRUE);
+        repaint_file (panel, panel->selected, STATUS, TRUE);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -1057,7 +1058,7 @@ paint_dir (WPanel * panel)
             color += (panel->selected == i + panel->top_file && panel->active);
         }
 
-        repaint_file (panel, i + panel->top_file, TRUE, color, FALSE);
+        repaint_file (panel, i + panel->top_file, color, FALSE);
     }
 
     tty_set_normal_attrs ();
@@ -1099,7 +1100,7 @@ display_total_marked_size (const WPanel * panel, int y, int x, gboolean size_onl
      * y == panel_lines (panel) + 2  for mini_info_separator
      * y == w->lines - 1             for panel bottom frame
      */
-    widget_move (w, y, x);
+    widget_gotoyx (w, y, x);
     tty_setcolor (MARKED_COLOR);
     tty_printf (" %s ", buf);
 }
@@ -1164,7 +1165,7 @@ show_free_space (const WPanel * panel)
         g_snprintf (tmp, sizeof (tmp), " %s/%s (%d%%) ", buffer1, buffer2,
                     myfs_stats.total == 0 ? 0 :
                     (int) (100 * (long double) myfs_stats.avail / myfs_stats.total));
-        widget_move (w, w->lines - 1, w->cols - 2 - (int) strlen (tmp));
+        widget_gotoyx (w, w->lines - 1, w->cols - 2 - (int) strlen (tmp));
         tty_setcolor (NORMAL_COLOR);
         tty_print_string (tmp);
     }
@@ -1221,7 +1222,7 @@ panel_correct_path_to_show (const WPanel * panel)
     return_path =
         vfs_path_to_str_flags (last_vpath, 0,
                                VPF_STRIP_HOME | VPF_STRIP_PASSWORD | VPF_HIDE_CHARSET);
-    vfs_path_free (last_vpath);
+    vfs_path_free (last_vpath, TRUE);
 
     return return_path;
 }
@@ -1256,7 +1257,6 @@ static void
 show_dir (const WPanel * panel)
 {
     const Widget *w = CONST_WIDGET (panel);
-
     gchar *tmp;
 
     set_colors (panel);
@@ -1268,25 +1268,25 @@ show_dir (const WPanel * panel)
 
         y = panel_lines (panel) + 2;
 
-        widget_move (w, y, 0);
+        widget_gotoyx (w, y, 0);
         tty_print_alt_char (ACS_LTEE, FALSE);
-        widget_move (w, y, w->cols - 1);
+        widget_gotoyx (w, y, w->cols - 1);
         tty_print_alt_char (ACS_RTEE, FALSE);
     }
 
-    widget_move (w, 0, 1);
-    tty_print_string (panel_history_prev_item_sign);
+    widget_gotoyx (w, 0, 1);
+    tty_print_string (panel_history_prev_item_char);
 
-    tmp = panels_options.show_dot_files ? panel_hiddenfiles_sign_show : panel_hiddenfiles_sign_hide;
-    tmp = g_strdup_printf ("%s[%s]%s", tmp, panel_history_show_list_sign,
-                           panel_history_next_item_sign);
+    tmp = panels_options.show_dot_files ? panel_hiddenfiles_show_char : panel_hiddenfiles_hide_char;
+    tmp = g_strdup_printf ("%s[%s]%s", tmp, panel_history_show_list_char,
+                           panel_history_next_item_char);
 
-    widget_move (w, 0, w->cols - 6);
+    widget_gotoyx (w, 0, w->cols - 6);
     tty_print_string (tmp);
 
     g_free (tmp);
 
-    widget_move (w, 0, 3);
+    widget_gotoyx (w, 0, 3);
 
     if (panel->is_panelized)
         tty_printf (" %s ", _("Panelize"));
@@ -1297,7 +1297,7 @@ show_dir (const WPanel * panel)
         if (tmp != NULL)
         {
             tty_printf ("%s", tmp);
-            widget_move (w, 0, 3 + strlen (tmp));
+            widget_gotoyx (w, 0, 3 + strlen (tmp));
             g_free (tmp);
         }
     }
@@ -1323,7 +1323,7 @@ show_dir (const WPanel * panel)
                             size_trunc_sep (panel->dir.list[panel->selected].st.st_size,
                                             panels_options.kilobyte_si));
                 tty_setcolor (NORMAL_COLOR);
-                widget_move (w, w->lines - 1, 4);
+                widget_gotoyx (w, w->lines - 1, 4);
                 tty_print_string (buffer);
             }
         }
@@ -1347,6 +1347,14 @@ static void
 adjust_top_file (WPanel * panel)
 {
     int items;
+
+    /* Update panel->selected to avoid out of range in panel->dir.list[panel->selected]
+     * when panel is redrawing when directory is reloading, for example in path:
+     * dir_list_reload() -> mc_refresh() -> dialog_change_screen_size() ->
+     * midnight_callback (MSG_RESIZE) -> setup_panels() -> panel_callback(MSG_DRAW) ->
+     * display_mini_info()
+     */
+    panel->selected = CLAMP (panel->selected, 0, panel->dir.len - 1);
 
     items = panel_items (panel);
 
@@ -1393,9 +1401,9 @@ panel_save_name (WPanel * panel)
 {
     /* If the program is shuting down */
     if ((mc_global.midnight_shutdown && auto_save_setup) || saving_setup)
-        return g_strdup (panel->panel_name);
+        return g_strdup (panel->name);
 
-    return g_strconcat ("Temporal:", panel->panel_name, (char *) NULL);
+    return g_strconcat ("Temporal:", panel->name, (char *) NULL);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -1406,8 +1414,8 @@ directory_history_add (WPanel * panel, const vfs_path_t * vpath)
     char *tmp;
 
     tmp = vfs_path_to_str_flags (vpath, 0, VPF_STRIP_PASSWORD);
-    panel->dir_history = list_append_unique (panel->dir_history, tmp);
-    panel->dir_history_current = panel->dir_history;
+    panel->dir_history.list = list_append_unique (panel->dir_history.list, tmp);
+    panel->dir_history.current = panel->dir_history.list;
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -1426,9 +1434,9 @@ panel_load_history (const gchar * event_group_name, const gchar * event_name,
     if (ev->receiver == NULL || ev->receiver == WIDGET (p))
     {
         if (ev->cfg != NULL)
-            p->dir_history = history_load (ev->cfg, p->hist_name);
+            p->dir_history.list = mc_config_history_load (ev->cfg, p->dir_history.name);
         else
-            p->dir_history = history_get (p->hist_name);
+            p->dir_history.list = mc_config_history_get (p->dir_history.name);
 
         directory_history_add (p, p->cwd_vpath);
     }
@@ -1448,11 +1456,11 @@ panel_save_history (const gchar * event_group_name, const gchar * event_name,
     (void) event_group_name;
     (void) event_name;
 
-    if (p->dir_history != NULL)
+    if (p->dir_history.list != NULL)
     {
         ev_history_load_save_t *ev = (ev_history_load_save_t *) data;
 
-        history_save (ev->cfg, p->hist_name, p->dir_history);
+        mc_config_history_save (ev->cfg, p->dir_history.name, p->dir_history.list);
     }
 
     return TRUE;
@@ -1477,34 +1485,29 @@ panel_destroy (WPanel * p)
     panel_clean_dir (p);
 
     /* clean history */
-    if (p->dir_history != NULL)
+    if (p->dir_history.list != NULL)
     {
         /* directory history is already saved before this moment */
-        p->dir_history = g_list_first (p->dir_history);
-        g_list_free_full (p->dir_history, g_free);
+        p->dir_history.list = g_list_first (p->dir_history.list);
+        g_list_free_full (p->dir_history.list, g_free);
     }
-    g_free (p->hist_name);
+    g_free (p->dir_history.name);
 
-    delete_format (p->format);
-    delete_format (p->status_format);
+    g_slist_free_full (p->format, (GDestroyNotify) format_item_free);
+    g_slist_free_full (p->status_format, (GDestroyNotify) format_item_free);
 
     g_free (p->user_format);
     for (i = 0; i < LIST_FORMATS; i++)
         g_free (p->user_status_format[i]);
 
     g_free (p->dir.list);
-    g_free (p->panel_name);
+    g_free (p->name);
 
-    vfs_path_free (p->lwd_vpath);
-    vfs_path_free (p->cwd_vpath);
-}
+    g_string_free (p->quick_search.buffer, TRUE);
+    g_string_free (p->quick_search.prev_buffer, TRUE);
 
-/* --------------------------------------------------------------------------------------------- */
-
-static inline void
-panel_format_modified (WPanel * panel)
-{
-    panel->format_modified = 1;
+    vfs_path_free (p->lwd_vpath, TRUE);
+    vfs_path_free (p->cwd_vpath, TRUE);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -1515,11 +1518,11 @@ panel_paint_sort_info (const WPanel * panel)
     if (*panel->sort_field->hotkey != '\0')
     {
         const char *sort_sign =
-            panel->sort_info.reverse ? panel_sort_up_sign : panel_sort_down_sign;
+            panel->sort_info.reverse ? panel_sort_up_char : panel_sort_down_char;
         char *str;
 
         str = g_strdup_printf ("%s%s", sort_sign, Q_ (panel->sort_field->hotkey));
-        widget_move (panel, 1, 1);
+        widget_gotoyx (panel, 1, 1);
         tty_print_string (str);
         g_free (str);
     }
@@ -1559,7 +1562,7 @@ panel_print_header (const WPanel * panel)
     int i;
     GString *format_txt;
 
-    widget_move (w, 1, 1);
+    widget_gotoyx (w, 1, 1);
     tty_getyx (&y, &x);
     tty_setcolor (NORMAL_COLOR);
     tty_draw_hline (y, x, ' ', w->cols - 2);
@@ -1568,23 +1571,24 @@ panel_print_header (const WPanel * panel)
 
     for (i = 0; i < panel->list_cols; i++)
     {
-        format_e *format;
+        GSList *format;
 
-        for (format = panel->format; format != NULL; format = format->next)
+        for (format = panel->format; format != NULL; format = g_slist_next (format))
         {
-            if (format->string_fn != NULL)
+            format_item_t *fi = (format_item_t *) format->data;
+
+            if (fi->string_fn != NULL)
             {
                 g_string_set_size (format_txt, 0);
 
-                if (panel->list_format == list_long
-                    && strcmp (format->id, panel->sort_field->id) == 0)
+                if (panel->list_format == list_long && strcmp (fi->id, panel->sort_field->id) == 0)
                     g_string_append (format_txt,
                                      panel->sort_info.reverse
-                                     ? panel_sort_up_sign : panel_sort_down_sign);
+                                     ? panel_sort_up_char : panel_sort_down_char);
 
-                g_string_append (format_txt, format->title);
+                g_string_append (format_txt, fi->title);
 
-                if (panel->filter != NULL && strcmp (format->id, "name") == 0)
+                if (panel->filter != NULL && strcmp (fi->id, "name") == 0)
                 {
                     g_string_append (format_txt, " [");
                     g_string_append (format_txt, panel->filter);
@@ -1592,8 +1596,7 @@ panel_print_header (const WPanel * panel)
                 }
 
                 tty_setcolor (HEADER_COLOR);
-                tty_print_string (str_fit_to_term (format_txt->str, format->field_len,
-                                                   J_CENTER_LEFT));
+                tty_print_string (str_fit_to_term (format_txt->str, fi->field_len, J_CENTER_LEFT));
             }
             else
             {
@@ -1621,6 +1624,7 @@ static const char *
 parse_panel_size (WPanel * panel, const char *format, gboolean isstatus)
 {
     panel_display_t frame = frame_half;
+
     format = skip_separators (format);
 
     if (strncmp (format, "full", 4) == 0)
@@ -1661,28 +1665,30 @@ parse_panel_size (WPanel * panel, const char *format, gboolean isstatus)
     return skip_separators (format);
 }
 
+/* --------------------------------------------------------------------------------------------- */
+
+/* *INDENT-OFF* */
 /* Format is:
 
    all              := panel_format? format
    panel_format     := [full|half] [1-9]
-   format           := one_format_e
-   | format , one_format_e
+   format           := one_format_item_t
+                     | format , one_format_item_t
 
-   one_format_e     := just format.id [opt_size]
-   just             := [<=>]
-   opt_size         := : size [opt_expand]
-   size             := [0-9]+
-   opt_expand       := +
+   one_format_item_t := just format.id [opt_size]
+   just              := [<=>]
+   opt_size          := : size [opt_expand]
+   size              := [0-9]+
+   opt_expand        := +
 
  */
+/* *INDENT-ON* */
 
-/* --------------------------------------------------------------------------------------------- */
-
-static format_e *
+static GSList *
 parse_display_format (WPanel * panel, const char *format, char **error, gboolean isstatus,
                       int *res_total_cols)
 {
-    format_e *darr, *old = NULL, *home = NULL;  /* The formats we return */
+    GSList *home = NULL;        /* The formats we return */
     int total_cols = 0;         /* Used columns by the format */
     size_t i;
 
@@ -1707,19 +1713,14 @@ parse_display_format (WPanel * panel, const char *format, char **error, gboolean
 
     while (*format != '\0')
     {                           /* format can be an empty string */
+        format_item_t *darr;
         align_crt_t justify;    /* Which mode. */
         gboolean set_justify = TRUE;    /* flag: set justification mode? */
         gboolean found = FALSE;
+        size_t klen = 0;
 
-        darr = g_new0 (format_e, 1);
-
-        /* I'm so ugly, don't look at me :-) */
-        if (home == NULL)
-            home = old = darr;
-
-        old->next = darr;
-        darr->next = NULL;
-        old = darr;
+        darr = g_new0 (format_item_t, 1);
+        home = g_slist_append (home, darr);
 
         format = skip_separators (format);
 
@@ -1743,21 +1744,20 @@ parse_display_format (WPanel * panel, const char *format, char **error, gboolean
             break;
         }
 
-        for (i = 0; panel_fields[i].id != NULL; i++)
+        for (i = 0; !found && panel_fields[i].id != NULL; i++)
         {
-            size_t klen;
-
             klen = strlen (panel_fields[i].id);
+            found = strncmp (format, panel_fields[i].id, klen) == 0;
+        }
 
-            if (strncmp (format, panel_fields[i].id, klen) != 0)
-                continue;
-
+        if (found)
+        {
+            i--;
             format += klen;
 
             darr->requested_field_len = panel_fields[i].min_size;
             darr->string_fn = panel_fields[i].string_fn;
             darr->title = g_strdup (panel_get_title_without_hotkey (panel_fields[i].title_hotkey));
-
             darr->id = panel_fields[i].id;
             darr->expand = panel_fields[i].expands;
             darr->just_mode = panel_fields[i].default_just;
@@ -1769,7 +1769,6 @@ parse_display_format (WPanel * panel, const char *format, char **error, gboolean
                 else
                     darr->just_mode = justify;
             }
-            found = TRUE;
 
             format = skip_separators (format);
 
@@ -1794,13 +1793,9 @@ parse_display_format (WPanel * panel, const char *format, char **error, gboolean
                     darr->expand = TRUE;
                     format++;
                 }
-
             }
-
-            break;
         }
-
-        if (!found)
+        else
         {
             size_t pos;
             char *tmp_format;
@@ -1810,7 +1805,7 @@ parse_display_format (WPanel * panel, const char *format, char **error, gboolean
                 pos = 8;
 
             tmp_format = g_strndup (format, pos);
-            delete_format (home);
+            g_slist_free_full (home, (GDestroyNotify) format_item_free);
             *error =
                 g_strconcat (_("Unknown tag on display format:"), " ", tmp_format, (char *) NULL);
             g_free (tmp_format);
@@ -1827,14 +1822,14 @@ parse_display_format (WPanel * panel, const char *format, char **error, gboolean
 
 /* --------------------------------------------------------------------------------------------- */
 
-static format_e *
+static GSList *
 use_display_format (WPanel * panel, const char *format, char **error, gboolean isstatus)
 {
 #define MAX_EXPAND 4
     int expand_top = 0;         /* Max used element in expand */
     int usable_columns;         /* Usable columns in the panel */
     int total_cols = 0;
-    format_e *darr, *home;
+    GSList *darr, *home;
 
     if (format == NULL)
         format = DEFAULT_USER_FORMAT;
@@ -1844,7 +1839,7 @@ use_display_format (WPanel * panel, const char *format, char **error, gboolean i
     if (*error != NULL)
         return NULL;
 
-    panel->dirty = 1;
+    panel->dirty = TRUE;
 
     usable_columns = WIDGET (panel)->cols - 2;
     /* Status needn't to be split */
@@ -1856,10 +1851,12 @@ use_display_format (WPanel * panel, const char *format, char **error, gboolean i
     }
 
     /* Look for the expandable fields and set field_len based on the requested field len */
-    for (darr = home; darr != NULL && expand_top < MAX_EXPAND; darr = darr->next)
+    for (darr = home; darr != NULL && expand_top < MAX_EXPAND; darr = g_slist_next (darr))
     {
-        darr->field_len = darr->requested_field_len;
-        if (darr->expand)
+        format_item_t *fi = (format_item_t *) darr->data;
+
+        fi->field_len = fi->requested_field_len;
+        if (fi->expand)
             expand_top++;
     }
 
@@ -1875,12 +1872,16 @@ use_display_format (WPanel * panel, const char *format, char **error, gboolean i
         {
             pdif = dif;
 
-            for (darr = home; darr; darr = darr->next)
-                if (dif != 0 && darr->field_len != 1)
+            for (darr = home; darr != NULL; darr = g_slist_next (darr))
+            {
+                format_item_t *fi = (format_item_t *) darr->data;
+
+                if (dif != 0 && fi->field_len != 1)
                 {
-                    darr->field_len--;
+                    fi->field_len--;
                     dif--;
                 }
+            }
         }
 
         total_cols = usable_columns;    /* give up, the rest should be truncated */
@@ -1890,17 +1891,24 @@ use_display_format (WPanel * panel, const char *format, char **error, gboolean i
     if (usable_columns > total_cols && expand_top != 0)
     {
         int i;
-        int spaces = (usable_columns - total_cols) / expand_top;
+        int spaces;
 
-        for (i = 0, darr = home; darr && (i < expand_top); darr = darr->next)
-            if (darr->expand)
+        spaces = (usable_columns - total_cols) / expand_top;
+
+        for (i = 0, darr = home; darr != NULL && i < expand_top; darr = g_slist_next (darr))
+        {
+            format_item_t *fi = (format_item_t *) darr->data;
+
+            if (fi->expand)
             {
-                darr->field_len += spaces;
+                fi->field_len += spaces;
                 if (i == 0)
-                    darr->field_len += (usable_columns - total_cols) % expand_top;
+                    fi->field_len += (usable_columns - total_cols) % expand_top;
                 i++;
             }
+        }
     }
+
     return home;
 }
 
@@ -1910,7 +1918,6 @@ use_display_format (WPanel * panel, const char *format, char **error, gboolean i
 static const char *
 panel_format (WPanel * panel)
 {
-
     switch (panel->list_format)
     {
     case list_long:
@@ -1970,31 +1977,38 @@ mini_status_format (WPanel * panel)
 /*                          */
 
 /* --------------------------------------------------------------------------------------------- */
+
+static void
+cd_up_dir (WPanel * panel)
+{
+    vfs_path_t *up_dir;
+
+    up_dir = vfs_path_from_str ("..");
+    panel_cd (panel, up_dir, cd_exact);
+    vfs_path_free (up_dir, TRUE);
+}
+
+/* --------------------------------------------------------------------------------------------- */
 /** Used to emulate Lynx's entering leaving a directory with the arrow keys */
 
 static cb_ret_t
-maybe_cd (gboolean move_up_dir)
+maybe_cd (WPanel * panel, gboolean move_up_dir)
 {
-    if (panels_options.navigate_with_arrows && (cmdline->buffer[0] == '\0'))
+    if (panels_options.navigate_with_arrows && input_is_empty (cmdline))
     {
         if (move_up_dir)
         {
-            vfs_path_t *up_dir;
-
-            up_dir = vfs_path_from_str ("..");
-            do_cd (up_dir, cd_exact);
-            vfs_path_free (up_dir);
+            cd_up_dir (panel);
             return MSG_HANDLED;
         }
 
-        if (S_ISDIR (selection (current_panel)->st.st_mode)
-            || link_isdir (selection (current_panel)))
+        if (S_ISDIR (selection (panel)->st.st_mode) || link_isdir (selection (panel)))
         {
             vfs_path_t *vpath;
 
-            vpath = vfs_path_from_str (selection (current_panel)->fname);
-            do_cd (vpath, cd_exact);
-            vfs_path_free (vpath);
+            vpath = vfs_path_from_str (selection (panel)->fname->str);
+            panel_cd (panel, vpath, cd_exact);
+            vfs_path_free (vpath, TRUE);
             return MSG_HANDLED;
         }
     }
@@ -2006,13 +2020,11 @@ maybe_cd (gboolean move_up_dir)
 
 /* if command line is empty then do 'cd ..' */
 static cb_ret_t
-force_maybe_cd (void)
+force_maybe_cd (WPanel * panel)
 {
-    if (cmdline->buffer[0] == '\0')
+    if (input_is_empty (cmdline))
     {
-        vfs_path_t *up_dir = vfs_path_from_str ("..");
-        do_cd (up_dir, cd_exact);
-        vfs_path_free (up_dir);
+        cd_up_dir (panel);
         return MSG_HANDLED;
     }
 
@@ -2024,26 +2036,28 @@ force_maybe_cd (void)
 static inline void
 unselect_item (WPanel * panel)
 {
-    repaint_file (panel, panel->selected, TRUE, 2 * selection (panel)->f.marked, FALSE);
+    repaint_file (panel, panel->selected, 2 * selection (panel)->f.marked, FALSE);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 /** Select/unselect all the files like a current file by extension */
 
 static void
-panel_select_ext_cmd (void)
+panel_select_ext_cmd (WPanel * panel)
 {
-    gboolean do_select = !selection (current_panel)->f.marked;
-    char *filename = selection (current_panel)->fname;
+    GString *filename;
+    gboolean do_select;
     char *reg_exp, *cur_file_ext;
     mc_search_t *search;
     int i;
 
+    filename = selection (panel)->fname;
     if (filename == NULL)
         return;
 
-    cur_file_ext = strutils_regex_escape (extension (filename));
+    do_select = !selection (panel)->f.marked;
 
+    cur_file_ext = strutils_regex_escape (extension (filename->str));
     if (cur_file_ext[0] != '\0')
         reg_exp = g_strconcat ("^.*\\.", cur_file_ext, "$", (char *) NULL);
     else
@@ -2055,22 +2069,21 @@ panel_select_ext_cmd (void)
     search->search_type = MC_SEARCH_T_REGEX;
     search->is_case_sensitive = FALSE;
 
-    for (i = 0; i < current_panel->dir.len; i++)
+    for (i = 0; i < panel->dir.len; i++)
     {
-        file_entry_t *file_entry = &current_panel->dir.list[i];
+        file_entry_t *file_entry = &panel->dir.list[i];
 
-        if (DIR_IS_DOTDOT (file_entry->fname) || S_ISDIR (file_entry->st.st_mode))
+        if (DIR_IS_DOTDOT (file_entry->fname->str) || S_ISDIR (file_entry->st.st_mode))
             continue;
 
-        if (!mc_search_run (search, file_entry->fname, 0, file_entry->fnamelen, NULL))
+        if (!mc_search_run (search, file_entry->fname->str, 0, file_entry->fname->len, NULL))
             continue;
 
-        do_file_mark (current_panel, i, do_select);
+        do_file_mark (panel, i, do_select ? 1 : 0);
     }
 
     mc_search_free (search);
     g_free (reg_exp);
-
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -2205,7 +2218,7 @@ move_left (WPanel * panel)
         return MSG_HANDLED;
     }
 
-    return maybe_cd (TRUE);     /* cd .. */
+    return maybe_cd (panel, TRUE);      /* cd .. */
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -2219,7 +2232,7 @@ move_right (WPanel * panel)
         return MSG_HANDLED;
     }
 
-    return maybe_cd (FALSE);    /* cd (selection) */
+    return maybe_cd (panel, FALSE);     /* cd (selection) */
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -2229,7 +2242,7 @@ prev_page (WPanel * panel)
 {
     int items;
 
-    if (!panel->selected && !panel->top_file)
+    if (panel->selected == 0 && panel->top_file == 0)
         return;
 
     unselect_item (panel);
@@ -2252,44 +2265,42 @@ static void
 goto_parent_dir (WPanel * panel)
 {
     if (!panel->is_panelized)
-    {
-        vfs_path_t *up_dir;
-
-        up_dir = vfs_path_from_str ("..");
-        do_cd (up_dir, cd_exact);
-        vfs_path_free (up_dir);
-    }
+        cd_up_dir (panel);
     else
     {
-        char *fname = panel->dir.list[panel->selected].fname;
+        GString *fname = panel->dir.list[panel->selected].fname;
         const char *bname;
         vfs_path_t *dname_vpath;
 
-        if (g_path_is_absolute (fname))
-            fname = g_strdup (fname);
+        if (g_path_is_absolute (fname->str))
+            fname = mc_g_string_dup (fname);
         else
-            fname =
-                mc_build_filename (vfs_path_as_str (panelized_panel.root_vpath), fname,
+        {
+            char *fname2;
+
+            fname2 =
+                mc_build_filename (vfs_path_as_str (panelized_panel.root_vpath), fname->str,
                                    (char *) NULL);
 
-        bname = x_basename (fname);
+            fname = g_string_new (fname2);
+            g_free (fname2);
+        }
 
-        if (bname == fname)
+        bname = x_basename (fname->str);
+
+        if (bname == fname->str)
             dname_vpath = vfs_path_from_str (".");
         else
         {
-            char *dname;
-
-            dname = g_strndup (fname, bname - fname);
-            dname_vpath = vfs_path_from_str (dname);
-            g_free (dname);
+            g_string_truncate (fname, bname - fname->str);
+            dname_vpath = vfs_path_from_str (fname->str);
         }
 
-        do_cd (dname_vpath, cd_exact);
+        panel_cd (panel, dname_vpath, cd_exact);
         try_to_select (panel, bname);
 
-        vfs_path_free (dname_vpath);
-        g_free (fname);
+        vfs_path_free (dname_vpath, TRUE);
+        g_string_free (fname, TRUE);
     }
 }
 
@@ -2328,9 +2339,9 @@ goto_child_dir (WPanel * panel)
     {
         vfs_path_t *vpath;
 
-        vpath = vfs_path_from_str (selection (panel)->fname);
-        do_cd (vpath, cd_exact);
-        vfs_path_free (vpath);
+        vpath = vfs_path_from_str (selection (panel)->fname->str);
+        panel_cd (panel, vpath, cd_exact);
+        vfs_path_free (vpath, TRUE);
     }
 }
 
@@ -2376,7 +2387,9 @@ move_home (WPanel * panel)
 
     if (panels_options.torben_fj_mode)
     {
-        int middle_pos = panel->top_file + panel_items (panel) / 2;
+        int middle_pos;
+
+        middle_pos = panel->top_file + panel_items (panel) / 2;
 
         if (panel->selected > middle_pos)
         {
@@ -2437,6 +2450,7 @@ static void
 do_mark_file (WPanel * panel, mark_act_t do_move)
 {
     do_file_mark (panel, panel->selected, selection (panel)->f.marked ? 0 : 1);
+
     if ((panels_options.mark_moves_down && do_move == MARK_DOWN) || do_move == MARK_FORCE_DOWN)
         move_down (panel);
     else if (do_move == MARK_FORCE_UP)
@@ -2557,13 +2571,14 @@ panel_select_unselect_files (WPanel * panel, const char *title, const char *hist
 
     for (i = 0; i < panel->dir.len; i++)
     {
-        if (DIR_IS_DOTDOT (panel->dir.list[i].fname))
+        if (DIR_IS_DOTDOT (panel->dir.list[i].fname->str))
             continue;
         if (S_ISDIR (panel->dir.list[i].st.st_mode) && files_only)
             continue;
 
-        if (mc_search_run (search, panel->dir.list[i].fname, 0, panel->dir.list[i].fnamelen, NULL))
-            do_file_mark (panel, i, do_select);
+        if (mc_search_run
+            (search, panel->dir.list[i].fname->str, 0, panel->dir.list[i].fname->len, NULL))
+            do_file_mark (panel, i, do_select ? 1 : 0);
     }
 
     mc_search_free (search);
@@ -2607,7 +2622,7 @@ panel_select_invert_files (WPanel * panel)
         file_entry_t *file = &panel->dir.list[i];
 
         if (!panels_options.reverse_files_only || !S_ISDIR (file->st.st_mode))
-            do_file_mark (panel, i, !file->f.marked);
+            do_file_mark (panel, i, file->f.marked ? 0 : 1);
     }
 }
 
@@ -2620,7 +2635,6 @@ panel_select_invert_files (WPanel * panel)
 static void
 do_search (WPanel * panel, int c_code)
 {
-    size_t l;
     int i, sel;
     gboolean wrapped = FALSE;
     char *act;
@@ -2628,47 +2642,42 @@ do_search (WPanel * panel, int c_code)
     char *reg_exp, *esc_str;
     gboolean is_found = FALSE;
 
-    l = strlen (panel->search_buffer);
     if (c_code == KEY_BACKSPACE)
     {
-        if (l != 0)
+        if (panel->quick_search.buffer->len != 0)
         {
-            act = panel->search_buffer + l;
-            str_prev_noncomb_char (&act, panel->search_buffer);
-            act[0] = '\0';
+            act = panel->quick_search.buffer->str + panel->quick_search.buffer->len;
+            str_prev_noncomb_char (&act, panel->quick_search.buffer->str);
+            g_string_set_size (panel->quick_search.buffer, act - panel->quick_search.buffer->str);
         }
-        panel->search_chpoint = 0;
+        panel->quick_search.chpoint = 0;
     }
     else
     {
-        if (c_code != 0 && (gsize) panel->search_chpoint < sizeof (panel->search_char))
+        if (c_code != 0 && (gsize) panel->quick_search.chpoint < sizeof (panel->quick_search.ch))
         {
-            panel->search_char[panel->search_chpoint] = c_code;
-            panel->search_chpoint++;
+            panel->quick_search.ch[panel->quick_search.chpoint] = c_code;
+            panel->quick_search.chpoint++;
         }
 
-        if (panel->search_chpoint > 0)
+        if (panel->quick_search.chpoint > 0)
         {
-            switch (str_is_valid_char (panel->search_char, panel->search_chpoint))
+            switch (str_is_valid_char (panel->quick_search.ch, panel->quick_search.chpoint))
             {
             case -2:
                 return;
             case -1:
-                panel->search_chpoint = 0;
+                panel->quick_search.chpoint = 0;
                 return;
             default:
-                if (l + panel->search_chpoint < sizeof (panel->search_buffer))
-                {
-                    memcpy (panel->search_buffer + l, panel->search_char, panel->search_chpoint);
-                    l += panel->search_chpoint;
-                    *(panel->search_buffer + l) = '\0';
-                    panel->search_chpoint = 0;
-                }
+                g_string_append_len (panel->quick_search.buffer, panel->quick_search.ch,
+                                     panel->quick_search.chpoint);
+                panel->quick_search.chpoint = 0;
             }
         }
     }
 
-    reg_exp = g_strdup_printf ("%s*", panel->search_buffer);
+    reg_exp = g_strdup_printf ("%s*", panel->quick_search.buffer->str);
     esc_str = strutils_escape (reg_exp, -1, ",|\\{}[]", TRUE);
     search = mc_search_new (esc_str, NULL);
     search->search_type = MC_SEARCH_T_GLOB;
@@ -2698,7 +2707,8 @@ do_search (WPanel * panel, int c_code)
                 break;
             wrapped = TRUE;
         }
-        if (mc_search_run (search, panel->dir.list[i].fname, 0, panel->dir.list[i].fnamelen, NULL))
+        if (mc_search_run
+            (search, panel->dir.list[i].fname->str, 0, panel->dir.list[i].fname->len, NULL))
         {
             sel = i;
             is_found = TRUE;
@@ -2710,13 +2720,13 @@ do_search (WPanel * panel, int c_code)
         unselect_item (panel);
         panel->selected = sel;
         select_item (panel);
-        widget_redraw (WIDGET (panel));
+        widget_draw (WIDGET (panel));
     }
     else if (c_code != KEY_BACKSPACE)
     {
-        act = panel->search_buffer + l;
-        str_prev_noncomb_char (&act, panel->search_buffer);
-        act[0] = '\0';
+        act = panel->quick_search.buffer->str + panel->quick_search.buffer->len;
+        str_prev_noncomb_char (&act, panel->quick_search.buffer->str);
+        g_string_set_size (panel->quick_search.buffer, act - panel->quick_search.buffer->str);
     }
     mc_search_free (search);
     g_free (reg_exp);
@@ -2731,27 +2741,26 @@ do_search (WPanel * panel, int c_code)
 static void
 start_search (WPanel * panel)
 {
-    if (panel->searching)
+    if (panel->quick_search.active)
     {
-        if (panel->selected + 1 == panel->dir.len)
+        if (panel->selected == panel->dir.len - 1)
             panel->selected = 0;
         else
             move_down (panel);
 
         /* in case if there was no search string we need to recall
            previous string, with which we ended previous searching */
-        if (panel->search_buffer[0] == '\0')
-            g_strlcpy (panel->search_buffer, panel->prev_search_buffer,
-                       sizeof (panel->search_buffer));
+        if (panel->quick_search.buffer->len == 0)
+            mc_g_string_copy (panel->quick_search.buffer, panel->quick_search.prev_buffer);
 
         do_search (panel, 0);
     }
     else
     {
-        panel->searching = TRUE;
-        panel->search_buffer[0] = '\0';
-        panel->search_char[0] = '\0';
-        panel->search_chpoint = 0;
+        panel->quick_search.active = TRUE;
+        g_string_set_size (panel->quick_search.buffer, 0);
+        panel->quick_search.ch[0] = '\0';
+        panel->quick_search.chpoint = 0;
         display_mini_info (panel);
         mc_refresh ();
     }
@@ -2762,13 +2771,12 @@ start_search (WPanel * panel)
 static void
 stop_search (WPanel * panel)
 {
-    panel->searching = FALSE;
+    panel->quick_search.active = FALSE;
 
-    /* if user had overrdied search string, we need to store it
-       to the previous_search_buffer */
-    if (panel->search_buffer[0] != '\0')
-        g_strlcpy (panel->prev_search_buffer, panel->search_buffer,
-                   sizeof (panel->prev_search_buffer));
+    /* if user overrdied search string, we need to store it
+       to the quick_search.prev_buffer */
+    if (panel->quick_search.buffer->len != 0)
+        mc_g_string_copy (panel->quick_search.prev_buffer, panel->quick_search.buffer);
 
     display_mini_info (panel);
 }
@@ -2777,8 +2785,9 @@ stop_search (WPanel * panel)
 /** Return TRUE if the Enter key has been processed, FALSE otherwise */
 
 static gboolean
-do_enter_on_file_entry (file_entry_t * fe)
+do_enter_on_file_entry (WPanel * panel, file_entry_t * fe)
 {
+    const char *fname = fe->fname->str;
     vfs_path_t *full_name_vpath;
     gboolean ok;
 
@@ -2790,53 +2799,49 @@ do_enter_on_file_entry (file_entry_t * fe)
     {
         vfs_path_t *fname_vpath;
 
-        fname_vpath = vfs_path_from_str (fe->fname);
-        if (!do_cd (fname_vpath, cd_exact))
+        fname_vpath = vfs_path_from_str (fname);
+        if (!panel_cd (panel, fname_vpath, cd_exact))
             message (D_ERROR, MSG_ERROR, _("Cannot change directory"));
-        vfs_path_free (fname_vpath);
+        vfs_path_free (fname_vpath, TRUE);
         return TRUE;
     }
 
-    full_name_vpath = vfs_path_append_new (current_panel->cwd_vpath, fe->fname, (char *) NULL);
+    full_name_vpath = vfs_path_append_new (panel->cwd_vpath, fname, (char *) NULL);
 
     /* Try associated command */
     ok = regex_command (full_name_vpath, "Open") != 0;
-    vfs_path_free (full_name_vpath);
+    vfs_path_free (full_name_vpath, TRUE);
     if (ok)
         return TRUE;
 
     /* Check if the file is executable */
-    full_name_vpath = vfs_path_append_new (current_panel->cwd_vpath, fe->fname, (char *) NULL);
+    full_name_vpath = vfs_path_append_new (panel->cwd_vpath, fname, (char *) NULL);
     ok = (is_exe (fe->st.st_mode) && if_link_is_exe (full_name_vpath, fe));
-    vfs_path_free (full_name_vpath);
+    vfs_path_free (full_name_vpath, TRUE);
     if (!ok)
         return FALSE;
 
-    if (confirm_execute)
-    {
-        if (query_dialog
-            (_("The Midnight Commander"),
-             _("Do you really want to execute?"), D_NORMAL, 2, _("&Yes"), _("&No")) != 0)
-            return TRUE;
-    }
+    if (confirm_execute
+        && query_dialog (_("The Midnight Commander"), _("Do you really want to execute?"), D_NORMAL,
+                         2, _("&Yes"), _("&No")) != 0)
+        return TRUE;
 
     if (!vfs_current_is_local ())
     {
         int ret;
         vfs_path_t *tmp_vpath;
 
-        tmp_vpath = vfs_path_append_new (vfs_get_raw_current_dir (), fe->fname, (char *) NULL);
+        tmp_vpath = vfs_path_append_new (vfs_get_raw_current_dir (), fname, (char *) NULL);
         ret = mc_setctl (tmp_vpath, VFS_SETCTL_RUN, NULL);
-        vfs_path_free (tmp_vpath);
-        /* We took action only if the dialog was shown or the execution
-         * was successful */
+        vfs_path_free (tmp_vpath, TRUE);
+        /* We took action only if the dialog was shown or the execution was successful */
         return confirm_execute || (ret == 0);
     }
 
     {
         char *tmp, *cmd;
 
-        tmp = name_quote (fe->fname, FALSE);
+        tmp = name_quote (fname, FALSE);
         cmd = g_strconcat (".", PATH_SEP_STR, tmp, (char *) NULL);
         g_free (tmp);
         shell_execute (cmd, 0);
@@ -2855,7 +2860,7 @@ do_enter_on_file_entry (file_entry_t * fe)
 static inline gboolean
 do_enter (WPanel * panel)
 {
-    return do_enter_on_file_entry (selection (panel));
+    return do_enter_on_file_entry (panel, selection (panel));
 }
 
 
@@ -2876,28 +2881,28 @@ static void
 chdir_other_panel (WPanel * panel)
 {
     const file_entry_t *entry = &panel->dir.list[panel->selected];
-
     vfs_path_t *new_dir_vpath;
     char *sel_entry = NULL;
+    WPanel *p;
 
     if (get_other_type () != view_listing)
-        set_display_type (get_other_index (), view_listing);
+        create_panel (get_other_index (), view_listing);
 
     if (S_ISDIR (entry->st.st_mode) || link_isdir (entry))
-        new_dir_vpath = vfs_path_append_new (panel->cwd_vpath, entry->fname, (char *) NULL);
+        new_dir_vpath = vfs_path_append_new (panel->cwd_vpath, entry->fname->str, (char *) NULL);
     else
     {
         new_dir_vpath = vfs_path_append_new (panel->cwd_vpath, "..", (char *) NULL);
         sel_entry = strrchr (vfs_path_get_last_path_str (panel->cwd_vpath), PATH_SEP);
     }
 
-    change_panel ();
-    do_cd (new_dir_vpath, cd_exact);
-    vfs_path_free (new_dir_vpath);
+    p = change_panel ();
+    panel_cd (p, new_dir_vpath, cd_exact);
+    vfs_path_free (new_dir_vpath, TRUE);
 
     if (sel_entry)
-        try_to_select (current_panel, sel_entry);
-    change_panel ();
+        try_to_select (p, sel_entry);
+    (void) change_panel ();
 
     move_down (panel);
 }
@@ -2914,13 +2919,13 @@ static void
 panel_sync_other (const WPanel * panel)
 {
     if (get_other_type () != view_listing)
-        set_display_type (get_other_index (), view_listing);
+        create_panel (get_other_index (), view_listing);
 
-    do_panel_cd (other_panel, current_panel->cwd_vpath, cd_exact);
+    panel_do_cd (other_panel, panel->cwd_vpath, cd_exact);
 
     /* try to select current filename on the other panel */
     if (!panel->is_panelized)
-        try_to_select (other_panel, selection (panel)->fname);
+        try_to_select (other_panel, selection (panel)->fname->str);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -2934,6 +2939,7 @@ chdir_to_readlink (WPanel * panel)
     struct stat st;
     vfs_path_t *panel_fname_vpath;
     gboolean ok;
+    WPanel *cpanel;
 
     if (get_other_type () != view_listing)
         return;
@@ -2941,56 +2947,43 @@ chdir_to_readlink (WPanel * panel)
     if (!S_ISLNK (panel->dir.list[panel->selected].st.st_mode))
         return;
 
-    i = readlink (selection (panel)->fname, buffer, MC_MAXPATHLEN - 1);
+    i = readlink (selection (panel)->fname->str, buffer, MC_MAXPATHLEN - 1);
     if (i < 0)
         return;
 
-    panel_fname_vpath = vfs_path_from_str (selection (panel)->fname);
+    panel_fname_vpath = vfs_path_from_str (selection (panel)->fname->str);
     ok = (mc_stat (panel_fname_vpath, &st) >= 0);
-    vfs_path_free (panel_fname_vpath);
+    vfs_path_free (panel_fname_vpath, TRUE);
     if (!ok)
         return;
 
-    buffer[i] = 0;
+    buffer[i] = '\0';
     if (!S_ISDIR (st.st_mode))
     {
         char *p;
 
         p = strrchr (buffer, PATH_SEP);
-        if (p && !p[1])
+        if (p != NULL && p[1] == '\0')
         {
-            *p = 0;
+            *p = '\0';
             p = strrchr (buffer, PATH_SEP);
         }
-        if (!p)
+        if (p == NULL)
             return;
-        p[1] = 0;
+
+        p[1] = '\0';
     }
     if (IS_PATH_SEP (*buffer))
         new_dir_vpath = vfs_path_from_str (buffer);
     else
         new_dir_vpath = vfs_path_append_new (panel->cwd_vpath, buffer, (char *) NULL);
 
-    change_panel ();
-    do_cd (new_dir_vpath, cd_exact);
-    vfs_path_free (new_dir_vpath);
-    change_panel ();
+    cpanel = change_panel ();
+    panel_cd (cpanel, new_dir_vpath, cd_exact);
+    vfs_path_free (new_dir_vpath, TRUE);
+    (void) change_panel ();
 
     move_down (panel);
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-static gsize
-panel_get_format_field_count (WPanel * panel)
-{
-    format_e *format;
-    gsize lc_index;
-
-    for (lc_index = 0, format = panel->format; format != NULL; format = format->next, lc_index++)
-        ;
-
-    return lc_index;
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -2999,13 +2992,14 @@ panel_get_format_field_count (WPanel * panel)
  */
 
 static gsize
-panel_get_format_field_index_by_name (WPanel * panel, const char *name)
+panel_get_format_field_index_by_name (const WPanel * panel, const char *name)
 {
-    format_e *format;
+    GSList *format;
     gsize lc_index;
 
     for (lc_index = 1, format = panel->format;
-         format != NULL && strcmp (format->title, name) != 0; format = format->next, lc_index++)
+         format != NULL && strcmp (((format_item_t *) format->data)->title, name) != 0;
+         format = g_slist_next (format), lc_index++)
         ;
 
     if (format == NULL)
@@ -3016,26 +3010,13 @@ panel_get_format_field_index_by_name (WPanel * panel, const char *name)
 
 /* --------------------------------------------------------------------------------------------- */
 
-static format_e *
-panel_get_format_field_by_index (WPanel * panel, gsize lc_index)
-{
-    format_e *format;
-
-    for (format = panel->format; format != NULL && lc_index != 0; format = format->next, lc_index--)
-        ;
-
-    return format;
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
 static const panel_field_t *
-panel_get_sortable_field_by_format (WPanel * panel, gsize lc_index)
+panel_get_sortable_field_by_format (const WPanel * panel, gsize lc_index)
 {
     const panel_field_t *pfield;
-    format_e *format;
+    const format_item_t *format;
 
-    format = panel_get_format_field_by_index (panel, lc_index);
+    format = (const format_item_t *) g_slist_nth_data (panel->format, lc_index);
     if (format == NULL)
         return NULL;
 
@@ -3070,7 +3051,7 @@ panel_toggle_sort_order_prev (WPanel * panel)
     if (pfield == NULL)
     {
         /* Sortable field not found. Try to search in each array */
-        for (i = panel_get_format_field_count (panel);
+        for (i = g_slist_length (panel->format);
              i != 0 && (pfield = panel_get_sortable_field_by_format (panel, i - 1)) == NULL; i--)
             ;
     }
@@ -3092,7 +3073,7 @@ panel_toggle_sort_order_next (WPanel * panel)
     gsize format_field_count;
     const char *title;
 
-    format_field_count = panel_get_format_field_count (panel);
+    format_field_count = g_slist_length (panel->format);
     title = panel_get_title_without_hotkey (panel->sort_field->title_hotkey);
     lc_index = panel_get_format_field_index_by_name (panel, title);
 
@@ -3161,7 +3142,6 @@ panel_content_scroll_left (WPanel * panel)
 }
 
 /* --------------------------------------------------------------------------------------------- */
-
 /**
  * panel_content_scroll_right:
  * @param panel the pointer to the panel on which we operate
@@ -3186,7 +3166,9 @@ panel_content_scroll_right (WPanel * panel)
 static void
 panel_set_sort_type_by_id (WPanel * panel, const char *name)
 {
-    if (strcmp (panel->sort_field->id, name) != 0)
+    if (strcmp (panel->sort_field->id, name) == 0)
+        panel->sort_info.reverse = !panel->sort_info.reverse;
+    else
     {
         const panel_field_t *sort_order;
 
@@ -3196,8 +3178,6 @@ panel_set_sort_type_by_id (WPanel * panel, const char *name)
 
         panel->sort_field = sort_order;
     }
-    else
-        panel->sort_info.reverse = !panel->sort_info.reverse;
 
     panel_set_sort_order (panel, panel->sort_field);
 }
@@ -3214,7 +3194,7 @@ static const char *
 get_parent_dir_name (const vfs_path_t * cwd_vpath, const vfs_path_t * lwd_vpath)
 {
     size_t llen, clen;
-    const char *p, *cwd, *lwd;
+    const char *p, *lwd;
 
     llen = vfs_path_len (lwd_vpath);
     clen = vfs_path_len (cwd_vpath);
@@ -3222,17 +3202,19 @@ get_parent_dir_name (const vfs_path_t * cwd_vpath, const vfs_path_t * lwd_vpath)
     if (llen <= clen)
         return NULL;
 
-    cwd = vfs_path_as_str (cwd_vpath);
     lwd = vfs_path_as_str (lwd_vpath);
 
     p = g_strrstr (lwd, VFS_PATH_URL_DELIMITER);
 
     if (p == NULL)
     {
+        const char *cwd;
+
+        cwd = vfs_path_as_str (cwd_vpath);
+
         p = strrchr (lwd, PATH_SEP);
 
-        if ((p != NULL)
-            && (strncmp (cwd, lwd, (size_t) (p - lwd)) == 0)
+        if (p != NULL && strncmp (cwd, lwd, (size_t) (p - lwd)) == 0
             && (clen == (size_t) (p - lwd) || (p == lwd && IS_PATH_SEP (cwd[0]) && cwd[1] == '\0')))
             return (p + 1);
 
@@ -3271,7 +3253,7 @@ subshell_chdir (const vfs_path_t * vpath)
  */
 
 static gboolean
-_do_panel_cd (WPanel * panel, const vfs_path_t * new_dir_vpath, enum cd_enum cd_type)
+panel_do_cd_int (WPanel * panel, const vfs_path_t * new_dir_vpath, enum cd_enum cd_type)
 {
     vfs_path_t *olddir_vpath;
 
@@ -3291,9 +3273,9 @@ _do_panel_cd (WPanel * panel, const vfs_path_t * new_dir_vpath, enum cd_enum cd_
     /* Success: save previous directory, shutdown status of previous dir */
     olddir_vpath = vfs_path_clone (panel->cwd_vpath);
     panel_set_lwd (panel, panel->cwd_vpath);
-    input_free_completions (cmdline);
+    input_complete_free (cmdline);
 
-    vfs_path_free (panel->cwd_vpath);
+    vfs_path_free (panel->cwd_vpath, TRUE);
     vfs_setup_cwd ();
     panel->cwd_vpath = vfs_path_clone (vfs_get_raw_current_dir ());
 
@@ -3304,15 +3286,17 @@ _do_panel_cd (WPanel * panel, const vfs_path_t * new_dir_vpath, enum cd_enum cd_
     /* Reload current panel */
     panel_clean_dir (panel);
 
-    dir_list_load (&panel->dir, panel->cwd_vpath, panel->sort_field->sort_routine,
-                   &panel->sort_info, panel->filter);
+    if (!dir_list_load (&panel->dir, panel->cwd_vpath, panel->sort_field->sort_routine,
+                        &panel->sort_info, panel->filter))
+        message (D_ERROR, MSG_ERROR, _("Cannot read directory contents"));
+
     try_to_select (panel, get_parent_dir_name (panel->cwd_vpath, olddir_vpath));
 
     load_hint (FALSE);
-    panel->dirty = 1;
+    panel->dirty = TRUE;
     update_xterm_title_path ();
 
-    vfs_path_free (olddir_vpath);
+    vfs_path_free (olddir_vpath, TRUE);
 
     return TRUE;
 }
@@ -3329,15 +3313,15 @@ directory_history_next (WPanel * panel)
         GList *next;
 
         ok = TRUE;
-        next = g_list_next (panel->dir_history_current);
+        next = g_list_next (panel->dir_history.current);
         if (next != NULL)
         {
             vfs_path_t *data_vpath;
 
             data_vpath = vfs_path_from_str ((char *) next->data);
-            ok = _do_panel_cd (panel, data_vpath, cd_exact);
-            vfs_path_free (data_vpath);
-            panel->dir_history_current = next;
+            ok = panel_do_cd_int (panel, data_vpath, cd_exact);
+            vfs_path_free (data_vpath, TRUE);
+            panel->dir_history.current = next;
         }
         /* skip directories that present in history but absent in file system */
     }
@@ -3356,15 +3340,15 @@ directory_history_prev (WPanel * panel)
         GList *prev;
 
         ok = TRUE;
-        prev = g_list_previous (panel->dir_history_current);
+        prev = g_list_previous (panel->dir_history.current);
         if (prev != NULL)
         {
             vfs_path_t *data_vpath;
 
             data_vpath = vfs_path_from_str ((char *) prev->data);
-            ok = _do_panel_cd (panel, data_vpath, cd_exact);
-            vfs_path_free (data_vpath);
-            panel->dir_history_current = prev;
+            ok = panel_do_cd_int (panel, data_vpath, cd_exact);
+            vfs_path_free (data_vpath, TRUE);
+            panel->dir_history.current = prev;
         }
         /* skip directories that present in history but absent in file system */
     }
@@ -3376,25 +3360,29 @@ directory_history_prev (WPanel * panel)
 static void
 directory_history_list (WPanel * panel)
 {
-    char *s;
+    history_descriptor_t hd;
     gboolean ok = FALSE;
     size_t pos;
 
-    pos = g_list_position (panel->dir_history_current, panel->dir_history);
+    pos = g_list_position (panel->dir_history.current, panel->dir_history.list);
 
-    s = history_show (&panel->dir_history, WIDGET (panel), pos);
-    if (s != NULL)
+    history_descriptor_init (&hd, WIDGET (panel)->y, WIDGET (panel)->x, panel->dir_history.list,
+                             (int) pos);
+    history_show (&hd);
+
+    panel->dir_history.list = hd.list;
+    if (hd.text != NULL)
     {
         vfs_path_t *s_vpath;
 
-        s_vpath = vfs_path_from_str (s);
-        ok = _do_panel_cd (panel, s_vpath, cd_exact);
+        s_vpath = vfs_path_from_str (hd.text);
+        ok = panel_do_cd_int (panel, s_vpath, cd_exact);
         if (ok)
             directory_history_add (panel, panel->cwd_vpath);
         else
             message (D_ERROR, MSG_ERROR, _("Cannot change directory"));
-        vfs_path_free (s_vpath);
-        g_free (s);
+        vfs_path_free (s_vpath, TRUE);
+        g_free (hd.text);
     }
 
     if (!ok)
@@ -3404,17 +3392,17 @@ directory_history_list (WPanel * panel)
 
         size_t i;
 
-        panel->dir_history_current = panel->dir_history;
+        panel->dir_history.current = panel->dir_history.list;
 
         for (i = 0; i <= pos; i++)
         {
             GList *prev;
 
-            prev = g_list_previous (panel->dir_history_current);
+            prev = g_list_previous (panel->dir_history.current);
             if (prev == NULL)
                 break;
 
-            panel->dir_history_current = prev;
+            panel->dir_history.current = prev;
         }
     }
 }
@@ -3458,22 +3446,22 @@ panel_execute_cmd (WPanel * panel, long command)
         chdir_to_readlink (panel);
         break;
     case CK_CopySingle:
-        copy_cmd_local ();
+        copy_cmd_local (panel);
         break;
     case CK_DeleteSingle:
-        delete_cmd_local ();
+        delete_cmd_local (panel);
         break;
     case CK_Enter:
         do_enter (panel);
         break;
     case CK_ViewRaw:
-        view_raw_cmd ();
+        view_raw_cmd (panel);
         break;
     case CK_EditNew:
         edit_cmd_new ();
         break;
     case CK_MoveSingle:
-        rename_cmd_local ();
+        rename_cmd_local (panel);
         break;
     case CK_SelectInvert:
         panel_select_invert_files (panel);
@@ -3482,7 +3470,7 @@ panel_execute_cmd (WPanel * panel, long command)
         panel_select_files (panel);
         break;
     case CK_SelectExt:
-        panel_select_ext_cmd ();
+        panel_select_ext_cmd (panel);
         break;
     case CK_Unselect:
         panel_unselect_files (panel);
@@ -3533,7 +3521,7 @@ panel_execute_cmd (WPanel * panel, long command)
         mark_file_right (panel);
         break;
     case CK_CdParentSmart:
-        res = force_maybe_cd ();
+        res = force_maybe_cd (panel);
         break;
     case CK_Up:
         move_up (panel);
@@ -3610,7 +3598,7 @@ panel_execute_cmd (WPanel * panel, long command)
 static cb_ret_t
 panel_key (WPanel * panel, int key)
 {
-    size_t i;
+    long command;
 
     if (is_abort_char (key))
     {
@@ -3618,15 +3606,15 @@ panel_key (WPanel * panel, int key)
         return MSG_HANDLED;
     }
 
-    if (panel->searching && ((key >= ' ' && key <= 255) || key == KEY_BACKSPACE))
+    if (panel->quick_search.active && ((key >= ' ' && key <= 255) || key == KEY_BACKSPACE))
     {
         do_search (panel, key);
         return MSG_HANDLED;
     }
 
-    for (i = 0; panel_map[i].key != 0; i++)
-        if (key == panel_map[i].key)
-            return panel_execute_cmd (panel, panel_map[i].command);
+    command = widget_lookup_key (WIDGET (panel), key);
+    if (command != CK_IgnoreKey)
+        return panel_execute_cmd (panel, command);
 
     if (panels_options.torben_fj_mode && key == ALT ('h'))
     {
@@ -3650,15 +3638,16 @@ static cb_ret_t
 panel_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
 {
     WPanel *panel = PANEL (w);
+    WDialog *h = DIALOG (w->owner);
     WButtonBar *bb;
 
     switch (msg)
     {
     case MSG_INIT:
         /* subscribe to "history_load" event */
-        mc_event_add (w->owner->event_group, MCEVENT_HISTORY_LOAD, panel_load_history, w, NULL);
+        mc_event_add (h->event_group, MCEVENT_HISTORY_LOAD, panel_load_history, w, NULL);
         /* subscribe to "history_save" event */
-        mc_event_add (w->owner->event_group, MCEVENT_HISTORY_SAVE, panel_save_history, w, NULL);
+        mc_event_add (h->event_group, MCEVENT_HISTORY_SAVE, panel_save_history, w, NULL);
         return MSG_HANDLED;
 
     case MSG_DRAW:
@@ -3670,13 +3659,13 @@ panel_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *d
         paint_dir (panel);
         mini_info_separator (panel);
         display_mini_info (panel);
-        panel->dirty = 0;
+        panel->dirty = FALSE;
         return MSG_HANDLED;
 
     case MSG_FOCUS:
         state_mark = -1;
         current_panel = panel;
-        panel->active = 1;
+        panel->active = TRUE;
 
         if (mc_chdir (panel->cwd_vpath) != 0)
         {
@@ -3693,15 +3682,15 @@ panel_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *d
         update_xterm_title_path ();
         select_item (panel);
 
-        bb = find_buttonbar (w->owner);
+        bb = find_buttonbar (h);
         midnight_set_buttonbar (bb);
-        widget_redraw (WIDGET (bb));
+        widget_draw (WIDGET (bb));
         return MSG_HANDLED;
 
     case MSG_UNFOCUS:
         /* Janne: look at this for the multiple panel options */
         stop_search (panel);
-        panel->active = 0;
+        panel->active = FALSE;
         unselect_item (panel);
         return MSG_HANDLED;
 
@@ -3712,10 +3701,11 @@ panel_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *d
         return panel_execute_cmd (panel, parm);
 
     case MSG_DESTROY:
+        vfs_stamp_path (panel->cwd_vpath);
         /* unsubscribe from "history_load" event */
-        mc_event_del (w->owner->event_group, MCEVENT_HISTORY_LOAD, panel_load_history, w);
+        mc_event_del (h->event_group, MCEVENT_HISTORY_LOAD, panel_load_history, w);
         /* unsubscribe from "history_save" event */
-        mc_event_del (w->owner->event_group, MCEVENT_HISTORY_SAVE, panel_save_history, w);
+        mc_event_del (h->event_group, MCEVENT_HISTORY_SAVE, panel_save_history, w);
         panel_destroy (panel);
         free_my_statfs ();
         return MSG_HANDLED;
@@ -3745,9 +3735,9 @@ mouse_set_mark (WPanel * panel)
 {
     if (mouse_mark_panel == panel)
     {
-        if (mouse_marking && !(selection (panel)->f.marked))
+        if (mouse_marking && !selection (panel)->f.marked)
             do_mark_file (panel, MARK_DONT_MOVE);
-        else if (!mouse_marking && (selection (panel)->f.marked))
+        else if (!mouse_marking && selection (panel)->f.marked)
             do_mark_file (panel, MARK_DONT_MOVE);
     }
 }
@@ -3778,18 +3768,20 @@ mark_if_marking (WPanel * panel, const mouse_event_t * event)
 static void
 mouse_sort_col (WPanel * panel, int x)
 {
-    int i;
+    int i = 0;
+    GSList *format;
     const char *lc_sort_name = NULL;
     panel_field_t *col_sort_format = NULL;
-    format_e *format;
 
-    for (i = 0, format = panel->format; format != NULL; format = format->next)
+    for (format = panel->format; format != NULL; format = g_slist_next (format))
     {
-        i += format->field_len;
+        format_item_t *fi = (format_item_t *) format->data;
+
+        i += fi->field_len;
         if (x < i + 1)
         {
             /* found column */
-            lc_sort_name = format->title;
+            lc_sort_name = fi->title;
             break;
         }
     }
@@ -3802,27 +3794,52 @@ mouse_sort_col (WPanel * panel, int x)
         const char *title;
 
         title = panel_get_title_without_hotkey (panel_fields[i].title_hotkey);
-        if (strcmp (title, lc_sort_name) == 0 && panel_fields[i].sort_routine != NULL)
+        if (panel_fields[i].sort_routine != NULL && strcmp (title, lc_sort_name) == 0)
         {
             col_sort_format = &panel_fields[i];
             break;
         }
     }
 
-    if (col_sort_format == NULL)
-        return;
+    if (col_sort_format != NULL)
+    {
+        if (panel->sort_field == col_sort_format)
+            /* reverse the sort if clicked column is already the sorted column */
+            panel->sort_info.reverse = !panel->sort_info.reverse;
+        else
+            /* new sort is forced to be ascending */
+            panel->sort_info.reverse = FALSE;
 
-    if (panel->sort_field == col_sort_format)
-    {
-        /* reverse the sort if clicked column is already the sorted column */
-        panel->sort_info.reverse = !panel->sort_info.reverse;
+        panel_set_sort_order (panel, col_sort_format);
     }
-    else
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+static int
+panel_mouse_is_on_item (const WPanel * panel, int y, int x)
+{
+    int last;
+
+    if (y < 0)
+        return (-1);
+
+    last = panel->dir.len - 1;
+    y += panel->top_file;
+
+    if (y > last)
+        return (-1);
+
+    if (panel->list_cols > 1)
     {
-        /* new sort is forced to be ascending */
-        panel->sort_info.reverse = FALSE;
+        int width, lines;
+
+        width = (CONST_WIDGET (panel)->cols - 2) / panel->list_cols;
+        lines = panel_lines (panel);
+        y += lines * (x / width);
     }
-    panel_set_sort_order (panel, col_sort_format);
+
+    return (y > last ? -1 : y);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -3852,13 +3869,13 @@ panel_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
                 directory_history_list (panel);
             else if (event->x == w->cols - 6)
                 /* "." button show/hide hidden files */
-                send_message (midnight_dlg, NULL, MSG_ACTION, CK_ShowHidden, NULL);
+                send_message (filemanager, NULL, MSG_ACTION, CK_ShowHidden, NULL);
             else
             {
                 /* no other events on 1st line, return MOU_UNHANDLED */
                 event->result.abort = TRUE;
                 /* avoid extra panel redraw */
-                panel->dirty = 0;
+                panel->dirty = FALSE;
             }
             break;
         }
@@ -3871,44 +3888,26 @@ panel_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
         }
 
         if (!is_active)
-            change_panel ();
-        /* fall through */
+            (void) change_panel ();
+        MC_FALLTHROUGH;
 
     case MSG_MOUSE_DRAG:
         {
-            int y, last, my_index;
+            int my_index;
 
-            last = panel->dir.len - 1;
-            y = event->y - 2;
-
-            if (panel->top_file + y > last)
-                my_index = last;
-            else
+            my_index = panel_mouse_is_on_item (panel, event->y - 2, event->x);
+            if (my_index >= 0)
             {
-                my_index = panel->top_file + y;
-
-                if (panel->list_cols > 1)
+                if (my_index != panel->selected)
                 {
-                    int width, lines;
-
-                    width = (w->cols - 2) / panel->list_cols;
-                    lines = panel_lines (panel);
-                    my_index += lines * (event->x / width);
+                    unselect_item (panel);
+                    panel->selected = my_index;
+                    select_item (panel);
                 }
 
-                if (my_index > last)
-                    my_index = last;
+                /* This one is new */
+                mark_if_marking (panel, event);
             }
-
-            if (my_index != panel->selected)
-            {
-                unselect_item (panel);
-                panel->selected = my_index;
-                select_item (panel);
-            }
-
-            /* This one is new */
-            mark_if_marking (panel, event);
         }
         break;
 
@@ -3916,16 +3915,9 @@ panel_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
         break;
 
     case MSG_MOUSE_CLICK:
-        if ((event->count & GPM_DOUBLE) != 0)
-        {
-            int y, lines;
-
-            y = event->y - 2;
-            lines = panel_lines (panel);
-
-            if (y >= 0 && y < lines)
-                do_enter (panel);
-        }
+        if ((event->count & GPM_DOUBLE) != 0 && (event->buttons & GPM_B_LEFT) != 0 &&
+            panel_mouse_is_on_item (panel, event->y - 2, event->x) >= 0)
+            do_enter (panel);
         break;
 
     case MSG_MOUSE_MOVE:
@@ -3957,7 +3949,7 @@ panel_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
     }
 
     if (panel->dirty)
-        widget_redraw (w);
+        widget_draw (w);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -3975,16 +3967,16 @@ reload_panelized (WPanel * panel)
     {
         vfs_path_t *vpath;
 
-        vpath = vfs_path_from_str (list->list[i].fname);
+        vpath = vfs_path_from_str (list->list[i].fname->str);
         if (mc_lstat (vpath, &list->list[i].st) != 0)
-            g_free (list->list[i].fname);
+            g_string_free (list->list[i].fname, TRUE);
         else
         {
             if (j != i)
                 list->list[j] = list->list[i];
             j++;
         }
-        vfs_path_free (vpath);
+        vfs_path_free (vpath, TRUE);
     }
     if (j == 0)
         dir_list_init (list);
@@ -4008,7 +4000,7 @@ update_one_panel_widget (WPanel * panel, panel_update_flags_t flags, const char 
     if ((flags & UP_RELOAD) != 0)
     {
         panel->is_panelized = FALSE;
-        mc_setctl (panel->cwd_vpath, VFS_SETCTL_FLUSH, 0);
+        mc_setctl (panel->cwd_vpath, VFS_SETCTL_FLUSH, NULL);
         memset (&(panel->dir_stat), 0, sizeof (panel->dir_stat));
     }
 
@@ -4017,7 +4009,8 @@ update_one_panel_widget (WPanel * panel, panel_update_flags_t flags, const char 
 
     if (free_pointer)
     {
-        my_current_file = g_strdup (panel->dir.list[panel->selected].fname);
+        my_current_file = g_strndup (panel->dir.list[panel->selected].fname->str,
+                                     panel->dir.list[panel->selected].fname->len);
         current_file = my_current_file;
     }
 
@@ -4027,7 +4020,7 @@ update_one_panel_widget (WPanel * panel, panel_update_flags_t flags, const char 
         panel_reload (panel);
 
     try_to_select (panel, current_file);
-    panel->dirty = 1;
+    panel->dirty = TRUE;
 
     if (free_pointer)
         g_free (my_current_file);
@@ -4038,7 +4031,7 @@ update_one_panel_widget (WPanel * panel, panel_update_flags_t flags, const char 
 static void
 update_one_panel (int which, panel_update_flags_t flags, const char *current_file)
 {
-    if (get_display_type (which) == view_listing)
+    if (get_panel_type (which) == view_listing)
     {
         WPanel *panel;
 
@@ -4056,7 +4049,7 @@ do_select (WPanel * panel, int i)
 {
     if (i != panel->selected)
     {
-        panel->dirty = 1;
+        panel->dirty = TRUE;
         panel->selected = i;
         panel->top_file = panel->selected - (WIDGET (panel)->lines - 2) / 2;
         if (panel->top_file < 0)
@@ -4072,7 +4065,7 @@ do_try_to_select (WPanel * panel, const char *name)
     int i;
     char *subdir;
 
-    if (!name)
+    if (name == NULL)
     {
         do_select (panel, 0);
         return;
@@ -4090,7 +4083,7 @@ do_try_to_select (WPanel * panel, const char *name)
     /* Search that subdir or filename without prefix (if not panelized panel), select it if found */
     for (i = 0; i < panel->dir.len; i++)
     {
-        if (strcmp (subdir, panel->dir.list[i].fname) == 0)
+        if (strcmp (subdir, panel->dir.list[i].fname->str) == 0)
         {
             do_select (panel, i);
             g_free (subdir);
@@ -4135,7 +4128,7 @@ panel_save_current_file_to_clip_file (const gchar * event_group_name, const gcha
 
     if (current_panel->marked == 0)
         mc_event_raise (MCEVENT_GROUP_CORE, "clipboard_text_to_file",
-                        (gpointer) selection (current_panel)->fname);
+                        (gpointer) selection (current_panel)->fname->str);
     else
     {
         int i;
@@ -4147,7 +4140,8 @@ panel_save_current_file_to_clip_file (const gchar * event_group_name, const gcha
             {                   /* Skip the unmarked ones */
                 if (first)
                 {
-                    flist = g_strdup (current_panel->dir.list[i].fname);
+                    flist = g_strndup (current_panel->dir.list[i].fname->str,
+                                       current_panel->dir.list[i].fname->len);
                     first = FALSE;
                 }
                 else
@@ -4156,7 +4150,8 @@ panel_save_current_file_to_clip_file (const gchar * event_group_name, const gcha
                     char *tmp;
 
                     tmp =
-                        g_strconcat (flist, "\n", current_panel->dir.list[i].fname, (char *) NULL);
+                        g_strconcat (flist, "\n", current_panel->dir.list[i].fname->str,
+                                     (char *) NULL);
                     g_free (flist);
                     flist = tmp;
                 }
@@ -4184,17 +4179,50 @@ panel_recursive_cd_to_parent (const vfs_path_t * vpath)
 
         /* check if path contains only '/' */
         panel_cwd_path = vfs_path_as_str (cwd_vpath);
-        if (IS_PATH_SEP (panel_cwd_path[0]) && panel_cwd_path[1] == '\0')
+        if (panel_cwd_path != NULL && IS_PATH_SEP (panel_cwd_path[0]) && panel_cwd_path[1] == '\0')
+        {
+            vfs_path_free (cwd_vpath, TRUE);
             return NULL;
+        }
 
         tmp_vpath = vfs_path_vtokens_get (cwd_vpath, 0, -1);
-        vfs_path_free (cwd_vpath);
+        vfs_path_free (cwd_vpath, TRUE);
         cwd_vpath =
             vfs_path_build_filename (PATH_SEP_STR, vfs_path_as_str (tmp_vpath), (char *) NULL);
-        vfs_path_free (tmp_vpath);
+        vfs_path_free (tmp_vpath, TRUE);
     }
 
     return cwd_vpath;
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+static void
+panel_dir_list_callback (dir_list_cb_state_t state, void *data)
+{
+    static int count = 0;
+
+    (void) data;
+
+    switch (state)
+    {
+    case DIR_OPEN:
+        count = 0;
+        break;
+
+    case DIR_READ:
+        count++;
+        if ((count & 15) == 0)
+            rotate_dash (TRUE);
+        break;
+
+    case DIR_CLOSE:
+        rotate_dash (FALSE);
+        break;
+
+    default:
+        g_assert_not_reached ();
+    }
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -4218,13 +4246,13 @@ panel_clean_dir (WPanel * panel)
     panel->marked = 0;
     panel->dirs_marked = 0;
     panel->total = 0;
-    panel->searching = FALSE;
+    panel->quick_search.active = FALSE;
     panel->is_panelized = FALSE;
-    panel->dirty = 1;
+    panel->dirty = TRUE;
     panel->content_shift = -1;
     panel->max_shift = -1;
 
-    dir_list_clean (&panel->dir);
+    dir_list_free_list (&panel->dir);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -4240,7 +4268,7 @@ panel_set_cwd (WPanel * panel, const vfs_path_t * vpath)
 {
     if (vpath != panel->cwd_vpath)      /* check if new vpath is not the panel->cwd_vpath object */
     {
-        vfs_path_free (panel->cwd_vpath);
+        vfs_path_free (panel->cwd_vpath, TRUE);
         panel->cwd_vpath = vfs_path_clone (vpath);
     }
 }
@@ -4258,36 +4286,106 @@ panel_set_lwd (WPanel * panel, const vfs_path_t * vpath)
 {
     if (vpath != panel->lwd_vpath)      /* check if new vpath is not the panel->lwd_vpath object */
     {
-        vfs_path_free (panel->lwd_vpath);
+        vfs_path_free (panel->lwd_vpath, TRUE);
         panel->lwd_vpath = vfs_path_clone (vpath);
     }
 }
 
 /* --------------------------------------------------------------------------------------------- */
 /**
- * Panel creation for specified directory.
+ * Creatie an empty panel with specified size.
  *
- * @param panel_name specifies the name of the panel for setup retieving
- * @param wpath the path of working panel directory. If path is NULL then panel will be created
- * for current directory
+ * @param panel_name name of panel for setup retieving
  *
  * @return new instance of WPanel
  */
 
 WPanel *
-panel_new_with_dir (const char *panel_name, const vfs_path_t * vpath)
+panel_sized_empty_new (const char *panel_name, int y, int x, int lines, int cols)
 {
     WPanel *panel;
     Widget *w;
     char *section;
     int i, err;
-    char *curdir = NULL;
 
     panel = g_new0 (WPanel, 1);
     w = WIDGET (panel);
-    /* No know sizes of the panel at startup */
-    widget_init (w, 0, 0, 0, 0, panel_callback, panel_mouse_callback);
+    widget_init (w, y, x, lines, cols, panel_callback, panel_mouse_callback);
     w->options |= WOP_SELECTABLE | WOP_TOP_SELECT;
+    w->keymap = panel_map;
+
+    panel->dir.size = DIR_LIST_MIN_SIZE;
+    panel->dir.list = g_new (file_entry_t, panel->dir.size);
+    panel->dir.len = 0;
+    panel->dir.callback = panel_dir_list_callback;
+
+    panel->list_cols = 1;
+    panel->brief_cols = 2;
+    panel->dirty = TRUE;
+    panel->content_shift = -1;
+    panel->max_shift = -1;
+
+    panel->list_format = list_full;
+    panel->user_format = g_strdup (DEFAULT_USER_FORMAT);
+
+    for (i = 0; i < LIST_FORMATS; i++)
+        panel->user_status_format[i] = g_strdup (DEFAULT_USER_FORMAT);
+
+#ifdef HAVE_CHARSET
+    panel->codepage = SELECT_CHARSET_NO_TRANSLATE;
+#endif
+
+    panel->frame_size = frame_half;
+
+    panel->quick_search.buffer = g_string_sized_new (MC_MAXFILENAMELEN);
+    panel->quick_search.prev_buffer = g_string_sized_new (MC_MAXFILENAMELEN);
+
+    panel->name = g_strdup (panel_name);
+    panel->dir_history.name = g_strconcat ("Dir Hist ", panel->name, (char *) NULL);
+    /* directories history will be get later */
+
+    section = g_strconcat ("Temporal:", panel->name, (char *) NULL);
+    if (!mc_config_has_group (mc_global.main_config, section))
+    {
+        g_free (section);
+        section = g_strdup (panel->name);
+    }
+    panel_load_setup (panel, section);
+    g_free (section);
+
+    /* Load format strings */
+    err = set_panel_formats (panel);
+    if (err != 0)
+        set_panel_formats (panel);
+
+    return panel;
+}
+
+/* --------------------------------------------------------------------------------------------- */
+/**
+ * Panel creation for specified size and directory.
+ *
+ * @param panel_name name of panel for setup retieving
+ * @param y y coordinate of top-left corner
+ * @param x x coordinate of top-left corner
+ * @param lines vertical size
+ * @param cols horizontal size
+ * @param vpath working panel directory. If NULL then current directory is used
+ *
+ * @return new instance of WPanel
+ */
+
+WPanel *
+panel_sized_with_dir_new (const char *panel_name, int y, int x, int lines, int cols,
+                          const vfs_path_t * vpath)
+{
+    WPanel *panel;
+    char *curdir = NULL;
+#ifdef HAVE_CHARSET
+    const vfs_path_element_t *path_element;
+#endif
+
+    panel = panel_sized_empty_new (panel_name, y, x, lines, cols);
 
     if (vpath != NULL)
     {
@@ -4302,66 +4400,10 @@ panel_new_with_dir (const char *panel_name, const vfs_path_t * vpath)
 
     panel_set_lwd (panel, vfs_get_raw_current_dir ());
 
-    panel->hist_name = g_strconcat ("Dir Hist ", panel_name, (char *) NULL);
-    /* directories history will be get later */
-
-    panel->dir.size = DIR_LIST_MIN_SIZE;
-    panel->dir.list = g_new (file_entry_t, panel->dir.size);
-    panel->dir.len = 0;
-    panel->active = 0;
-    panel->filter = NULL;
-    panel->list_cols = 1;
-    panel->brief_cols = 2;
-    panel->top_file = 0;
-    panel->selected = 0;
-    panel->marked = 0;
-    panel->total = 0;
-    panel->dirty = 1;
-    panel->searching = FALSE;
-    panel->dirs_marked = 0;
-    panel->is_panelized = FALSE;
-    panel->format = NULL;
-    panel->status_format = NULL;
-    panel->format_modified = 1;
-    panel->content_shift = -1;
-    panel->max_shift = -1;
-
-    panel->panel_name = g_strdup (panel_name);
-    panel->user_format = g_strdup (DEFAULT_USER_FORMAT);
-
 #ifdef HAVE_CHARSET
-    panel->codepage = SELECT_CHARSET_NO_TRANSLATE;
-#endif
-
-    for (i = 0; i < LIST_FORMATS; i++)
-        panel->user_status_format[i] = g_strdup (DEFAULT_USER_FORMAT);
-
-    panel->search_buffer[0] = '\0';
-    panel->prev_search_buffer[0] = '\0';
-    panel->frame_size = frame_half;
-
-    section = g_strconcat ("Temporal:", panel->panel_name, (char *) NULL);
-    if (!mc_config_has_group (mc_global.main_config, section))
-    {
-        g_free (section);
-        section = g_strdup (panel->panel_name);
-    }
-    panel_load_setup (panel, section);
-    g_free (section);
-
-    /* Load format strings */
-    err = set_panel_formats (panel);
-    if (err != 0)
-        set_panel_formats (panel);
-
-#ifdef HAVE_CHARSET
-    {
-        const vfs_path_element_t *path_element;
-
-        path_element = vfs_path_get_by_index (panel->cwd_vpath, -1);
-        if (path_element->encoding != NULL)
-            panel->codepage = get_codepage_index (path_element->encoding);
-    }
+    path_element = vfs_path_get_by_index (panel->cwd_vpath, -1);
+    if (path_element->encoding != NULL)
+        panel->codepage = get_codepage_index (path_element->encoding);
 #endif
 
     if (mc_chdir (panel->cwd_vpath) != 0)
@@ -4370,22 +4412,25 @@ panel_new_with_dir (const char *panel_name, const vfs_path_t * vpath)
         panel->codepage = SELECT_CHARSET_NO_TRANSLATE;
 #endif
         vfs_setup_cwd ();
-        vfs_path_free (panel->cwd_vpath);
+        vfs_path_free (panel->cwd_vpath, TRUE);
         panel->cwd_vpath = vfs_path_clone (vfs_get_raw_current_dir ());
     }
 
     /* Load the default format */
-    dir_list_load (&panel->dir, panel->cwd_vpath, panel->sort_field->sort_routine,
-                   &panel->sort_info, panel->filter);
+    if (!dir_list_load (&panel->dir, panel->cwd_vpath, panel->sort_field->sort_routine,
+                        &panel->sort_info, panel->filter))
+        message (D_ERROR, MSG_ERROR, _("Cannot read directory contents"));
 
     /* Restore old right path */
     if (curdir != NULL)
     {
         vfs_path_t *tmp_vpath;
+        int err;
 
         tmp_vpath = vfs_path_from_str (curdir);
-        err = mc_chdir (tmp_vpath);
-        vfs_path_free (tmp_vpath);
+        mc_chdir (tmp_vpath);
+        vfs_path_free (tmp_vpath, TRUE);
+        (void) err;
     }
     g_free (curdir);
 
@@ -4406,7 +4451,7 @@ panel_reload (WPanel * panel)
         return;
 
     cwd_vpath = panel_recursive_cd_to_parent (panel->cwd_vpath);
-    vfs_path_free (panel->cwd_vpath);
+    vfs_path_free (panel->cwd_vpath, TRUE);
 
     if (cwd_vpath == NULL)
     {
@@ -4420,10 +4465,11 @@ panel_reload (WPanel * panel)
     memset (&(panel->dir_stat), 0, sizeof (panel->dir_stat));
     show_dir (panel);
 
-    dir_list_reload (&panel->dir, panel->cwd_vpath, panel->sort_field->sort_routine,
-                     &panel->sort_info, panel->filter);
+    if (!dir_list_reload (&panel->dir, panel->cwd_vpath, panel->sort_field->sort_routine,
+                          &panel->sort_info, panel->filter))
+        message (D_ERROR, MSG_ERROR, _("Cannot read directory contents"));
 
-    panel->dirty = 1;
+    panel->dirty = TRUE;
     if (panel->selected >= panel->dir.len)
         do_select (panel, panel->dir.len - 1);
 
@@ -4438,7 +4484,7 @@ panel_reload (WPanel * panel)
 int
 set_panel_formats (WPanel * p)
 {
-    format_e *form;
+    GSList *form;
     char *err = NULL;
     int retcode = 0;
 
@@ -4451,7 +4497,7 @@ set_panel_formats (WPanel * p)
     }
     else
     {
-        delete_format (p->format);
+        g_slist_free_full (p->format, (GDestroyNotify) format_item_free);
         p->format = form;
     }
 
@@ -4466,12 +4512,11 @@ set_panel_formats (WPanel * p)
         }
         else
         {
-            delete_format (p->status_format);
+            g_slist_free_full (p->status_format, (GDestroyNotify) format_item_free);
             p->status_format = form;
         }
     }
 
-    panel_format_modified (p);
     panel_update_cols (WIDGET (p), p->frame_size);
 
     if (retcode)
@@ -4497,19 +4542,9 @@ set_panel_formats (WPanel * p)
 void
 select_item (WPanel * panel)
 {
-    /* Although currently all over the code we set the selection and
-       top file to decent values before calling select_item, I could
-       forget it someday, so it's better to do the actual fitting here */
-
-    if (panel->selected < 0)
-        panel->selected = 0;
-
-    if (panel->selected > panel->dir.len - 1)
-        panel->selected = panel->dir.len - 1;
-
     adjust_top_file (panel);
 
-    panel->dirty = 1;
+    panel->dirty = TRUE;
 
     execute_hooks (select_file_hook);
 }
@@ -4519,17 +4554,17 @@ select_item (WPanel * panel)
 void
 unmark_files (WPanel * panel)
 {
-    int i;
+    if (panel->marked != 0)
+    {
+        int i;
 
-    if (!panel->marked)
-        return;
+        for (i = 0; i < panel->dir.len; i++)
+            file_mark (panel, i, 0);
 
-    for (i = 0; i < panel->dir.len; i++)
-        file_mark (panel, i, 0);
-
-    panel->dirs_marked = 0;
-    panel->marked = 0;
-    panel->total = 0;
+        panel->dirs_marked = 0;
+        panel->marked = 0;
+        panel->total = 0;
+    }
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -4566,7 +4601,7 @@ do_file_mark (WPanel * panel, int idx, int mark)
         return;
 
     /* Only '..' can't be marked, '.' isn't visible */
-    if (DIR_IS_DOTDOT (panel->dir.list[idx].fname))
+    if (DIR_IS_DOTDOT (panel->dir.list[idx].fname->str))
         return;
 
     file_mark (panel, idx, mark);
@@ -4606,11 +4641,11 @@ do_file_mark (WPanel * panel, int idx, int mark)
  * Record change in the directory history.
  */
 gboolean
-do_panel_cd (WPanel * panel, const vfs_path_t * new_dir_vpath, enum cd_enum cd_type)
+panel_do_cd (WPanel * panel, const vfs_path_t * new_dir_vpath, enum cd_enum cd_type)
 {
     gboolean r;
 
-    r = _do_panel_cd (panel, new_dir_vpath, cd_type);
+    r = panel_do_cd_int (panel, new_dir_vpath, cd_type);
     if (r)
         directory_history_add (panel, panel->cwd_vpath);
     return r;
@@ -4624,7 +4659,7 @@ file_mark (WPanel * panel, int lc_index, int val)
     if (panel->dir.list[lc_index].f.marked != val)
     {
         panel->dir.list[lc_index].f.marked = val;
-        panel->dirty = 1;
+        panel->dirty = TRUE;
     }
 }
 
@@ -4634,18 +4669,20 @@ void
 panel_re_sort (WPanel * panel)
 {
     char *filename;
+    file_entry_t *fe;
     int i;
 
     if (panel == NULL)
         return;
 
-    filename = g_strdup (selection (panel)->fname);
+    fe = selection (panel);
+    filename = g_strndup (fe->fname->str, fe->fname->len);
     unselect_item (panel);
     dir_list_sort (&panel->dir, panel->sort_field->sort_routine, &panel->sort_info);
     panel->selected = -1;
 
     for (i = panel->dir.len; i != 0; i--)
-        if (strcmp (panel->dir.list[i - 1].fname, filename) == 0)
+        if (strcmp (panel->dir.list[i - 1].fname->str, filename) == 0)
         {
             panel->selected = i - 1;
             break;
@@ -4654,7 +4691,7 @@ panel_re_sort (WPanel * panel)
     g_free (filename);
     panel->top_file = panel->selected - panel_items (panel) / 2;
     select_item (panel);
-    panel->dirty = 1;
+    panel->dirty = TRUE;
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -4672,7 +4709,8 @@ panel_set_sort_order (WPanel * panel, const panel_field_t * sort_order)
     {
         char *current_file;
 
-        current_file = g_strdup (panel->dir.list[panel->selected].fname);
+        current_file = g_strndup (panel->dir.list[panel->selected].fname->str,
+                                  panel->dir.list[panel->selected].fname->len);
         panel_reload (panel);
         try_to_select (panel, current_file);
         g_free (current_file);
@@ -4710,9 +4748,9 @@ panel_change_encoding (WPanel * panel)
 
         g_free (init_translation_table (mc_global.display_codepage, mc_global.display_codepage));
         cd_path_vpath = remove_encoding_from_path (panel->cwd_vpath);
-        do_panel_cd (panel, cd_path_vpath, cd_parse_command);
+        panel_do_cd (panel, cd_path_vpath, cd_parse_command);
         show_dir (panel);
-        vfs_path_free (cd_path_vpath);
+        vfs_path_free (cd_path_vpath, TRUE);
         return;
     }
 
@@ -4729,7 +4767,7 @@ panel_change_encoding (WPanel * panel)
     {
         vfs_path_change_encoding (panel->cwd_vpath, encoding);
 
-        if (!do_panel_cd (panel, panel->cwd_vpath, cd_parse_command))
+        if (!panel_do_cd (panel, panel->cwd_vpath, cd_parse_command))
             message (D_ERROR, MSG_ERROR, _("Cannot chdir to \"%s\""),
                      vfs_path_as_str (panel->cwd_vpath));
     }
@@ -4958,18 +4996,19 @@ panel_get_user_possible_fields (gsize * array_size)
 void
 panel_init (void)
 {
-    panel_sort_up_sign = mc_skin_get ("widget-common", "sort-sign-up", "'");
-    panel_sort_down_sign = mc_skin_get ("widget-common", "sort-sign-down", ".");
-
-    panel_hiddenfiles_sign_show = mc_skin_get ("widget-panel", "hiddenfiles-sign-show", ".");
-    panel_hiddenfiles_sign_hide = mc_skin_get ("widget-panel", "hiddenfiles-sign-hide", ".");
-    panel_history_prev_item_sign = mc_skin_get ("widget-panel", "history-prev-item-sign", "<");
-    panel_history_next_item_sign = mc_skin_get ("widget-panel", "history-next-item-sign", ">");
-    panel_history_show_list_sign = mc_skin_get ("widget-panel", "history-show-list-sign", "^");
+    panel_sort_up_char = mc_skin_get ("widget-panel", "sort-up-char", "'");
+    panel_sort_down_char = mc_skin_get ("widget-panel", "sort-down-char", ".");
+    panel_hiddenfiles_show_char = mc_skin_get ("widget-panel", "hiddenfiles-show-char", ".");
+    panel_hiddenfiles_hide_char = mc_skin_get ("widget-panel", "hiddenfiles-hide-char", ".");
+    panel_history_prev_item_char = mc_skin_get ("widget-panel", "history-prev-item-char", "<");
+    panel_history_next_item_char = mc_skin_get ("widget-panel", "history-next-item-char", ">");
+    panel_history_show_list_char = mc_skin_get ("widget-panel", "history-show-list-char", "^");
     panel_filename_scroll_left_char =
         mc_skin_get ("widget-panel", "filename-scroll-left-char", "{");
     panel_filename_scroll_right_char =
         mc_skin_get ("widget-panel", "filename-scroll-right-char", "}");
+
+    string_file_name_buffer = g_string_sized_new (MC_MAXFILENAMELEN);
 
     mc_event_add (MCEVENT_GROUP_FILEMANAGER, "update_panels", event_update_panels, NULL, NULL);
     mc_event_add (MCEVENT_GROUP_FILEMANAGER, "panel_save_current_file_to_clip_file",
@@ -4981,27 +5020,27 @@ panel_init (void)
 void
 panel_deinit (void)
 {
-    g_free (panel_sort_up_sign);
-    g_free (panel_sort_down_sign);
-
-    g_free (panel_hiddenfiles_sign_show);
-    g_free (panel_hiddenfiles_sign_hide);
-    g_free (panel_history_prev_item_sign);
-    g_free (panel_history_next_item_sign);
-    g_free (panel_history_show_list_sign);
+    g_free (panel_sort_up_char);
+    g_free (panel_sort_down_char);
+    g_free (panel_hiddenfiles_show_char);
+    g_free (panel_hiddenfiles_hide_char);
+    g_free (panel_history_prev_item_char);
+    g_free (panel_history_next_item_char);
+    g_free (panel_history_show_list_char);
     g_free (panel_filename_scroll_left_char);
     g_free (panel_filename_scroll_right_char);
+    g_string_free (string_file_name_buffer, TRUE);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-do_cd (const vfs_path_t * new_dir_vpath, enum cd_enum exact)
+panel_cd (WPanel * panel, const vfs_path_t * new_dir_vpath, enum cd_enum exact)
 {
     gboolean res;
     const vfs_path_t *_new_dir_vpath = new_dir_vpath;
 
-    if (current_panel->is_panelized)
+    if (panel->is_panelized)
     {
         size_t new_vpath_len;
 
@@ -5010,18 +5049,18 @@ do_cd (const vfs_path_t * new_dir_vpath, enum cd_enum exact)
             _new_dir_vpath = panelized_panel.root_vpath;
     }
 
-    res = do_panel_cd (current_panel, _new_dir_vpath, exact);
+    res = panel_do_cd (panel, _new_dir_vpath, exact);
 
 #ifdef HAVE_CHARSET
     if (res)
     {
         const vfs_path_element_t *path_element;
 
-        path_element = vfs_path_get_by_index (current_panel->cwd_vpath, -1);
+        path_element = vfs_path_get_by_index (panel->cwd_vpath, -1);
         if (path_element->encoding != NULL)
-            current_panel->codepage = get_codepage_index (path_element->encoding);
+            panel->codepage = get_codepage_index (path_element->encoding);
         else
-            current_panel->codepage = SELECT_CHARSET_NO_TRANSLATE;
+            panel->codepage = SELECT_CHARSET_NO_TRANSLATE;
     }
 #endif /* HAVE_CHARSET */
 

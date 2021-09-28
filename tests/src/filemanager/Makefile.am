@@ -10,20 +10,19 @@ AM_CPPFLAGS = \
 
 AM_LDFLAGS = @TESTS_LDFLAGS@
 
-LIBS=@CHECK_LIBS@  \
+LIBS = @CHECK_LIBS@ \
 	$(top_builddir)/src/libinternal.la \
 	$(top_builddir)/lib/libmc.la \
 	@PCRE_LIBS@
 
-if ENABLE_VFS_SMB
-# this is a hack for linking with own samba library in simple way
-LIBS += $(top_builddir)/src/vfs/smbfs/helpers/libsamba.a
+if ENABLE_MCLIB
+LIBS += $(GLIB_LIBS)
 endif
 
 EXTRA_DIST = hints/mc.hint
 
 TESTS = \
-	do_cd_command \
+	cd_to \
 	examine_cd \
 	exec_get_export_variables_ext \
 	filegui_is_wildcarded \
@@ -31,8 +30,8 @@ TESTS = \
 
 check_PROGRAMS = $(TESTS)
 
-do_cd_command_SOURCES = \
-	do_cd_command.c
+cd_to_SOURCES = \
+	cd_to.c
 
 examine_cd_SOURCES = \
 	examine_cd.c

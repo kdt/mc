@@ -9,7 +9,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <dirent.h>
+#include <dirent.h>             /* DIR */
 #ifdef HAVE_UTIMENSAT
 #include <sys/time.h>
 #elif defined (HAVE_UTIME_H)
@@ -20,13 +20,14 @@
 #include <stddef.h>
 
 #include "lib/global.h"
-#include "lib/fs.h"             /* MC_MAXPATHLEN */
 
 #include "path.h"
 
 /*** typedefs(not structures) and defined constants **********************************************/
 
-#if defined (ENABLE_VFS_FTP) || defined (ENABLE_VFS_FISH) || defined (ENABLE_VFS_SMB)
+#define VFS_CLASS(a) ((struct vfs_class *) (a))
+
+#if defined (ENABLE_VFS_FTP) || defined (ENABLE_VFS_FISH)
 #define ENABLE_VFS_NET 1
 #endif
 
@@ -107,13 +108,16 @@ typedef struct utimbuf mc_timesbuf_t;
 
 /*** enums ***************************************************************************************/
 
-/* Flags of VFS classes */
 typedef enum
 {
     VFSF_UNKNOWN = 0,
     VFSF_LOCAL = 1 << 0,        /* Class is local (not virtual) filesystem */
-    VFSF_NOLINKS = 1 << 1       /* Hard links not supported */
-} vfs_class_flags_t;
+    VFSF_NOLINKS = 1 << 1,      /* Hard links not supported */
+
+    VFSF_REMOTE = 1 << 2,
+    VFSF_READONLY = 1 << 3,
+    VFSF_USETMP = 1 << 4
+} vfs_flags_t;
 
 /* Operations for mc_ctl - on open file */
 enum
@@ -139,10 +143,11 @@ enum
 typedef struct vfs_class
 {
     const char *name;           /* "FIles over SHell" */
-    vfs_class_flags_t flags;
+    vfs_flags_t flags;
     const char *prefix;         /* "fish:" */
-    void *data;                 /* this is for filesystem's own use */
     int verrno;                 /* can't use errno because glibc2 might define errno as function */
+    gboolean flush;             /* if set to TRUE, invalidate directory cache */
+    FILE *logfile;
 
     /* *INDENT-OFF* */
     int (*init) (struct vfs_class * me);
@@ -166,7 +171,7 @@ typedef struct vfs_class
     ssize_t (*write) (void *vfs_info, const char *buf, size_t count);
 
     void *(*opendir) (const vfs_path_t * vpath);
-    void *(*readdir) (void *vfs_info);
+    struct vfs_dirent *(*readdir) (void *vfs_info);
     int (*closedir) (void *vfs_info);
 
     int (*stat) (const vfs_path_t * vpath, struct stat * buf);
@@ -189,7 +194,7 @@ typedef struct vfs_class
 
     vfsid (*getid) (const vfs_path_t * vpath);
 
-    int (*nothingisopen) (vfsid id);
+    gboolean (*nothingisopen) (vfsid id);
     void (*free) (vfsid id);
 
     vfs_path_t *(*getlocalcopy) (const vfs_path_t * vpath);
@@ -205,13 +210,17 @@ typedef struct vfs_class
 } vfs_class;
 
 /*
- * This union is used to ensure that there is enough space for the
- * filename (d_name) when the dirent structure is created.
+ * This struct is used instead of standard dirent to hold file name of any length
+ * (not limited to NAME_MAX).
  */
-union vfs_dirent
+struct vfs_dirent
 {
-    struct dirent dent;
-    char _extra_buffer[offsetof (struct dirent, d_name) + MC_MAXPATHLEN + 1];
+    /* private */
+    GString *d_name_str;
+
+    /* public */
+    ino_t d_ino;
+    char *d_name;               /* Alias of d_name_str->str */
 };
 
 /*** global variables defined in .c file *********************************************************/
@@ -225,6 +234,9 @@ extern int use_netrc;
 /*** declarations of public functions ************************************************************/
 
 /* lib/vfs/direntry.c: */
+void vfs_init_class (struct vfs_class *vclass, const char *name, vfs_flags_t flags,
+                     const char *prefix);
+
 void *vfs_s_open (const vfs_path_t * vpath, int flags, mode_t mode);
 int vfs_s_stat (const vfs_path_t * vpath, struct stat *buf);
 int vfs_s_lstat (const vfs_path_t * vpath, struct stat *buf);
@@ -238,6 +250,7 @@ void vfs_init (void);
 void vfs_shut (void);
 /* Register a file system class */
 gboolean vfs_register_class (struct vfs_class *vfs);
+void vfs_unregister_class (struct vfs_class *vfs);
 
 void vfs_setup_work_dir (void);
 
@@ -255,7 +268,7 @@ gboolean vfs_file_is_local (const vfs_path_t * vpath);
 
 char *vfs_strip_suffix_from_filename (const char *filename);
 
-vfs_class_flags_t vfs_file_class_flags (const vfs_path_t * vpath);
+vfs_flags_t vfs_file_class_flags (const vfs_path_t * vpath);
 
 /* translate path back to terminal encoding, remove all #enc:
  * every invalid character is replaced with question mark
@@ -264,9 +277,13 @@ const char *vfs_translate_path (const char *path);
 /* return new string */
 char *vfs_translate_path_n (const char *path);
 
-void vfs_stamp_path (const char *path);
+void vfs_stamp_path (const vfs_path_t * path);
 
 void vfs_release_path (const vfs_path_t * vpath);
+
+struct vfs_dirent *vfs_dirent_init (struct vfs_dirent *d, const char *fname, ino_t ino);
+void vfs_dirent_assign (struct vfs_dirent *d, const char *fname, ino_t ino);
+void vfs_dirent_free (struct vfs_dirent *d);
 
 void vfs_fill_names (fill_names_f);
 
@@ -287,6 +304,8 @@ char *_vfs_get_cwd (void);
 
 int vfs_preallocate (int dest_desc, off_t src_fsize, off_t dest_fsize);
 
+int vfs_clone_file (int dest_vfs_fd, int src_vfs_fd);
+
 /**
  * Interface functions described in interface.c
  */
@@ -297,7 +316,7 @@ int mc_readlink (const vfs_path_t * vpath, char *buf, size_t bufsiz);
 int mc_close (int handle);
 off_t mc_lseek (int fd, off_t offset, int whence);
 DIR *mc_opendir (const vfs_path_t * vpath);
-struct dirent *mc_readdir (DIR * dirp);
+struct vfs_dirent *mc_readdir (DIR * dirp);
 int mc_closedir (DIR * dir);
 int mc_stat (const vfs_path_t * vpath, struct stat *buf);
 int mc_mknod (const vfs_path_t * vpath, mode_t mode, dev_t dev);

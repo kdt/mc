@@ -2,7 +2,7 @@
    Internal file viewer for the Midnight Commander
    Function for search data
 
-   Copyright (C) 1994-2017
+   Copyright (C) 1994-2021
    Free Software Foundation, Inc.
 
    Written by:
@@ -37,6 +37,9 @@
 
 #include "lib/global.h"
 #include "lib/strutil.h"
+#ifdef HAVE_CHARSET
+#include "lib/charsets.h"       /* cp_source */
+#endif
 #include "lib/widget.h"
 
 #include "src/setup.h"
@@ -44,6 +47,14 @@
 #include "internal.h"
 
 /*** global variables ****************************************************************************/
+
+mcview_search_options_t mcview_search_options = {
+    .type = MC_SEARCH_T_NORMAL,
+    .case_sens = FALSE,
+    .backwards = FALSE,
+    .whole_words = FALSE,
+    .all_codepages = FALSE
+};
 
 /*** file scope macro definitions ****************************************************************/
 
@@ -148,7 +159,7 @@ mcview_find (mcview_search_status_msg_t * ssm, off_t search_start, off_t search_
             ok = mc_search_run (view->search, (void *) ssm, search_start, search_end, len);
             if (ok && view->search->normal_offset == search_start)
             {
-                if (view->text_nroff_mode)
+                if (view->mode_flags.nroff)
                     view->search->normal_offset++;
                 return TRUE;
             }
@@ -178,17 +189,17 @@ mcview_search_show_result (WView * view, size_t match_len)
     int nroff_len;
 
     nroff_len =
-        view->text_nroff_mode
+        view->mode_flags.nroff
         ? mcview__get_nroff_real_len (view, view->search->start_buffer,
                                       view->search->normal_offset - view->search->start_buffer) : 0;
     view->search_start = view->search->normal_offset + nroff_len;
 
-    if (!view->hex_mode)
+    if (!view->mode_flags.hex)
         view->search_start++;
 
     nroff_len =
-        view->text_nroff_mode ? mcview__get_nroff_real_len (view, view->search_start - 1,
-                                                            match_len) : 0;
+        view->mode_flags.nroff ? mcview__get_nroff_real_len (view, view->search_start - 1,
+                                                             match_len) : 0;
     view->search_end = view->search_start + match_len + nroff_len;
 
     mcview_moveto_match (view);
@@ -198,13 +209,51 @@ mcview_search_show_result (WView * view, size_t match_len)
 /*** public functions ****************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
+gboolean
+mcview_search_init (WView * view)
+{
+#ifdef HAVE_CHARSET
+    view->search = mc_search_new (view->last_search_string, cp_source);
+#else
+    view->search = mc_search_new (view->last_search_string, NULL);
+#endif
+
+    view->search_nroff_seq = mcview_nroff_seq_new (view);
+
+    if (view->search == NULL)
+        return FALSE;
+
+    view->search->search_type = mcview_search_options.type;
+#ifdef HAVE_CHARSET
+    view->search->is_all_charsets = mcview_search_options.all_codepages;
+#endif
+    view->search->is_case_sensitive = mcview_search_options.case_sens;
+    view->search->whole_words = mcview_search_options.whole_words;
+    view->search->search_fn = mcview_search_cmd_callback;
+    view->search->update_fn = mcview_search_update_cmd_callback;
+
+    return TRUE;
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+void
+mcview_search_deinit (WView * view)
+{
+    mc_search_free (view->search);
+    g_free (view->last_search_string);
+    mcview_nroff_seq_free (&view->search_nroff_seq);
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
 mc_search_cbret_t
 mcview_search_cmd_callback (const void *user_data, gsize char_offset, int *current_char)
 {
     WView *view = ((const mcview_search_status_msg_t *) user_data)->view;
 
     /*    view_read_continue (view, &view->search_onechar_info); *//* AB:FIXME */
-    if (!view->text_nroff_mode)
+    if (!view->mode_flags.nroff)
     {
         mcview_get_byte (view, char_offset, current_char);
         return MC_SEARCH_CB_OK;
@@ -309,7 +358,7 @@ mcview_do_search (WView * view, off_t want_search_start)
 
     if (view->search_start != 0)
     {
-        if (!view->text_nroff_mode)
+        if (!view->mode_flags.nroff)
             search_start = view->search_start + (mcview_search_options.backwards ? -2 : 0);
         else
         {
@@ -366,12 +415,25 @@ mcview_do_search (WView * view, off_t want_search_start)
             break;
         }
 
-        if (view->search->error == MC_SEARCH_E_ABORT || view->search->error == MC_SEARCH_E_NOTFOUND)
+        /* Search error is here.
+         * MC_SEARCH_E_NOTFOUND: continue search
+         * others: stop
+         */
+        if (view->search->error != MC_SEARCH_E_NOTFOUND)
             break;
 
         search_start = growbufsize - view->search->original_len;
     }
     while (search_start > 0 && mcview_may_still_grow (view));
+
+    /* After mcview_may_still_grow (view) == FALSE we have remained last chunk. Search there. */
+    if (view->growbuf_in_use && !found && view->search->error == MC_SEARCH_E_NOTFOUND
+        && !mcview_search_options.backwards
+        && mcview_find (&vsm, search_start, mcview_get_filesize (view), &match_len))
+    {
+        mcview_search_show_result (view, match_len);
+        found = TRUE;
+    }
 
     status_msg_deinit (STATUS_MSG (&vsm));
 

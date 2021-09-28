@@ -3,25 +3,31 @@
 # This file is distributed under the same license as the mc package.
 #
 # Translators:
+# Andrij Mizyk <andmizyk@gmail.com>, 2021
 # Andriy Il <toelik@ukr.net>, 2016-2017
+# Andriy Smilyanets <smile.andriy@gmail.com>, 2019
 # Oleksandr Natalenko <oleksandr@natalenko.name>, 2011, 2012
 # Sergey Fesyura <pingvein@gmail.com>, 2012-2013
+# Serhii Trykoza <sergey.trikoza@gmail.com>, 2019
 # Slava Zanko <slavazanko@gmail.com>, 2011
+# Vlad Anisimov <uniss@ua.fm>, 2019
 # Yury V. Zaytsev <yury@shurup.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: Midnight Commander\n"
 "Report-Msgid-Bugs-To: http://www.midnight-commander.org/\n"
-"POT-Creation-Date: 2017-05-02 21:10+0200\n"
-"PO-Revision-Date: 2017-04-15 09:35+0000\n"
-"Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
+"POT-Creation-Date: 2021-09-26 10:06+0300\n"
+"PO-Revision-Date: 2021-07-26 20:16+0000\n"
+"Last-Translator: Transifex Bot <>\n"
 "Language-Team: Ukrainian (http://www.transifex.com/mc/mc/language/uk/)\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != "
+"11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
+"100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
+"(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 
 # "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 msgid "Warning: cannot load codepages list"
@@ -52,7 +58,7 @@ msgstr "Не вдалося створити для подій групу «%s»
 
 #, c-format
 msgid "Unable to create event '%s'!"
-msgstr "Не вдалося створити подію «%s."
+msgstr "Не вдалося створити подію '%s'!"
 
 #, c-format
 msgid ""
@@ -80,46 +86,26 @@ msgstr "Не вдалося створити каталог %s"
 msgid "FATAL: not a directory:"
 msgstr "Сталася помилка. Не є каталогом:"
 
-#, c-format
-msgid "An error occurred while migrating user settings: %s"
-msgstr "Під час перенесення користувацьких параметрів сталася помилка: %s"
-
-#, c-format
-msgid ""
-"Your old settings were migrated from %s\n"
-"to Freedesktop recommended dirs.\n"
-"To get more info, please visit\n"
-"http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html"
-msgstr ""
-"Старі настройки перенесено з %s\n"
-"до каталогів, рекомендованих Freedesktop.\n"
-"Щоб отримати докладніші відомості, відвідайте веб-сторінку http://standards."
-"freedesktop.org/basedir-spec/basedir-spec-latest.html"
-
-#, c-format
-msgid ""
-"Your old settings were migrated from %s\n"
-"to %s\n"
-msgstr ""
-"Застарілі настройки переміщено з %s\n"
-"у %s\n"
-
 msgid ""
 "Number out of range (should be in byte range, 0 <= n <= 0xFF, expressed in "
 "hex)"
 msgstr ""
+"Число поза діапазоном (повинне бути в межах байту, 0 <= n <= 0xFF, в "
+"шістнадцятиричній формі)"
 
 msgid "Invalid character"
-msgstr ""
+msgstr "Неприпустимий символ"
 
 msgid "Unmatched quotes character"
-msgstr ""
+msgstr "Незакритий символ лапки"
 
 #, c-format
 msgid ""
 "Hex pattern error at position %d:\n"
 "%s."
 msgstr ""
+"Помилка шістнадцятиричного шаблону в позиції %d:\n"
+"%s."
 
 msgid "Search string not found"
 msgstr "Пошуковий рядок не знайдено"
@@ -189,11 +175,11 @@ msgstr ""
 msgid "True color not supported with ncurses."
 msgstr "Ncurses не підтримує 16М кольорів."
 
-msgid "True color not supported in this slang version."
-msgstr ""
-
 msgid "Your terminal doesn't even seem to support 256 colors."
 msgstr "Не виглядає на те, що ваш термінал підтримує 256 кольорів."
+
+msgid "True color not supported in this slang version."
+msgstr "True колір не підтримується в цій версії slang."
 
 msgid "Set COLORTERM=truecolor if your terminal really supports true colors."
 msgstr ""
@@ -432,7 +418,7 @@ msgid "Understrike"
 msgstr "_"
 
 msgid "Pipe"
-msgstr "|"
+msgstr "Канал"
 
 msgid "Left parenthesis"
 msgstr "("
@@ -486,6 +472,33 @@ msgstr "Shift"
 msgid "The TERM environment variable is unset!\n"
 msgstr "Змінна середовища TERM не встановлена!\n"
 
+msgid "Cannot check SIGWINCH pipe"
+msgstr "Не вдалося перевірити канал SIGWINCH"
+
+#, c-format
+msgid ""
+"\n"
+"Cannot create pipe for SIGWINCH: %s (%d)\n"
+msgstr ""
+"\n"
+"Не вдалося створити канал для SIGWINCH: %s (%d)\n"
+
+#, c-format
+msgid ""
+"\n"
+"Cannot configure write end of SIGWINCH pipe: %s (%d)\n"
+msgstr ""
+"\n"
+"Не вдалося налаштувати кінець запису каналу SIGWINCH: %s (%d)\n"
+
+#, c-format
+msgid ""
+"\n"
+"Cannot configure read end of SIGWINCH pipe: %s (%d)\n"
+msgstr ""
+"\n"
+"Не вдалося налаштувати кінець зчитування каналу SIGWINCH: %s (%d)\n"
+
 #, c-format
 msgid ""
 "Screen size %dx%d is not supported.\n"
@@ -516,10 +529,10 @@ msgid "GiB"
 msgstr "Гібібайт"
 
 msgid "Cannot create pipe descriptor"
-msgstr ""
+msgstr "Не вдалося створити дескриптор каналу"
 
 msgid "Cannot create pipe streams"
-msgstr ""
+msgstr "Не вдалося створити потоки каналу"
 
 #, c-format
 msgid ""
@@ -536,18 +549,6 @@ msgid ""
 msgstr ""
 "Неочікувана помилка у waitpid():\n"
 "%s"
-
-msgid "Warning"
-msgstr "Попередження"
-
-msgid "Pipe failed"
-msgstr "Сталася помилка каналу"
-
-msgid "Dup failed"
-msgstr "Сталася помилка дублювання дескриптора"
-
-msgid "Error dup'ing old error pipe"
-msgstr "Сталася помилка дублювання старого каналу помилок"
 
 #, c-format
 msgid "Directory cache expired for %s"
@@ -594,7 +595,6 @@ msgstr "Тимчасові файли створюватимуться у %s\n"
 msgid "Temporary files will not be created\n"
 msgstr "Тимчасові файли не створюватимуться\n"
 
-#, c-format
 msgid "Press any key to continue..."
 msgstr "Щоб продовжити, натисніть будь-яку клавішу…"
 
@@ -663,6 +663,9 @@ msgstr "Показати параметри конфігурації"
 msgid "Print last working directory to specified file"
 msgstr "Показати останній робочий каталог у вказаний файл"
 
+msgid "<file>"
+msgstr "<file>"
+
 msgid "Enables subshell support (default)"
 msgstr "Вмикає підтримку вкладеної оболонки (стандартно)"
 
@@ -672,14 +675,14 @@ msgstr "Вимикає підтримку вкладеної оболонки"
 msgid "Log ftp dialog to specified file"
 msgstr "Журналювати команди FTP у вказаний файл"
 
-msgid "Set debug level"
-msgstr "Встановити рівень відлагоджування"
-
 msgid "Launches the file viewer on a file"
 msgstr "Запускає програму перегляду для файлу"
 
 msgid "Edit files"
 msgstr "Редагувати файли"
+
+msgid "<file> ..."
+msgstr "<file> ..."
 
 msgid "Forces xterm features"
 msgstr "Нав’язує властивості xterm"
@@ -720,6 +723,9 @@ msgstr "Запит на запуск у кольоровому режимі"
 msgid "Specifies a color configuration"
 msgstr "Вказує конфігурацію кольорів"
 
+msgid "<string>"
+msgstr "<string>"
+
 msgid "Show mc with specified skin"
 msgstr "Показати mc із обраною обкладинкою"
 
@@ -744,6 +750,25 @@ msgid ""
 "   Viewer:       viewnormal,viewbold, viewunderline, viewselected\n"
 "   Help:         helpnormal, helpitalic, helpbold, helplink, helpslink\n"
 msgstr ""
+"--colors КЛЮЧ={ТЕКСТ},{ФОН},{АТРИБУТ}:KEYWORD2=...\n"
+"\n"
+"{ТЕКСТ}, {ФОН} та {АТРИБУТ} можна не вказувати, в такому випадку будуть "
+"використовуватись стандартні значення\n"
+"\n"
+"Ключі :\n"
+"   Глобальні:       errors, disabled, reverse, gauge, header\n"
+"                 input, inputmark, inputunchanged, commandlinemark\n"
+"                 bbarhotkey, bbarbutton, statusbar\n"
+"   Відображення файлів: normal, selected, marked, markselect\n"
+"   Діалогові вікна: dnormal, dfocus, dhotnormal, dhotfocus, errdhotnormal,\n"
+"                 errdhotfocus\n"
+"   Меню:        menunormal, menuhot, menusel, menuhotsel, menuinactive\n"
+"   Контекстні меню:  pmenunormal, pmenusel, pmenutitle\n"
+"   Редактор:       editnormal, editbold, editmarked, editwhitespace,\n"
+"                 editlinestate, editbg, editframe, editframeactive\n"
+"                 editframedrag\n"
+"   Переглядач:       viewnormal,viewbold, viewunderline, viewselected\n"
+"   Довідка:         helpnormal, helpitalic, helpbold, helplink, helpslink\n"
 
 #. TRANSLATORS: don't translate color names and attributes
 msgid ""
@@ -774,13 +799,13 @@ msgid "Color options"
 msgstr "Параметри кольору"
 
 msgid "[+lineno] file1[:lineno] [file2[:lineno]...]"
-msgstr ""
+msgstr "[+lineno] file1[:lineno] [file2[:lineno]...]"
 
 msgid "file"
 msgstr "файл"
 
 msgid "file1 file2"
-msgstr ""
+msgstr "file1 file2"
 
 msgid "[this_dir] [other_panel_dir]"
 msgstr "[цей_каталог] [каталог_іншої_панелі]"
@@ -811,7 +836,7 @@ msgid "No arguments given to the viewer."
 msgstr "Переглядачу не передано жодних аргументів."
 
 msgid "Two files are required to envoke the diffviewer."
-msgstr ""
+msgstr "Для виклику diffviewer необхідно два файли."
 
 msgid "Background protocol error"
 msgstr "Сталася помилка фонового протоколу"
@@ -983,15 +1008,6 @@ msgstr "Переглядач diff: некоректний режим"
 msgid "Two files are needed to compare"
 msgstr "Для порівняння необхідно вказати два файли"
 
-msgid "Choose syntax highlighting"
-msgstr "Оберіть підсвітку синтаксису"
-
-msgid "< Auto >"
-msgstr "< Авто >"
-
-msgid "< Reload Current Syntax >"
-msgstr "< Оновити поточний синтаксис >"
-
 #, c-format
 msgid "Loading: %3d%%"
 msgstr "Завантаження: %3d%%"
@@ -1026,6 +1042,9 @@ msgstr ""
 "Файл «%s» надто великий\n"
 "Все одно відкрити?"
 
+msgid "Warning"
+msgstr "Попередження"
+
 #, c-format
 msgid "Error reading from pipe: %s"
 msgstr "Сталася помилка читання з каналу: %s"
@@ -1033,14 +1052,6 @@ msgstr "Сталася помилка читання з каналу: %s"
 #, c-format
 msgid "Cannot open pipe for reading: %s"
 msgstr "Не вдалося відкрити канал для читання: %s"
-
-#, c-format
-msgid "Searching %s: %3d%%"
-msgstr "Виконується пошук %s: %3d%%"
-
-#, c-format
-msgid "Searching %s"
-msgstr "Виконується пошук %s"
 
 msgid "File has hard-links. Detach before saving?"
 msgstr "Файл має жорсткі посилання. Відкріпити їх перед зберіганням?"
@@ -1087,12 +1098,6 @@ msgstr "Замінити закінчення рядків на:"
 msgid "Save As"
 msgstr "Зберегти як"
 
-msgid "Block is large, you may not be able to undo this action"
-msgstr "Блок завеликий, імовірно, цю дію не можна буде повернути."
-
-msgid "Collect completions"
-msgstr ""
-
 msgid "&Quick save"
 msgstr "&Швидке збереження"
 
@@ -1122,27 +1127,6 @@ msgstr "&Замістити"
 
 msgid "Cannot save file"
 msgstr "Не вдалося зберегти файл"
-
-msgid "Delete macro"
-msgstr "Видалити макрос"
-
-msgid "Press macro hotkey:"
-msgstr "Натисніть гарячу клавішу для макросу:"
-
-msgid "Macro not deleted"
-msgstr "Макрос не видалено"
-
-msgid "Save macro"
-msgstr "Зберегти макрос"
-
-msgid "Press the macro's new hotkey:"
-msgstr "Натисніть нову клавішу макросу:"
-
-msgid "Repeat last commands"
-msgstr "Повторити останні команди"
-
-msgid "Repeat times:"
-msgstr "Кількість повторень:"
 
 #, c-format
 msgid "Confirm save file: \"%s\""
@@ -1177,13 +1161,6 @@ msgstr "Який файл меню необхідно редагувати?"
 
 msgid "&Local"
 msgstr "&Місцевий"
-
-msgid "Replace"
-msgstr "Замінити"
-
-#, c-format
-msgid "%ld replacements made"
-msgstr "Виконано замін: %ld"
 
 msgid "[NoName]"
 msgstr "[БезНазви]"
@@ -1288,47 +1265,40 @@ msgstr "Натисніть будь-яку клавішу:"
 
 msgid ""
 "Current text was modified without a file save.\n"
-"Continue discards these changes"
-msgstr ""
-"Поточний текст змінено і не збережено.\n"
-"Продовження операції призведе до втрати змін"
-
-msgid "In se&lection"
-msgstr "У вид&іленні"
-
-msgid "&Find all"
-msgstr "&Знайти все"
-
-msgid "Enter replacement string:"
-msgstr "Введіть рядок для заміни:"
-
-msgid "Replace with:"
-msgstr "Замінити на:"
-
-msgid "&Replace"
-msgstr "&Замінити"
-
-msgid "A&ll"
-msgstr "&Усі"
-
-msgid "&Skip"
-msgstr "П&ропустити"
-
-msgid "Confirm replace"
-msgstr "Підтвердити заміну"
-
-msgid "Cancel"
-msgstr "Скасувати"
-
-msgid ""
-"Current text was modified without a file save.\n"
 "Continue discards these changes."
 msgstr ""
 "Поточний текст змінено і не збережено. \n"
 "Продовження операції призведе до втрати змін."
 
+msgid "Cancel"
+msgstr "Скасувати"
+
+msgid "Collect completions"
+msgstr "Зібрати доповнення"
+
 msgid "NoName"
 msgstr "БезНазви"
+
+msgid "Save macro"
+msgstr "Зберегти макрос"
+
+msgid "Press the macro's new hotkey:"
+msgstr "Натисніть нову клавішу макросу:"
+
+msgid "Delete macro"
+msgstr "Видалити макрос"
+
+msgid "Press macro hotkey:"
+msgstr "Натисніть гарячу клавішу для макросу:"
+
+msgid "Macro not deleted"
+msgstr "Макрос не видалено"
+
+msgid "Repeat last commands"
+msgstr "Повторити останні команди"
+
+msgid "Repeat times:"
+msgstr "Кількість повторень:"
 
 msgid "&Open file..."
 msgstr "&Відкрити файл…"
@@ -1338,6 +1308,9 @@ msgstr "&Новий"
 
 msgid "&Close"
 msgstr "&Закрити"
+
+msgid "&History..."
+msgstr "&Історія..."
 
 msgid "Save &as..."
 msgstr "Зберегти &як…"
@@ -1615,6 +1588,45 @@ msgstr "Переносити після досягнення довжини:"
 msgid "Editor options"
 msgstr "Параметри редактора"
 
+msgid "In se&lection"
+msgstr "У вид&іленні"
+
+msgid "&Find all"
+msgstr "&Знайти все"
+
+msgid "Enter replacement string:"
+msgstr "Введіть рядок для заміни:"
+
+msgid "Replace"
+msgstr "Замінити"
+
+msgid "Replace with:"
+msgstr "Замінити на:"
+
+msgid "&Replace"
+msgstr "&Замінити"
+
+msgid "A&ll"
+msgstr "&Усі"
+
+msgid "&Skip"
+msgstr "П&ропустити"
+
+msgid "Confirm replace"
+msgstr "Підтвердити заміну"
+
+#, c-format
+msgid "Searching %s: %3d%%"
+msgstr "Виконується пошук %s: %3d%%"
+
+#, c-format
+msgid "Searching %s"
+msgstr "Виконується пошук %s"
+
+#, c-format
+msgid "%ld replacements made"
+msgstr "Виконано замін: %ld"
+
 msgid ""
 "A user friendly text editor\n"
 "written for the Midnight Commander."
@@ -1622,8 +1634,8 @@ msgstr ""
 "Дружній до користувача редактор тексту\n"
 "написаний для Midnight Commander."
 
-msgid "Copyright (C) 1996-2016 the Free Software Foundation"
-msgstr "Авторські права (C) 1996-2016 за Free Software Foundation"
+msgid "Copyright (C) 1996-2021 the Free Software Foundation"
+msgstr ""
 
 msgid "About"
 msgstr "Про програму"
@@ -1742,6 +1754,15 @@ msgstr "Запропонувати"
 msgid "Select language"
 msgstr "Вибрати мову"
 
+msgid "Choose syntax highlighting"
+msgstr "Оберіть підсвітку синтаксису"
+
+msgid "< Auto >"
+msgstr "< Авто >"
+
+msgid "< Reload Current Syntax >"
+msgstr "< Оновити поточний синтаксис >"
+
 msgid "Load syntax file"
 msgstr "Завантажити файл синтаксису"
 
@@ -1774,7 +1795,13 @@ msgstr "Не вдалося отримати локальну копію %s"
 msgid "The shell is already running a command"
 msgstr "Інтерпретатор вже виконує команду"
 
-#, c-format
+msgid ""
+"Not an xterm or Linux console;\n"
+"the subshell cannot be toggled."
+msgstr ""
+"Це не xterm чи консоль Linux;\n"
+"підоболонку не можливо перемкнути."
+
 msgid "Type 'exit' to return to the Midnight Commander"
 msgstr "Введіть 'exit', щоб повернутися до Midnight Commander"
 
@@ -1799,6 +1826,10 @@ msgstr "інші"
 msgid "Flag"
 msgstr "Мітка"
 
+#, c-format
+msgid "Permissions (octal): %o"
+msgstr "Дозволи (шістнад.): %o"
+
 msgid "Chown advanced command"
 msgstr "Розширена зміна власника"
 
@@ -1809,6 +1840,15 @@ msgid ""
 msgstr ""
 "Не вдалося змінити права на «%s» \n"
 "%s"
+
+msgid "&Ignore"
+msgstr "&Ігнорувати"
+
+msgid "Ignore &all"
+msgstr "Ігнорувати &все"
+
+msgid "&Retry"
+msgstr "По&вторити"
 
 #, c-format
 msgid ""
@@ -1902,6 +1942,9 @@ msgstr "Зміна &каталогу за посиланнями"
 msgid "Sa&fe delete"
 msgstr "Безпечне &видалення"
 
+msgid "Safe overwrite"
+msgstr "Безпечний перезапис"
+
 msgid "A&uto save setup"
 msgstr "&Автозбереження параметрів"
 
@@ -1910,6 +1953,9 @@ msgstr "Параметри конфігурації"
 
 msgid "Skin:"
 msgstr "Шкіра:"
+
+msgid "&Shadows"
+msgstr "&Тіні"
 
 msgid "Appearance"
 msgstr "Вигляд"
@@ -1960,7 +2006,7 @@ msgid "Pa&ge scrolling"
 msgstr "Гор&тання сторінки"
 
 msgid "Center &scrolling"
-msgstr ""
+msgstr "&Центральне гортання"
 
 msgid "&Mouse page scrolling"
 msgstr "&Гортання сторінки мишею"
@@ -2011,9 +2057,8 @@ msgstr "стовпці"
 msgid "User &mini status"
 msgstr "Рядок &міні-статусу у форматі користувача"
 
-#, fuzzy
 msgid "Listing format"
-msgstr "&Редагування формату списку"
+msgstr "Формат списку"
 
 msgid "Executable &first"
 msgstr "Виконувані &першими"
@@ -2122,17 +2167,118 @@ msgid "Background jobs"
 msgstr "Фонові завдання"
 
 #, c-format
-msgid "Password for \\\\%s\\%s"
-msgstr "Пароль для \\\\%s\\%s"
+msgid ""
+"Cannot chdir to \"%s\"\n"
+"%s"
+msgstr ""
+"Не вдалося змінити каталог на «%s»\n"
+"%s "
 
-msgid "Domain:"
-msgstr "Домен:"
+msgid "Secure deletion"
+msgstr "Безпечне видалення"
 
-msgid "Username:"
-msgstr "Ім’я користувача:"
+msgid "Undelete"
+msgstr "Відновлення після видалення"
 
-msgid "SMB authentication"
-msgstr "SMB(самба) автентифікація"
+msgid "Synchronous updates"
+msgstr "Синхронне оновлення"
+
+msgid "Synchronous directory updates"
+msgstr "Синхронне оновлення каталогу"
+
+msgid "Immutable"
+msgstr "Незмінюваний"
+
+msgid "Append only"
+msgstr "Лише дозапис"
+
+msgid "No dump"
+msgstr "Не піддається рез. копіюванню"
+
+msgid "No update atime"
+msgstr "Не оновлювати запис atime"
+
+msgid "Compress"
+msgstr "Стиснення"
+
+msgid "Compressed clusters"
+msgstr "Стиснені кластери"
+
+msgid "Compressed dirty file"
+msgstr "Стиснення поганих файлів"
+
+msgid "Compression raw access"
+msgstr "Дозвіл стиснення raw"
+
+msgid "Encrypted inode"
+msgstr "Зашифрований інфовузол"
+
+msgid "Journaled data"
+msgstr "Журнальовані дані"
+
+msgid "Indexed directory"
+msgstr "Індексований каталог"
+
+msgid "No tail merging"
+msgstr "Не обʼєднувати кінцівки"
+
+msgid "Top of directory hierarchies"
+msgstr "На верху ієрархії каталогів"
+
+msgid "Inode uses extents"
+msgstr "Інфовузол використовує екстенти"
+
+msgid "Huge_file"
+msgstr "Великий_файл"
+
+msgid "No COW"
+msgstr "Не CoW"
+
+msgid "Direct access for files"
+msgstr "Прямий доступ до файлів"
+
+msgid "Casefolded file"
+msgstr "Не чутливий до регістру файл"
+
+msgid "Inode has inline data"
+msgstr "Інфовузол має вбудовані дані"
+
+msgid "Project hierarchy"
+msgstr "Ієрархія проєкту"
+
+msgid "Verity protected inode"
+msgstr "Істинність захищеного інфовузла"
+
+msgid "&Marked all"
+msgstr "Вст. пом&iч."
+
+msgid "S&et marked"
+msgstr "Увім. п&oміч."
+
+msgid "C&lear marked"
+msgstr "&Вим. поміч."
+
+msgid "Chattr command"
+msgstr "Команда chattr"
+
+#, c-format
+msgid ""
+"Cannot chattr \"%s\"\n"
+"%s"
+msgstr ""
+"Не вдалося змінити атрибути \"%s\"\n"
+"%s"
+
+msgid "Cannot change attributes on non-local filesystems"
+msgstr "Не можливо змінити атрибути на нелокальних файлових системах"
+
+#, c-format
+msgid ""
+"Cannot get flags of \"%s\"\n"
+"%s"
+msgstr ""
+"Не вдалося отримати прапорець \"%s\"\n"
+"%s"
 
 msgid "set &user ID on execution"
 msgstr "встановити ID &користувача на виконання"
@@ -2181,15 +2327,6 @@ msgstr "Ім’я власника:"
 
 msgid "Group name:"
 msgstr "Назва групи:"
-
-msgid "&Marked all"
-msgstr "Вст. пом&iч."
-
-msgid "S&et marked"
-msgstr "Увім. п&oміч."
-
-msgid "C&lear marked"
-msgstr "&Вим. поміч."
 
 msgid "Chmod command"
 msgstr "Команда chmod"
@@ -2322,13 +2459,6 @@ msgstr ""
 "Для виконання цієї команди обидві панелі\n"
 "повинні бути в режимі списку"
 
-msgid ""
-"Not an xterm or Linux console;\n"
-"the panels cannot be toggled."
-msgstr ""
-"Це не xterm і не консоль Linux.\n"
-"Панелі не можна перемкнути. "
-
 #, c-format
 msgid "'%s' is not a symbolic link"
 msgstr "«%s» — не символьне посилання"
@@ -2357,9 +2487,6 @@ msgstr "З’єднання по SFTP"
 msgid "Shell link to machine"
 msgstr "Shell-з’єднання з віддаленою машиною"
 
-msgid "SMB link to machine"
-msgstr "SMB-з’єднання з віддаленою машиною"
-
 msgid "Undelete files on an ext2 file system"
 msgstr "Відновлення файлів на файловій системі ext2"
 
@@ -2387,17 +2514,6 @@ msgstr "Не вдалося зберегти установки в %s"
 msgid "Cannot execute commands on non-local filesystems"
 msgstr "Не можна виконувати команди на нелокальних файлових системах"
 
-#, c-format
-msgid ""
-"Cannot chdir to \"%s\"\n"
-"%s"
-msgstr ""
-"Не вдалося змінити каталог на «%s»\n"
-"%s "
-
-msgid "Cannot read directory contents"
-msgstr "Не вдалося отримати зміст каталога"
-
 msgid "Parameter"
 msgstr "Параметр"
 
@@ -2408,6 +2524,9 @@ msgid ""
 msgstr ""
 "Не вдалося створити тимчасовий командний файл\n"
 "%s"
+
+msgid "Pipe failed"
+msgstr "Сталася помилка каналу"
 
 #, c-format
 msgid " %s%s file error"
@@ -2476,8 +2595,25 @@ msgstr "файли/каталоги"
 msgid " with source mask:"
 msgstr " із шаблоном джерела:"
 
-msgid "Cannot make the hardlink"
-msgstr "Не вдалося створити жорстке посилання"
+#, c-format
+msgid ""
+"Cannot stat hardlink source file \"%s\"\n"
+"%s"
+msgstr ""
+"Не вдалося отримати властивості вихідного файлу жорсткого посилання \"%s\"\n"
+"%s"
+
+#, c-format
+msgid ""
+"Cannot create target hardlink \"%s\"\n"
+"%s"
+msgstr ""
+"Не вдалося створити цільове жорстке посилання \"%s\"\n"
+"%s"
+
+#, c-format
+msgid "Cannot create target hardlink \"%s\""
+msgstr "Не вдалося створити цільове жорстке посилання \"%s\""
 
 #, c-format
 msgid ""
@@ -2492,6 +2628,10 @@ msgid ""
 "\n"
 "Option Stable Symlinks will be disabled"
 msgstr ""
+"Неможливо створити стійкі символьні посилання між нелокальними файловими "
+"системами:\n"
+"\n"
+"Параметр «Стійкі символьні посилання» буде вимкнено"
 
 #, c-format
 msgid ""
@@ -2501,11 +2641,32 @@ msgstr ""
 "Не вдалося створити цільове символьне посилання «%s»\n"
 "%s"
 
+#, c-format
+msgid ""
+"\"%s\"\n"
+"and\n"
+"\"%s\"\n"
+"are the same directory"
+msgstr ""
+"«%s»\n"
+"та\n"
+"«%s» \n"
+"є одним і тим же каталогом"
+
+#, c-format
+msgid ""
+"\"%s\"\n"
+"and\n"
+"\"%s\"\n"
+"are the same file"
+msgstr ""
+"«%s»\n"
+"та\n"
+"«%s»\n"
+"є одним і тим же файлом "
+
 msgid "Ski&p all"
 msgstr "П&ропустити все"
-
-msgid "&Retry"
-msgstr "По&вторити"
 
 #, c-format
 msgid ""
@@ -2530,23 +2691,19 @@ msgstr "Ж&oдного"
 
 #, c-format
 msgid ""
+"Cannot remove file \"%s\"\n"
+"%s"
+msgstr ""
+"Не вдалося видалити файл «%s»\n"
+"%s"
+
+#, c-format
+msgid ""
 "Cannot stat file \"%s\"\n"
 "%s"
 msgstr ""
 "Не вдалося отримати властивості файлу «%s»\n"
 "%s"
-
-#, c-format
-msgid ""
-"\"%s\"\n"
-"and\n"
-"\"%s\"\n"
-"are the same file"
-msgstr ""
-"«%s»\n"
-"та\n"
-"«%s»\n"
-"є одним і тим же файлом "
 
 #, c-format
 msgid "Cannot overwrite directory \"%s\""
@@ -2559,22 +2716,6 @@ msgid ""
 msgstr ""
 "Не вдалося перенести файл «%s» у «%s»\n"
 "%s "
-
-#, c-format
-msgid ""
-"Cannot remove file \"%s\"\n"
-"%s"
-msgstr ""
-"Не вдалося видалити файл «%s»\n"
-"%s"
-
-#, c-format
-msgid ""
-"Cannot delete file \"%s\"\n"
-"%s"
-msgstr ""
-"Не вдалося видалити файл «%s»\n"
-"%s"
 
 #, c-format
 msgid ""
@@ -2591,6 +2732,23 @@ msgid ""
 msgstr ""
 "Не вдалося перезаписати каталог «%s»\n"
 "%s"
+
+#, c-format
+msgid ""
+"Cannot overwrite file \"%s\"\n"
+"%s"
+msgstr "Не вдалося перезаписати файл «%s» %s"
+
+#, c-format
+msgid ""
+"Cannot move directory \"%s\" to \"%s\"\n"
+"%s"
+msgstr ""
+"Не вдалося перенести каталог «%s» у «%s»\n"
+"%s"
+
+msgid "Cannot operate on \"..\"!"
+msgstr "Не можна виконувати операції з «..»"
 
 #, c-format
 msgid ""
@@ -2757,37 +2915,8 @@ msgstr ""
 "%s"
 
 #, c-format
-msgid ""
-"\"%s\"\n"
-"and\n"
-"\"%s\"\n"
-"are the same directory"
-msgstr ""
-"«%s»\n"
-"та\n"
-"«%s» \n"
-"є одним і тим же каталогом"
-
-#, c-format
-msgid ""
-"Cannot overwrite file \"%s\"\n"
-"%s"
-msgstr "Не вдалося перезаписати файл «%s» %s"
-
-#, c-format
-msgid ""
-"Cannot move directory \"%s\" to \"%s\"\n"
-"%s"
-msgstr ""
-"Не вдалося перенести каталог «%s» у «%s»\n"
-"%s"
-
-#, c-format
 msgid "Directories: %zu, total size: %s"
 msgstr "Теки: %zu, загальний розмір: %s"
-
-msgid "Cannot operate on \"..\"!"
-msgstr "Не можна виконувати операції з «..»"
 
 msgid "Sorry, I could not put the job in background"
 msgstr "Не вдалося помістити цей процес у фон"
@@ -2818,18 +2947,13 @@ msgstr "%.2f Кб/с"
 msgid "%ld B/s"
 msgstr "%ld б/с"
 
-msgid "Target file already exists!"
-msgstr "Цільовий файл вже існує."
+msgid "New     :"
+msgstr "Новий   :"
 
-#, c-format
-msgid "New     : %s, size %s"
-msgstr "Новий: %s, розмір %s"
+msgid "Existing:"
+msgstr "Існуючий:"
 
-#, c-format
-msgid "Existing: %s, size %s"
-msgstr "Існуючий: %s, розмір %s"
-
-msgid "Overwrite this target?"
+msgid "Overwrite this file?"
 msgstr "Замістити цей файл?"
 
 msgid "A&ppend"
@@ -2838,14 +2962,20 @@ msgstr "Дописати у &кінець"
 msgid "&Reget"
 msgstr "Пере&читати"
 
-msgid "Overwrite all targets?"
+msgid "Overwrite all files?"
 msgstr "Замістити всі файли?"
 
-msgid "&Update"
-msgstr "&Оновити"
+msgid "Don't overwrite with &zero length file"
+msgstr "Не перезаписувати файли з &нульовим розміром"
 
-msgid "If &size differs"
-msgstr "Із різним &розміром"
+msgid "&Older"
+msgstr "&Старіший"
+
+msgid "S&maller"
+msgstr "&Менший"
+
+msgid "&Size differs"
+msgstr "&Різний розмір"
 
 msgid "File exists"
 msgstr "Файл існує"
@@ -2919,6 +3049,224 @@ msgstr "На &фоні"
 msgid "Invalid source pattern '%s'"
 msgstr "Неправильний шаблон джерела «%s»"
 
+msgid "File listin&g"
+msgstr "Список &файлів"
+
+msgid "&Quick view"
+msgstr "&Швидкий перегляд"
+
+msgid "&Info"
+msgstr "&Відомості"
+
+msgid "&Tree"
+msgstr "Д&eрево"
+
+msgid "&Listing format..."
+msgstr "&Формат списку"
+
+msgid "&Sort order..."
+msgstr "Порядок &сортування…"
+
+msgid "&Filter..."
+msgstr "&Фільтр…"
+
+msgid "&Encoding..."
+msgstr "Кодування…"
+
+msgid "FT&P link..."
+msgstr "&FTP-з’єднання…"
+
+msgid "S&hell link..."
+msgstr "&Shell-з’єднання…"
+
+msgid "S&FTP link..."
+msgstr "S&FTP-з’єднання…"
+
+msgid "Paneli&ze"
+msgstr "Панелі&зувати"
+
+msgid "&Rescan"
+msgstr "&Пересканувати"
+
+msgid "&View"
+msgstr "П&ереглянути"
+
+msgid "Vie&w file..."
+msgstr "Пе&регляд файлу…"
+
+msgid "&Filtered view"
+msgstr "Фі&льтрований перегляд"
+
+msgid "&Copy"
+msgstr "С&копіювати"
+
+msgid "C&hmod"
+msgstr "З&міна прав"
+
+msgid "&Link"
+msgstr "&Посилання"
+
+msgid "&Symlink"
+msgstr "&Символьне посилання"
+
+msgid "Relative symlin&k"
+msgstr "Від&носне символьне посилання"
+
+msgid "Edit s&ymlink"
+msgstr "Ред&агувати символьне посилання"
+
+msgid "Ch&own"
+msgstr "Зміна &власника"
+
+msgid "&Advanced chown"
+msgstr "Права (р&озширені)    "
+
+msgid "Cha&ttr"
+msgstr "Зміна а&трибутів"
+
+msgid "&Rename/Move"
+msgstr "Пере&йменувати/перемістити"
+
+msgid "&Mkdir"
+msgstr "Створ&ити каталог"
+
+msgid "&Quick cd"
+msgstr "&Швидка зміна каталогу"
+
+msgid "Select &group"
+msgstr "Обрати гр&yпу"
+
+msgid "U&nselect group"
+msgstr "Зн&яти відмітку з групи"
+
+msgid "&Invert selection"
+msgstr "&Інвертувати виділення"
+
+msgid "E&xit"
+msgstr "Ви&хід"
+
+msgid "&User menu"
+msgstr "&Меню користувача"
+
+msgid "&Directory tree"
+msgstr "&Дерево каталогів"
+
+msgid "&Find file"
+msgstr "&Знайти файл"
+
+msgid "S&wap panels"
+msgstr "Пе&реставити панелі"
+
+msgid "Switch &panels on/off"
+msgstr "&Сховати/показати панелі"
+
+msgid "&Compare directories"
+msgstr "П&орівняти каталоги"
+
+msgid "C&ompare files"
+msgstr "П&орівняти файли"
+
+msgid "E&xternal panelize"
+msgstr "Зовн&ішня панелізація"
+
+msgid "Show directory s&izes"
+msgstr "Показати &розміри каталогів"
+
+msgid "Command &history"
+msgstr "&Історія команд"
+
+msgid "Viewed/edited files hi&story"
+msgstr "І&сторія читання/редагування файлів"
+
+msgid "Di&rectory hotlist"
+msgstr "&Гарячий список каталогів"
+
+msgid "&Active VFS list"
+msgstr "Список &активних VFS"
+
+msgid "&Background jobs"
+msgstr "Фонові завдання"
+
+msgid "Screen lis&t"
+msgstr "Список екранів"
+
+msgid "&Undelete files (ext2fs only)"
+msgstr "&Відновлення файлів (лише ext2fs)"
+
+msgid "&Listing format edit"
+msgstr "&Редагування формату списку"
+
+msgid "Edit &extension file"
+msgstr "Редагувати файл роз&ширень"
+
+msgid "Edit &menu file"
+msgstr "Редагувати файл &меню"
+
+msgid "Edit hi&ghlighting group file"
+msgstr "Редагувати файл підсвітки груп"
+
+msgid "&Configuration..."
+msgstr "&Конфігурація…"
+
+msgid "&Layout..."
+msgstr "&Зовнішній вигляд…"
+
+msgid "&Panel options..."
+msgstr "Параметри панелі…"
+
+msgid "C&onfirmation..."
+msgstr "&Підтвердження…"
+
+msgid "&Appearance..."
+msgstr "&Вигляд..."
+
+msgid "&Display bits..."
+msgstr "&Відображення символів…"
+
+msgid "&Virtual FS..."
+msgstr "Віртуальні &ФС…"
+
+msgid "Panels:"
+msgstr "Панелі:"
+
+#, c-format
+msgid "You have %zu opened screen. Quit anyway?"
+msgid_plural "You have %zu opened screens. Quit anyway?"
+msgstr[0] "Відкрито %zu екран. Все одно вийти?"
+msgstr[1] "Відкрито %zu екрани. Все одно вийти?"
+msgstr[2] "Відкрито %zu екранів. Все одно вийти?"
+msgstr[3] "Відкрито %zu екранів. Все одно вийти?"
+
+msgid "The Midnight Commander"
+msgstr "Midnight Commander"
+
+msgid "Do you really want to quit the Midnight Commander?"
+msgstr "Справді вийти з Midnight Commander?"
+
+msgid "&Above"
+msgstr "Верхня"
+
+msgid "&Left"
+msgstr "&Ліва панель "
+
+msgid "&Below"
+msgstr "Нижня"
+
+msgid "&Right"
+msgstr "&Права панель "
+
+msgid "ButtonBar|Menu"
+msgstr "ButtonBar|Меню"
+
+msgid "ButtonBar|View"
+msgstr "ButtonBar|Перегляд"
+
+msgid "ButtonBar|RenMov"
+msgstr "ButtonBar|Переміст."
+
+msgid "ButtonBar|Mkdir"
+msgstr "ButtonBar|СтвКат"
+
 msgid "&Chdir"
 msgstr "Пере&хід"
 
@@ -2947,6 +3295,9 @@ msgstr "Назва файлу:"
 msgid "&Find recursively"
 msgstr "&Шукати рекурсивно"
 
+msgid "Follow s&ymlinks"
+msgstr ""
+
 msgid "S&kip hidden"
 msgstr "П&ропускати приховані"
 
@@ -2964,9 +3315,6 @@ msgstr "&Усі кодування"
 
 msgid "Fir&st hit"
 msgstr "Пер&ший збіг"
-
-msgid "&Tree"
-msgstr "Д&eрево"
 
 msgid "Find File"
 msgstr "Знайти файл"
@@ -2990,6 +3338,15 @@ msgid_plural "Finished (ignored %zu directories)"
 msgstr[0] "Завершено (ігнорований %zu каталог)"
 msgstr[1] "Завершено (ігноровано %zu каталогів)"
 msgstr[2] "Завершено (ігноровано %zu каталогів)"
+msgstr[3] "Завершено (ігноровано %zu каталогів)"
+
+#, c-format
+msgid "Find File: \"%s\". Content: \"%s\""
+msgstr "Знайдено Файл: \"%s\". Містить: \"%s\""
+
+#, c-format
+msgid "Find File: \"%s\""
+msgstr "Знайдено Файл: \"%s\""
 
 msgid "Searching"
 msgstr "Виконується пошук"
@@ -3154,6 +3511,7 @@ msgid_plural " (%lu blocks)"
 msgstr[0] " (%lu блок)"
 msgstr[1] " (%lu блоків)"
 msgstr[2] " (%lu блоків)"
+msgstr[3] " (%lu блоків)"
 
 #, c-format
 msgid "Owner:      %s/%s"
@@ -3162,6 +3520,16 @@ msgstr "Власник:     %s/%s"
 #, c-format
 msgid "Links:      %d"
 msgstr "Посилань: %d"
+
+msgid "Attributes: not supported"
+msgstr "Атрибути: не підтримуються"
+
+#, c-format
+msgid "Attributes: %s"
+msgstr "Атрибути: %s"
+
+msgid "Attributes: unavailable"
+msgstr "Атрибути: не дозволені"
 
 #, c-format
 msgid "Mode:       %s (%04o)"
@@ -3209,218 +3577,6 @@ msgstr "Рядки виводу:"
 
 msgid "Layout"
 msgstr "Зовнішній вигляд"
-
-msgid "File listin&g"
-msgstr "Список &файлів"
-
-msgid "&Quick view"
-msgstr "&Швидкий перегляд"
-
-msgid "&Info"
-msgstr "&Відомості"
-
-#, fuzzy
-msgid "&Listing format..."
-msgstr "&Редагування формату списку"
-
-msgid "&Sort order..."
-msgstr "Порядок &сортування…"
-
-msgid "&Filter..."
-msgstr "&Фільтр…"
-
-msgid "&Encoding..."
-msgstr "Кодування…"
-
-msgid "FT&P link..."
-msgstr "&FTP-з’єднання…"
-
-msgid "S&hell link..."
-msgstr "&Shell-з’єднання…"
-
-msgid "S&FTP link..."
-msgstr "S&FTP-з’єднання…"
-
-msgid "SM&B link..."
-msgstr "&SMB-з’єднання…"
-
-msgid "Paneli&ze"
-msgstr "Панелі&зувати"
-
-msgid "&Rescan"
-msgstr "&Пересканувати"
-
-msgid "&View"
-msgstr "П&ереглянути"
-
-msgid "Vie&w file..."
-msgstr "Пе&регляд файлу…"
-
-msgid "&Filtered view"
-msgstr "Фі&льтрований перегляд"
-
-msgid "&Copy"
-msgstr "Ско&піювати"
-
-msgid "C&hmod"
-msgstr "З&міна прав"
-
-msgid "&Link"
-msgstr "&Посилання"
-
-msgid "&Symlink"
-msgstr "&Символьне посилання"
-
-msgid "Relative symlin&k"
-msgstr "Від&носне символьне посилання"
-
-msgid "Edit s&ymlink"
-msgstr "Ред&агувати символьне посилання"
-
-msgid "Ch&own"
-msgstr "Змі&на власника"
-
-msgid "&Advanced chown"
-msgstr "Пр&ава (розширені)    "
-
-msgid "&Rename/Move"
-msgstr "&Перейменувати/перемістити"
-
-msgid "&Mkdir"
-msgstr "&Створити каталог"
-
-msgid "&Quick cd"
-msgstr "&Швидка зміна каталогу"
-
-msgid "Select &group"
-msgstr "Обрати гр&yпу"
-
-msgid "U&nselect group"
-msgstr "Зн&яти відмітку з групи"
-
-msgid "&Invert selection"
-msgstr "&Інвертувати виділення"
-
-msgid "E&xit"
-msgstr "Ви&хід"
-
-msgid "&User menu"
-msgstr "&Меню користувача"
-
-msgid "&Directory tree"
-msgstr "&Дерево каталогів"
-
-msgid "&Find file"
-msgstr "&Знайти файл"
-
-msgid "S&wap panels"
-msgstr "Пе&реставити панелі"
-
-msgid "Switch &panels on/off"
-msgstr "&Сховати/показати панелі"
-
-msgid "&Compare directories"
-msgstr "П&орівняти каталоги"
-
-msgid "C&ompare files"
-msgstr "П&орівняти файли"
-
-msgid "E&xternal panelize"
-msgstr "Зовн&ішня панелізація"
-
-msgid "Show directory s&izes"
-msgstr "Показати &розміри каталогів"
-
-msgid "Command &history"
-msgstr "&Історія команд"
-
-msgid "Di&rectory hotlist"
-msgstr "&Гарячий список каталогів"
-
-msgid "&Active VFS list"
-msgstr "Список &активних VFS"
-
-msgid "&Background jobs"
-msgstr "Фонові завдання"
-
-msgid "Screen lis&t"
-msgstr "Список екранів"
-
-msgid "&Undelete files (ext2fs only)"
-msgstr "&Відновлення файлів (лише ext2fs)"
-
-msgid "&Listing format edit"
-msgstr "&Редагування формату списку"
-
-msgid "Edit &extension file"
-msgstr "Редагувати файл роз&ширень"
-
-msgid "Edit &menu file"
-msgstr "Редагувати файл &меню"
-
-msgid "Edit hi&ghlighting group file"
-msgstr "Редагувати файл підсвітки груп"
-
-msgid "&Configuration..."
-msgstr "&Конфігурація…"
-
-msgid "&Layout..."
-msgstr "&Зовнішній вигляд…"
-
-msgid "&Panel options..."
-msgstr "Параметри панелі…"
-
-msgid "C&onfirmation..."
-msgstr "&Підтвердження…"
-
-msgid "&Appearance..."
-msgstr "&Вигляд..."
-
-msgid "&Display bits..."
-msgstr "&Відображення символів…"
-
-msgid "&Virtual FS..."
-msgstr "Віртуальні &ФС…"
-
-msgid "Panels:"
-msgstr "Панелі:"
-
-#, c-format
-msgid "You have %zu opened screen. Quit anyway?"
-msgid_plural "You have %zu opened screens. Quit anyway?"
-msgstr[0] "Відкрито %zu екран. Все одно вийти?"
-msgstr[1] "Відкрито %zu екрани. Все одно вийти?"
-msgstr[2] "Відкрито %zu екранів. Все одно вийти?"
-
-msgid "The Midnight Commander"
-msgstr "Midnight Commander"
-
-msgid "Do you really want to quit the Midnight Commander?"
-msgstr "Справді вийти з Midnight Commander?"
-
-msgid "&Above"
-msgstr "Верхня"
-
-msgid "&Left"
-msgstr "&Ліва панель "
-
-msgid "&Below"
-msgstr "Нижня"
-
-msgid "&Right"
-msgstr "&Права панель "
-
-msgid "ButtonBar|Menu"
-msgstr "ButtonBar|Меню"
-
-msgid "ButtonBar|View"
-msgstr "ButtonBar|Перегляд"
-
-msgid "ButtonBar|RenMov"
-msgstr "ButtonBar|Переміст."
-
-msgid "ButtonBar|Mkdir"
-msgstr "ButtonBar|СтвКат"
 
 msgid "Memory exhausted!"
 msgstr "Не вистачає пам’яті."
@@ -3539,6 +3695,7 @@ msgid_plural "%s in %d files"
 msgstr[0] "%s у %d файлі"
 msgstr[1] "%s у %d файлах"
 msgstr[2] "%s у %d файлах"
+msgstr[3] "%s у %d файлах"
 
 msgid "Panelize"
 msgstr "Панелізувати"
@@ -3560,6 +3717,9 @@ msgstr "Зняти відмітку"
 
 msgid "Do you really want to execute?"
 msgstr "Справді виконати?"
+
+msgid "Cannot read directory contents"
+msgstr "Не вдалося отримати зміст каталога"
 
 msgid "User supplied format looks invalid, reverting to default."
 msgstr ""
@@ -3583,11 +3743,18 @@ msgstr "Додати до зовнішньої панелізації"
 msgid "Enter command label:"
 msgstr "Введіть мітку команди: "
 
-msgid "Cannot invoke command."
-msgstr "Не вдалося викликати команду."
+#, c-format
+msgid ""
+"External panelize:\n"
+"%s"
+msgstr ""
 
-msgid "Pipe close failed"
-msgstr "Сталася помилка закриття каналу"
+#, c-format
+msgid ""
+"External panelize:\n"
+"failed to read data from child stdout:\n"
+"%s"
+msgstr ""
 
 msgid "Cannot run external panelize in a non-local directory"
 msgstr "Не вдалося виконати зовнішню панелізацію у нелокальному каталозі"
@@ -3654,50 +3821,6 @@ msgid ""
 msgstr ""
 "Не вдалося записати у файл %s:\n"
 "%s\n"
-
-msgid "Debug"
-msgstr "Відлагоджування"
-
-msgid "ERROR:"
-msgstr "ПОМИЛКА:"
-
-msgid "True:"
-msgstr "Істина:"
-
-msgid "False:"
-msgstr "Хибність:"
-
-msgid "Error calling program"
-msgstr "Сталася помилка виклику програми"
-
-msgid "Warning -- ignoring file"
-msgstr "Попередження — файл не враховується"
-
-#, c-format
-msgid ""
-"File %s is not owned by root or you or is world writable.\n"
-"Using it may compromise your security"
-msgstr ""
-"Файл %s не належить ні root'у, ні вам, або доступний усім на запис.\n"
-"Його використання неприйнятно з міркувань безпеки."
-
-msgid "Format error on file Extensions File"
-msgstr "Виявлено помилку формату у файлі розширень"
-
-#, c-format
-msgid "The %%var macro has no default"
-msgstr "Макрос %%var не має стандартного значення"
-
-#, c-format
-msgid "The %%var macro has no variable"
-msgstr "Макрос %%var не має змінної"
-
-#, c-format
-msgid "No suitable entries found in %s"
-msgstr "У %s не знайдено потрібних записів"
-
-msgid "User menu"
-msgstr "Меню користувача"
 
 msgid "Help file format error\n"
 msgstr "Виявлено помилку формату файла довідки\n"
@@ -3792,6 +3915,15 @@ msgstr ""
 msgid "Home directory path is not absolute"
 msgstr "Шлях до домашнього каталогу не абсолютний"
 
+msgid ""
+"GNU Midnight Commander\n"
+"is already running on this terminal.\n"
+"Subshell support will be disabled."
+msgstr ""
+"GNU Midnight Commander\n"
+"вже запущено в цьому терміналі\n"
+"підтримку підоболонки буде вимкнено."
+
 #, c-format
 msgid ""
 "\n"
@@ -3822,15 +3954,6 @@ msgstr ""
 "Не вдалося зберегти файл %s:\n"
 "%s"
 
-msgid ""
-"GNU Midnight Commander is already\n"
-"running on this terminal.\n"
-"Subshell support will be disabled."
-msgstr ""
-"Запущено іншу копію Midnight Commander\n"
-"на цьому терміналі. Вкладену командну\n"
-"оболонку вимкнуто."
-
 #, c-format
 msgid "Cannot open named pipe %s\n"
 msgstr "Не вдалося відкрити іменований канал %s\n"
@@ -3842,59 +3965,72 @@ msgstr "Оболонка ще активна. Все одно вийти?"
 msgid "Warning: Cannot change to %s.\n"
 msgstr "Попередження: не вдалося змінити на %s.\n"
 
-msgid "Using the S-Lang library with terminfo database\n"
-msgstr "Використання бібліотеки S-Lang із БД terminfo\n"
+msgid "With builtin Editor and Aspell support"
+msgstr "З вбудованим редактором і підтримкою Aspell"
 
-msgid "Using the ncurses library\n"
-msgstr "Використання бібліотеки ncurses\n"
+msgid "With builtin Editor"
+msgstr "З вбудованим редактором"
 
-msgid "Using the ncursesw library\n"
-msgstr "Використання бібліотеки ncursesw\n"
+msgid "With optional subshell support"
+msgstr "З необовʼязковою підтримкою підоболонки"
 
-msgid "With builtin Editor\n"
-msgstr "Із вмонтованим редактором\n"
+msgid "With subshell support as default"
+msgstr "З підтримкою підоболонки за замовчуванням"
 
-msgid "With optional subshell support\n"
-msgstr "Із підтримкою довільної вкладеної оболонки\n"
+msgid "With support for background operations"
+msgstr "З підтримкою фонових операцій"
 
-msgid "With subshell support as default\n"
-msgstr "Із підтримкою вкладеної оболонки (стандартно)\n"
+msgid "With mouse support on xterm and Linux console"
+msgstr "З підтримкою миші в xterm та консолях Linux"
 
-msgid "With support for background operations\n"
-msgstr "Із підтримкою фонових операцій\n"
+msgid "With mouse support on xterm"
+msgstr "З підтримкою миші в xterm"
 
-msgid "With mouse support on xterm and Linux console\n"
-msgstr "Із підтримкою миші у xterm і консолі Linux\n"
+msgid "With support for X11 events"
+msgstr "З підтримкою подій X11"
 
-msgid "With mouse support on xterm\n"
-msgstr "Із підтримкою миші у xterm\n"
+msgid "With internationalization support"
+msgstr "З підтримкою інтернаціоналізації"
 
-msgid "With support for X11 events\n"
-msgstr "Із підтримкою подій X11\n"
+msgid "With multiple codepages support"
+msgstr "З підтримкою багатьох кодових сторінок"
 
-msgid "With internationalization support\n"
-msgstr "Із підтримкою інтернаціоналізації\n"
-
-msgid "With multiple codepages support\n"
-msgstr "Із підтримкою багатьох кодових сторінок\n"
+msgid "With ext2fs attributes support"
+msgstr "З підтримкою атрибутів ext2fs"
 
 #, c-format
 msgid "Built with GLib %d.%d.%d\n"
 msgstr "Зібрано із GLib %d.%d.%d\n"
 
 #, c-format
+msgid "Built with S-Lang %s with terminfo database\n"
+msgstr "Зібрано зі S-Lang %s з базою даних terminfo\n"
+
+#, c-format
+msgid "Built with ncurses %s\n"
+msgstr "Зібрано з ncurses %s\n"
+
+msgid "Built with ncurses (unknown version)"
+msgstr "Зібрано з ncurses (невідома версія)"
+
+#, c-format
+msgid "Built with ncursesw %s\n"
+msgstr "Зібрано з ncursesw %s\n"
+
+msgid "Built with ncursesw (unknown version)"
+msgstr "Зібрано з ncursesw (невідома версія)"
+
 msgid "Virtual File Systems:"
 msgstr "Віртуальні файлові системи:"
 
-#, c-format
 msgid "Data types:"
 msgstr "Типи даних:"
 
 msgid "Home directory:"
-msgstr ""
+msgstr "Домашній каталог:"
 
 msgid "Profile root directory:"
-msgstr ""
+msgstr "Кореневий каталог профілю:"
 
 msgid "System data"
 msgstr "Системна дата"
@@ -3916,6 +4052,50 @@ msgstr "Користувацький каталог:"
 
 msgid "Cache directory:"
 msgstr "Каталог кешу:"
+
+msgid "Debug"
+msgstr "Відлагоджування"
+
+msgid "ERROR:"
+msgstr "ПОМИЛКА:"
+
+msgid "True:"
+msgstr "Істина:"
+
+msgid "False:"
+msgstr "Хибність:"
+
+msgid "Error calling program"
+msgstr "Сталася помилка виклику програми"
+
+msgid "Warning -- ignoring file"
+msgstr "Попередження — файл не враховується"
+
+#, c-format
+msgid ""
+"File %s is not owned by root or you or is world writable.\n"
+"Using it may compromise your security"
+msgstr ""
+"Файл %s не належить ні root'у, ні вам, або доступний усім на запис.\n"
+"Його використання неприйнятно з міркувань безпеки."
+
+msgid "Format error on file Extensions File"
+msgstr "Виявлено помилку формату у файлі розширень"
+
+#, c-format
+msgid "The %%var macro has no default"
+msgstr "Макрос %%var не має стандартного значення"
+
+#, c-format
+msgid "The %%var macro has no variable"
+msgstr "Макрос %%var не має змінної"
+
+#, c-format
+msgid "No suitable entries found in %s"
+msgstr "У %s не знайдено потрібних записів"
+
+msgid "User menu"
+msgstr "Меню користувача"
 
 #, c-format
 msgid ""
@@ -3968,13 +4148,15 @@ msgstr ""
 #, c-format
 msgid ""
 "Cannot open %s archive\n"
+"%s:\n"
 "%s"
 msgstr ""
-"Не вдалося відкрити архів %s\n"
-"%s"
 
-msgid "Inconsistent extfs archive"
-msgstr "Виявлено неузгоджений архів extfs"
+#, c-format
+msgid ""
+"EXTFS virtual file system:\n"
+"%s"
+msgstr ""
 
 #, c-format
 msgid "Warning: cannot open %s directory\n"
@@ -4143,6 +4325,12 @@ msgstr ""
 "Видаліть пароль або змініть режим"
 
 #, c-format
+msgid ""
+"SFS virtual file system:\n"
+"%s"
+msgstr ""
+
+#, c-format
 msgid "%s: Warning: file %s not found\n"
 msgstr "%s: Попередження: файл %s не знайдено\n"
 
@@ -4176,6 +4364,9 @@ msgstr "sftp: Неправильне ім’я хоста."
 msgid "sftp: %s"
 msgstr "sftp: %s"
 
+msgid "sftp: failed to convert remote host IP address into text form"
+msgstr ""
+
 #, c-format
 msgid "sftp: making connection to %s"
 msgstr "sftp: з’єднання з %s"
@@ -4186,6 +4377,50 @@ msgstr "sftp: з’єднання перервано користувачем"
 #, c-format
 msgid "sftp: connection to server failed: %s"
 msgstr "sftp: з’єдання з сервером невдале: %s"
+
+msgid "sftp: found host key of unsupported type: RSA1"
+msgstr ""
+
+msgid "sftp: unknown host key type:"
+msgstr ""
+
+#, c-format
+msgid ""
+"Permanently added\n"
+"%s (%s)\n"
+"to the list of known hosts."
+msgstr ""
+
+msgid "sftp: cannot get the remote host key"
+msgstr ""
+
+msgid "sftp: unsupported key type, can't check remote host key"
+msgstr ""
+
+msgid "sftp: can't compute host key fingerprint hash"
+msgstr ""
+
+#, c-format
+msgid ""
+"The authenticity of host\n"
+"%s (%s)\n"
+"can't be established!\n"
+"%s key fingerprint hash is\n"
+"SHA1:%s.\n"
+"Do you want to add it to the list of known hosts and continue connecting?"
+msgstr ""
+
+#, c-format
+msgid ""
+"%s (%s)\n"
+"is found in the list of known hosts but\n"
+"KEYS DO NOT MATCH! THIS COULD BE A MITM ATTACK!\n"
+"Are you sure you want to add it to the list of known hosts and continue "
+"connecting?"
+msgstr ""
+
+msgid "sftp: host key verification failed"
+msgstr ""
 
 #, c-format
 msgid "sftp: Enter passphrase for %s "
@@ -4201,11 +4436,15 @@ msgstr "sftp: Введіть пароль для %s "
 msgid "sftp: Password is empty."
 msgstr "sftp: Пароль порожній."
 
-msgid "sftp: Failure establishing SSH session"
-msgstr "sftp: Невдача при встановленні SSH сесії"
+msgid "sftp: failure establishing SSH session"
+msgstr ""
 
 msgid "sftp: No file handler data present for reading file"
 msgstr "sftp: Немає даних про  оброблювач для читання файлу"
+
+#, c-format
+msgid "sftp: socket error: %s"
+msgstr "sftp: помилка сокету: %s"
 
 #, c-format
 msgid "sftp: (Ctrl-G break) Listing... %s"
@@ -4213,35 +4452,6 @@ msgstr "sftp: (Ctrl-G перервати) Створення списку... %s"
 
 msgid "sftp: Listing done."
 msgstr "sftp: Створення списку завершено."
-
-#, c-format
-msgid "reconnect to %s failed"
-msgstr ""
-"сталася помилка повторного з’єднання з %s\n"
-" "
-
-msgid "Authentication failed"
-msgstr "Сталася помилка авторизації "
-
-#, c-format
-msgid "Error %s creating directory %s"
-msgstr "Сталася помилка %s створення каталогу %s"
-
-#, c-format
-msgid "Error %s removing directory %s"
-msgstr "Сталася помилка %s видалення каталогу %s"
-
-#, c-format
-msgid "%s opening remote file %s"
-msgstr "%s відкриває віддалений файл %s"
-
-#, c-format
-msgid "%s removing remote file %s"
-msgstr "%s видаляє віддалений файл %s"
-
-#, c-format
-msgid "%s renaming files\n"
-msgstr "%s перейменовує файли\n"
 
 #, c-format
 msgid ""
@@ -4406,6 +4616,8 @@ msgid ""
 "Failed to read data from child stdout:\n"
 "%s"
 msgstr ""
+"Помилка читання даних зі stdout підпроцеса:\n"
+"%s"
 
 #, c-format
 msgid ""
@@ -4444,6 +4656,8 @@ msgid ""
 "Cannot open \"%s\" in parse mode\n"
 "%s"
 msgstr ""
+"Не вдалось відкрити \"%s\" в режимі парсингу\n"
+"%s"
 
 msgid "Search done"
 msgstr "Пошук завершено"
@@ -4454,8 +4668,56 @@ msgstr "Почати спочатку?"
 msgid "Cannot fetch a local copy of /ftp://some.host/editme.txt"
 msgstr "Не вдалося отримати локальну копію /ftp://some.host/editme.txt"
 
-#~ msgid "Listing mode"
-#~ msgstr "Формат списку файлів"
+#~ msgid "Set debug level"
+#~ msgstr "Встановити рівень відлагоджування"
 
-#~ msgid "&Listing mode..."
-#~ msgstr "Фор&мат списку…"
+#~ msgid "<integer>"
+#~ msgstr "<integer>"
+
+#, c-format
+#~ msgid "Password for \\\\%s\\%s"
+#~ msgstr "Пароль для \\\\%s\\%s"
+
+#~ msgid "Domain:"
+#~ msgstr "Домен:"
+
+#~ msgid "Username:"
+#~ msgstr "Ім’я користувача:"
+
+#~ msgid "SMB authentication"
+#~ msgstr "SMB(самба) автентифікація"
+
+#~ msgid "SMB link to machine"
+#~ msgstr "SMB-з’єднання з віддаленою машиною"
+
+#~ msgid "SM&B link..."
+#~ msgstr "&SMB-з’єднання…"
+
+#, c-format
+#~ msgid "reconnect to %s failed"
+#~ msgstr ""
+#~ "сталася помилка повторного з’єднання з %s\n"
+#~ " "
+
+#~ msgid "Authentication failed"
+#~ msgstr "Сталася помилка авторизації "
+
+#, c-format
+#~ msgid "Error %s creating directory %s"
+#~ msgstr "Сталася помилка %s створення каталогу %s"
+
+#, c-format
+#~ msgid "Error %s removing directory %s"
+#~ msgstr "Сталася помилка %s видалення каталогу %s"
+
+#, c-format
+#~ msgid "%s opening remote file %s"
+#~ msgstr "%s відкриває віддалений файл %s"
+
+#, c-format
+#~ msgid "%s removing remote file %s"
+#~ msgstr "%s видаляє віддалений файл %s"
+
+#, c-format
+#~ msgid "%s renaming files\n"
+#~ msgstr "%s перейменовує файли\n"

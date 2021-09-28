@@ -1,7 +1,7 @@
 /*
    lib - common code for testing lib/utilinux:my_system() function
 
-   Copyright (C) 2013-2017
+   Copyright (C) 2013-2021
    Free Software Foundation, Inc.
 
    Written by:
@@ -27,6 +27,11 @@
 #include <unistd.h>
 
 #include "lib/vfs/vfs.h"
+
+/* sighandler_t is GNU extension */
+#ifndef HAVE_SIGHANDLER_T
+typedef void (*sighandler_t) (int);
+#endif
 
 /* --------------------------------------------------------------------------------------------- */
 
@@ -240,7 +245,7 @@ execvp__deinit (void)
 #define VERIFY_SIGACTION__IS_RESTORED(oldact_idx, act_idx) { \
     struct sigaction *_oldact = (struct sigaction *) g_ptr_array_index(sigaction_oldact__captured, oldact_idx); \
     struct sigaction *_act = (struct sigaction *) g_ptr_array_index(sigaction_act__captured, act_idx); \
-    fail_unless (memcmp(_oldact, _act, sizeof(struct sigaction)) == 0, \
+    ck_assert_msg (memcmp(_oldact, _act, sizeof(struct sigaction)) == 0, \
         "sigaction(): oldact[%d] should be equals to act[%d]", oldact_idx, act_idx); \
 }
 
@@ -259,7 +264,7 @@ execvp__deinit (void)
     VERIFY_SIGACTION__ACT_IGNORED(g_ptr_array_index(sigaction_act__captured, 1)); \
     { \
         struct sigaction *_act  = g_ptr_array_index(sigaction_act__captured, 2); \
-        fail_unless (memcmp (_act, &startup_handler, sizeof(struct sigaction)) == 0, \
+        ck_assert_msg (memcmp (_act, &startup_handler, sizeof(struct sigaction)) == 0, \
             "The 'act' in third call to sigaction() should be equals to startup_handler"); \
     } \
 \
@@ -267,11 +272,11 @@ execvp__deinit (void)
     VERIFY_SIGACTION__IS_RESTORED (1, 4); \
     VERIFY_SIGACTION__IS_RESTORED (2, 5); \
 \
-    fail_unless (g_ptr_array_index(sigaction_oldact__captured, 3) == NULL, \
+    ck_assert_msg (g_ptr_array_index(sigaction_oldact__captured, 3) == NULL, \
         "oldact in fourth call to sigaction() should be NULL"); \
-    fail_unless (g_ptr_array_index(sigaction_oldact__captured, 4) == NULL, \
+    ck_assert_msg (g_ptr_array_index(sigaction_oldact__captured, 4) == NULL, \
         "oldact in fifth call to sigaction() should be NULL"); \
-    fail_unless (g_ptr_array_index(sigaction_oldact__captured, 5) == NULL, \
+    ck_assert_msg (g_ptr_array_index(sigaction_oldact__captured, 5) == NULL, \
         "oldact in sixth call to sigaction() should be NULL"); \
 }
 

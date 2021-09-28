@@ -1,7 +1,7 @@
 /*
-   lib/vfs - common serialize/deserialize functions
+   lib - common serialize/deserialize functions
 
-   Copyright (C) 2011-2017
+   Copyright (C) 2011-2021
    Free Software Foundation, Inc.
 
    Written by:
@@ -97,6 +97,8 @@ START_PARAMETRIZED_TEST (test_serialize, test_serialize_ds)
 
     g_free (actual_result);
 
+    if (error != NULL)
+        g_error_free (error);
 }
 /* *INDENT-OFF* */
 END_PARAMETRIZED_TEST
@@ -357,11 +359,9 @@ END_TEST
 int
 main (void)
 {
-    int number_failed;
+    TCase *tc_core;
 
-    Suite *s = suite_create (TEST_SUITE_NAME);
-    TCase *tc_core = tcase_create ("Core");
-    SRunner *sr;
+    tc_core = tcase_create ("Core");
 
     tcase_add_checked_fixture (tc_core, setup, teardown);
 
@@ -381,13 +381,7 @@ main (void)
     tcase_add_test (tc_core, test_deserialize_config);
     /* *********************************** */
 
-    suite_add_tcase (s, tc_core);
-    sr = srunner_create (s);
-    srunner_set_log (sr, "serialize.log");
-    srunner_run_all (sr, CK_ENV);
-    number_failed = srunner_ntests_failed (sr);
-    srunner_free (sr);
-    return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    return mctest_run_all (tc_core);
 }
 
 /* --------------------------------------------------------------------------------------------- */

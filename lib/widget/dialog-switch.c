@@ -3,7 +3,7 @@
 
    Original idea and code: Oleg "Olegarch" Konovalov <olegarch@linuxinside.com>
 
-   Copyright (C) 2009-2017
+   Copyright (C) 2009-2021
    Free Software Foundation, Inc.
 
    Written by:
@@ -40,7 +40,7 @@
 
 /*** global variables ****************************************************************************/
 
-WDialog *midnight_dlg = NULL;
+WDialog *filemanager = NULL;
 
 /*** file scope macro definitions ****************************************************************/
 
@@ -86,7 +86,7 @@ dialog_switch_goto (GList * dlg)
 
         mc_current = dlg;
 
-        if (old == midnight_dlg)
+        if (old == filemanager)
         {
             /* switch from panels to another dialog (editor, viewer, etc) */
             dialog_switch_pending = TRUE;
@@ -97,14 +97,14 @@ dialog_switch_goto (GList * dlg)
             /* switch from editor, viewer, etc to another dialog */
             widget_set_state (WIDGET (old), WST_SUSPENDED, TRUE);
 
-            if (DIALOG (dlg->data) != midnight_dlg)
+            if (DIALOG (dlg->data) != filemanager)
                 /* switch to another editor, viewer, etc */
                 /* return to panels before run the required dialog */
                 dialog_switch_pending = TRUE;
             else
             {
                 /* switch to panels */
-                widget_set_state (WIDGET (midnight_dlg), WST_ACTIVE, TRUE);
+                widget_set_state (WIDGET (filemanager), WST_ACTIVE, TRUE);
                 do_refresh ();
             }
         }
@@ -119,7 +119,7 @@ dialog_switch_resize (WDialog * d)
     if (widget_get_state (WIDGET (d), WST_ACTIVE))
         send_message (d, NULL, MSG_RESIZE, 0, NULL);
     else
-        d->winch_pending = TRUE;
+        GROUP (d)->winch_pending = TRUE;
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -233,12 +233,10 @@ dialog_switch_list (void)
 
     for (h = mc_dialogs; h != NULL; h = g_list_next (h))
     {
-        WDialog *dlg;
+        WDialog *dlg = DIALOG (h->data);
         char *title;
 
-        dlg = DIALOG (h->data);
-
-        if ((dlg != NULL) && (dlg->get_title != NULL))
+        if (dlg->get_title != NULL)
             title = dlg->get_title (dlg, WIDGET (listbox->list)->cols - 2);
         else
             title = g_strdup ("");
@@ -270,12 +268,12 @@ dialog_switch_process_pending (void)
         ret = dlg_run (h);
         if (widget_get_state (wh, WST_CLOSED))
         {
-            dlg_destroy (h);
+            widget_destroy (wh);
 
             /* return to panels */
             if (mc_global.mc_run_mode == MC_RUN_FULL)
             {
-                mc_current = g_list_find (mc_dialogs, midnight_dlg);
+                mc_current = g_list_find (mc_dialogs, filemanager);
                 mc_event_raise (MCEVENT_GROUP_FILEMANAGER, "update_panels", NULL);
             }
         }
@@ -295,7 +293,7 @@ dialog_switch_got_winch (void)
 
     for (dlg = mc_dialogs; dlg != NULL; dlg = g_list_next (dlg))
         if (dlg != mc_current)
-            DIALOG (dlg->data)->winch_pending = TRUE;
+            GROUP (dlg->data)->winch_pending = TRUE;
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -308,18 +306,8 @@ dialog_switch_shutdown (void)
         WDialog *dlg = DIALOG (mc_dialogs->data);
 
         dlg_run (dlg);
-        dlg_destroy (dlg);
+        widget_destroy (WIDGET (dlg));
     }
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-void
-clr_scr (void)
-{
-    tty_set_normal_attrs ();
-    tty_fill_region (0, 0, LINES, COLS, ' ');
-    tty_refresh ();
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -340,7 +328,8 @@ mc_refresh (void)
     if (mc_global.we_are_background)
         return;
 #endif /* ENABLE_BACKGROUND */
-    if (mc_global.tty.winch_flag == 0)
+
+    if (!tty_got_winch ())
         tty_refresh ();
     else
     {
@@ -357,8 +346,7 @@ dialog_change_screen_size (void)
 {
     GList *d;
 
-    mc_global.tty.winch_flag = 0;
-
+    tty_flush_winch ();
     tty_change_screen_size ();
 
 #ifdef HAVE_SLANG

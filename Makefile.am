@@ -1,7 +1,7 @@
 ## Process this file with automake to create Makefile.in.
-AUTOMAKE_OPTIONS = 1.5
+AUTOMAKE_OPTIONS = 1.12
 
-SUBDIRS = intl po lib src doc contrib misc
+SUBDIRS = po lib src doc contrib misc
 
 if HAVE_TESTS
     SUBDIRS += tests
@@ -9,13 +9,15 @@ endif
 
 EXTRA_DIST = 
 
-dist_noinst_SCRIPTS = build-glib2.sh
+dist_noinst_SCRIPTS = \
+    build-glib2.sh \
+    version.sh
 
-dist_noinst_HEADERS = $(top_srcdir)/version.h
+dist_noinst_HEADERS = $(top_srcdir)/mc-version.h
 
 ACLOCAL_AMFLAGS = -I m4
 
-CONFIG_STATUS_DEPENDENCIES = $(top_srcdir)/version.h
+CONFIG_STATUS_DEPENDENCIES = $(top_srcdir)/mc-version.h
 
 .PHONY: update-version \
         cppcheck \
@@ -29,16 +31,16 @@ CONFIG_STATUS_DEPENDENCIES = $(top_srcdir)/version.h
 
 
 update-version:
-	@if test -x $(top_srcdir)/maint/utils/version.sh; then \
-	    $(top_srcdir)/maint/utils/version.sh "$(top_srcdir)" 2>&1 >/dev/null; \
+	@if test -x $(top_srcdir)/version.sh; then \
+	    $(top_srcdir)/version.sh "$(top_srcdir)" 2>&1 >/dev/null; \
 	else \
-	    if test ! -e $(top_srcdir)/version.h; then \
-	        echo "File not found: $(top_srcdir)/maint/utils/version.sh"; \
+	    if test ! -e $(top_srcdir)/mc-version.h; then \
+	        echo "File not found: $(top_srcdir)/version.sh"; \
 	        exit 1; \
 	    fi; \
 	fi
 
-$(top_srcdir)/version.h: update-version
+$(top_srcdir)/mc-version.h: update-version
 
 CPPCHECK_CMD = cppcheck \
     --inline-suppr \
@@ -58,7 +60,6 @@ CPPCHECK_OUT_PREFIX = $(top_builddir)/cppcheck-
 CPPCHECK_OUT_EXT = log.txt
 
 CPPCHECK_SED_FILTER = \
-    -e '/\/src\/vfs\/smbfs\//d' \
     -e '/is reassigned a value before the old one has been used./d' \
     -e '/ Unmatched suppression: /d' \
     -e "/Skipping configuration '.*' since the value of '.*' is unknown./d"

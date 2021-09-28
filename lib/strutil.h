@@ -103,54 +103,56 @@ typedef enum
 /* all functions in str_class must be defined for every encoding */
 struct str_class
 {
+    /* *INDENT-OFF* */
     gchar *(*conv_gerror_message) (GError * error, const char *def_msg);
       /*I*/ estr_t (*vfs_convert_to) (GIConv coder, const char *string, int size, GString * buffer);
       /*I*/ void (*insert_replace_char) (GString * buffer);
-    int (*is_valid_string) (const char *);
-      /*I*/ int (*is_valid_char) (const char *, size_t);
-      /*I*/ void (*cnext_char) (const char **);
-    void (*cprev_char) (const char **);
-    void (*cnext_char_safe) (const char **);
-      /*I*/ void (*cprev_char_safe) (const char **);
+    gboolean (*is_valid_string) (const char *text);
+      /*I*/ int (*is_valid_char) (const char *ch, size_t size);
+      /*I*/ void (*cnext_char) (const char **text);
+    void (*cprev_char) (const char **text);
+    void (*cnext_char_safe) (const char **text);
+      /*I*/ void (*cprev_char_safe) (const char **text);
       /*I*/ int (*cnext_noncomb_char) (const char **text);
       /*I*/ int (*cprev_noncomb_char) (const char **text, const char *begin);
-      /*I*/ int (*char_isspace) (const char *);
-      /*I*/ int (*char_ispunct) (const char *);
-      /*I*/ int (*char_isalnum) (const char *);
-      /*I*/ int (*char_isdigit) (const char *);
-      /*I*/ int (*char_isprint) (const char *);
-      /*I*/ gboolean (*char_iscombiningmark) (const char *);
-      /*I*/ int (*length) (const char *);
-      /*I*/ int (*length2) (const char *, int);
-      /*I*/ int (*length_noncomb) (const char *);
-      /*I*/ int (*char_toupper) (const char *, char **, size_t *);
-    int (*char_tolower) (const char *, char **, size_t *);
-    void (*fix_string) (char *);
-      /*I*/ const char *(*term_form) (const char *);
-      /*I*/ const char *(*fit_to_term) (const char *, int, align_crt_t);
+      /*I*/ gboolean (*char_isspace) (const char *ch);
+      /*I*/ gboolean (*char_ispunct) (const char *ch);
+      /*I*/ gboolean (*char_isalnum) (const char *ch);
+      /*I*/ gboolean (*char_isdigit) (const char *ch);
+      /*I*/ gboolean (*char_isprint) (const char *ch);
+      /*I*/ gboolean (*char_iscombiningmark) (const char *ch);
+      /*I*/ int (*length) (const char *text);
+      /*I*/ int (*length2) (const char *text, int size);
+      /*I*/ int (*length_noncomb) (const char *text);
+      /*I*/ gboolean (*char_toupper) (const char *ch, char **out, size_t * remain);
+    gboolean (*char_tolower) (const char *ch, char **out, size_t * remain);
+    void (*fix_string) (char *text);
+      /*I*/ const char *(*term_form) (const char *text);
+      /*I*/ const char *(*fit_to_term) (const char *text, int width, align_crt_t just_mode);
       /*I*/ const char *(*term_trim) (const char *text, int width);
-      /*I*/ const char *(*term_substring) (const char *, int, int);
-      /*I*/ int (*term_width1) (const char *);
-      /*I*/ int (*term_width2) (const char *, size_t);
-      /*I*/ int (*term_char_width) (const char *);
-      /*I*/ const char *(*trunc) (const char *, int);
-      /*I*/ int (*offset_to_pos) (const char *, size_t);
-      /*I*/ int (*column_to_pos) (const char *, size_t);
-      /*I*/ char *(*create_search_needle) (const char *, int);
-    void (*release_search_needle) (char *, int);
-    const char *(*search_first) (const char *, const char *, int);
-    const char *(*search_last) (const char *, const char *, int);
-    int (*compare) (const char *, const char *);
-      /*I*/ int (*ncompare) (const char *, const char *);
-      /*I*/ int (*casecmp) (const char *, const char *);
-      /*I*/ int (*ncasecmp) (const char *, const char *);
-      /*I*/ int (*prefix) (const char *, const char *);
-      /*I*/ int (*caseprefix) (const char *, const char *);
-      /*I*/ char *(*create_key) (const char *text, int case_sen);
-      /*I*/ char *(*create_key_for_filename) (const char *text, int case_sen);
-      /*I*/ int (*key_collate) (const char *t1, const char *t2, int case_sen);
-      /*I*/ void (*release_key) (char *key, int case_sen);
-  /*I*/};
+      /*I*/ const char *(*term_substring) (const char *text, int start, int width);
+      /*I*/ int (*term_width1) (const char *text);
+      /*I*/ int (*term_width2) (const char *text, size_t length);
+      /*I*/ int (*term_char_width) (const char *length);
+      /*I*/ const char *(*trunc) (const char *length, int width);
+      /*I*/ int (*offset_to_pos) (const char *text, size_t length);
+      /*I*/ int (*column_to_pos) (const char *text, size_t pos);
+      /*I*/ char *(*create_search_needle) (const char *needle, gboolean case_sen);
+    void (*release_search_needle) (char *needle, gboolean case_sen);
+    const char *(*search_first) (const char *text, const char *needle, gboolean case_sen);
+    const char *(*search_last) (const char *text, const char *needle, gboolean case_sen);
+    int (*compare) (const char *t1, const char *t2);
+      /*I*/ int (*ncompare) (const char *t1, const char *t2);
+      /*I*/ int (*casecmp) (const char *t1, const char *t2);
+      /*I*/ int (*ncasecmp) (const char *t1, const char *t2);
+      /*I*/ int (*prefix) (const char *text, const char *prefix);
+      /*I*/ int (*caseprefix) (const char *text, const char *prefix);
+      /*I*/ char *(*create_key) (const char *text, gboolean case_sen);
+      /*I*/ char *(*create_key_for_filename) (const char *text, gboolean case_sen);
+      /*I*/ int (*key_collate) (const char *t1, const char *t2, gboolean case_sen);
+      /*I*/ void (*release_key) (char *key, gboolean case_sen);
+    /* *INDENT-ON* */
+};
 
 /*** global variables defined in .c file *********************************************************/
 
@@ -169,17 +171,17 @@ struct str_class str_ascii_init (void);
 /* create convertor from "from_enc" to terminal encoding
  * if "from_enc" is not supported return INVALID_CONV 
  */
-GIConv str_crt_conv_from (const char *);
+GIConv str_crt_conv_from (const char *from_enc);
 
 /* create convertor from terminal encoding to "to_enc"
  * if "to_enc" is not supported return INVALID_CONV 
  */
-GIConv str_crt_conv_to (const char *);
+GIConv str_crt_conv_to (const char *to_enc);
 
 /* close convertor, do not close str_cnv_to_term, str_cnv_from_term, 
  * str_cnv_not_convert 
  */
-void str_close_conv (GIConv);
+void str_close_conv (GIConv conv);
 
 /* return on of not used buffers (.used == 0) or create new
  * returned buffer has set .used to 1
@@ -189,8 +191,8 @@ void str_close_conv (GIConv);
  * return ESTR_SUCCESS if there was no problem.
  * otherwise return  ESTR_PROBLEM or ESTR_FAILURE
  */
-estr_t str_convert (GIConv, const char *, GString *);
-estr_t str_nconvert (GIConv, const char *, int, GString *);
+estr_t str_convert (GIConv coder, const char *string, GString * buffer);
+estr_t str_nconvert (GIConv coder, const char *string, int size, GString * buffer);
 
 /* convert GError message (which in UTF-8) to terminal charset
  * def_char is used if result of error->str conversion if ESTR_FAILURE
@@ -204,13 +206,13 @@ gchar *str_conv_gerror_message (GError * error, const char *def_msg);
  * if coder is str_cnv_from_term or str_cnv_not_convert, string is only copied,
  * so is possible to show file, that is not valid in terminal encoding
  */
-estr_t str_vfs_convert_from (GIConv, const char *, GString *);
+estr_t str_vfs_convert_from (GIConv coder, const char *string, GString * buffer);
 
 /* if coder is str_cnv_to_term or str_cnv_not_convert, string is only copied,
  * does replace with questionmark 
  * I
  */
-estr_t str_vfs_convert_to (GIConv, const char *, int, GString *);
+estr_t str_vfs_convert_to (GIConv coder, const char *string, int size, GString * buffer);
 
 /* printf function for str_buffer, append result of printf at the end of buffer
  */
@@ -220,7 +222,7 @@ void str_printf (GString * buffer, const char *format, ...) G_GNUC_PRINTF (2, 3)
 
 /* add standard replacement character in terminal encoding
  */
-void str_insert_replace_char (GString *);
+void str_insert_replace_char (GString * buffer);
 
 /* init strings and set terminal encoding,
  * if is termenc NULL, detect terminal encoding
@@ -245,7 +247,7 @@ estr_t str_translate_char (GIConv conv, const char *ch, size_t ch_size,
 /* test, if text is valid in terminal encoding
  * I
  */
-int str_is_valid_string (const char *text);
+gboolean str_is_valid_string (const char *text);
 
 /* test, if first char of ch is valid
  * size, how many bytes characters occupied, could be (size_t)(-1)
@@ -322,27 +324,27 @@ int str_cprev_noncomb_char (const char **text, const char *begin);
 /* if first characters in ch is space, tabulator  or new lines
  * I
  */
-int str_isspace (const char *ch);
+gboolean str_isspace (const char *ch);
 
 /* if first characters in ch is punctuation or symbol
  * I
  */
-int str_ispunct (const char *ch);
+gboolean str_ispunct (const char *ch);
 
 /* if first characters in ch is alphanum
  * I
  */
-int str_isalnum (const char *ch);
+gboolean str_isalnum (const char *ch);
 
 /* if first characters in ch is digit
  * I
  */
-int str_isdigit (const char *ch);
+gboolean str_isdigit (const char *ch);
 
 /* if first characters in ch is printable
  * I
  */
-int str_isprint (const char *ch);
+gboolean str_isprint (const char *ch);
 
 /* if first characters in ch is a combining mark (only in utf-8)
  * combining makrs are assumed to be zero width 
@@ -354,13 +356,13 @@ gboolean str_iscombiningmark (const char *ch);
  * decrase remain by size of returned characters
  * if out is not big enough, do nothing
  */
-int str_toupper (const char *ch, char **out, size_t * remain);
+gboolean str_toupper (const char *ch, char **out, size_t * remain);
 
 /* write upper from of fisrt characters in ch into out
  * decrase remain by size of returned characters
  * if out is not big enough, do nothing
  */
-int str_tolower (const char *ch, char **out, size_t * remain);
+gboolean str_tolower (const char *ch, char **out, size_t * remain);
 
 /* return length of text in characters
  * I
@@ -375,7 +377,7 @@ int str_length2 (const char *text, int size);
 /* return length of one char
  * I
  */
-int str_length_char (const char *);
+int str_length_char (const char *text);
 
 /* return length of text in characters, count only noncombining characters
  * I
@@ -455,19 +457,19 @@ const char *str_trunc (const char *text, int width);
  * so needle can be reused
  * in UTF-8 return normalized form of needle
  */
-char *str_create_search_needle (const char *needle, int case_sen);
+char *str_create_search_needle (const char *needle, gboolean case_sen);
 
 /* free needle returned by str_create_search_needle
  */
-void str_release_search_needle (char *needle, int case_sen);
+void str_release_search_needle (char *needle, gboolean case_sen);
 
 /* search for first occurrence of search in text
  */
-const char *str_search_first (const char *text, const char *needle, int case_sen);
+const char *str_search_first (const char *text, const char *needle, gboolean case_sen);
 
 /* search for last occurrence of search in text
  */
-const char *str_search_last (const char *text, const char *needle, int case_sen);
+const char *str_search_last (const char *text, const char *needle, gboolean case_sen);
 
 /* case sensitive compare two strings
  * I
@@ -507,25 +509,25 @@ int str_caseprefix (const char *text, const char *prefix);
 /* create a key that is used by str_key_collate
  * I
  */
-char *str_create_key (const char *text, int case_sen);
+char *str_create_key (const char *text, gboolean case_sen);
 
 /* create a key that is used by str_key_collate
  * should aware dot '.' in text
  * I
  */
-char *str_create_key_for_filename (const char *text, int case_sen);
+char *str_create_key_for_filename (const char *text, gboolean case_sen);
 
 /* compare two string using LC_COLLATE, if is possible
  * if case_sen is set, comparing is case sensitive,
  * case_sen must be same for str_create_key, str_key_collate and str_release_key
  * I
  */
-int str_key_collate (const char *t1, const char *t2, int case_sen);
+int str_key_collate (const char *t1, const char *t2, gboolean case_sen);
 
 /* release_key created by str_create_key, only rigth way to release key
  * I
  */
-void str_release_key (char *key, int case_sen);
+void str_release_key (char *key, gboolean case_sen);
 
 /* return TRUE if codeset_name is utf8 or utf-8
  * I
@@ -535,6 +537,28 @@ gboolean str_isutf8 (const char *codeset_name);
 const char *str_detect_termencoding (void);
 
 int str_verscmp (const char *s1, const char *s2);
+
+/* Compare version strings:
+
+   This function compares strings s1 and s2:
+   1) By PREFIX in the same way as strcmp.
+   2) Then by VERSION (most similarly to version compare of Debian's dpkg).
+   Leading zeros in version numbers are ignored.
+   3) If both (PREFIX and  VERSION) are equal, strcmp function is used for
+   comparison. So this function can return 0 if (and only if) strings s1
+   and s2 are identical.
+
+   It returns number > 0 for s1 > s2, 0 for s1 == s2 and number < 0 for s1 < s2.
+
+   This function compares strings, in a way that if VER1 and VER2 are version
+   numbers and PREFIX and SUFFIX (SUFFIX defined as (\.[A-Za-z~][A-Za-z0-9~]*)*)
+   are strings then VER1 < VER2 implies filevercmp (PREFIX VER1 SUFFIX,
+   PREFIX VER2 SUFFIX) < 0.
+
+   This function is intended to be a replacement for strverscmp.
+ */
+int filevercmp (const char *s1, const char *s2);
+
 
 /* return how many lines and columns will text occupy on terminal
  */

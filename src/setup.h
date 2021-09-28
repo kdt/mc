@@ -73,7 +73,7 @@ struct mc_fhl_struct;
 
 /*** global variables defined in .c file *********************************************************/
 
-/* global paremeters */
+/* global parameters */
 extern char *global_profile_name;
 extern gboolean confirm_delete;
 extern gboolean confirm_directory_hotlist_delete;
@@ -82,6 +82,7 @@ extern gboolean confirm_exit;
 extern gboolean confirm_overwrite;
 extern gboolean confirm_view_dir;
 extern gboolean safe_delete;
+extern gboolean safe_overwrite;
 extern gboolean clear_before_exec;
 extern gboolean auto_menu;
 extern gboolean drop_menus;
@@ -151,9 +152,6 @@ void load_key_defs (void);
 #ifdef ENABLE_VFS_FTP
 char *load_anon_passwd (void);
 #endif /* ENABLE_VFS_FTP */
-
-void load_keymap_defs (gboolean load_from_file);
-void free_keymap_defs (void);
 
 void panel_load_setup (WPanel * panel, const char *section);
 void panel_save_setup (WPanel * panel, const char *section);

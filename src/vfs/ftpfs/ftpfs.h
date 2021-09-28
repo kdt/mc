@@ -6,6 +6,8 @@
 #ifndef MC__VFS_FTPFS_H
 #define MC__VFS_FTPFS_H
 
+#include "lib/vfs/xdirentry.h"
+
 /*** typedefs(not structures) and defined constants **********************************************/
 
 #define FTP_INET         1
@@ -36,7 +38,9 @@ extern gboolean ftpfs_first_cd_then_ls;
 /*** declarations of public functions ************************************************************/
 
 void ftpfs_init_passwd (void);
-void init_ftpfs (void);
+void vfs_init_ftpfs (void);
+GSList *ftpfs_parse_long_list (struct vfs_class *me, struct vfs_s_inode *dir, GSList * buf,
+                               int *err_ret);
 
 /*** inline functions ****************************************************************************/
 #endif

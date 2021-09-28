@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Midnight Commander\n"
 "Report-Msgid-Bugs-To: http://www.midnight-commander.org/\n"
-"POT-Creation-Date: 2017-05-02 21:10+0200\n"
-"PO-Revision-Date: 2017-04-15 09:35+0000\n"
-"Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
+"POT-Creation-Date: 2021-09-26 10:06+0300\n"
+"PO-Revision-Date: 2021-07-26 20:16+0000\n"
+"Last-Translator: Transifex Bot <>\n"
 "Language-Team: Vietnamese (http://www.transifex.com/mc/mc/language/vi/)\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
@@ -70,24 +70,6 @@ msgid "Cannot create %s directory"
 msgstr ""
 
 msgid "FATAL: not a directory:"
-msgstr ""
-
-#, c-format
-msgid "An error occurred while migrating user settings: %s"
-msgstr ""
-
-#, c-format
-msgid ""
-"Your old settings were migrated from %s\n"
-"to Freedesktop recommended dirs.\n"
-"To get more info, please visit\n"
-"http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html"
-msgstr ""
-
-#, c-format
-msgid ""
-"Your old settings were migrated from %s\n"
-"to %s\n"
 msgstr ""
 
 msgid ""
@@ -164,10 +146,10 @@ msgstr ""
 msgid "True color not supported with ncurses."
 msgstr ""
 
-msgid "True color not supported in this slang version."
+msgid "Your terminal doesn't even seem to support 256 colors."
 msgstr ""
 
-msgid "Your terminal doesn't even seem to support 256 colors."
+msgid "True color not supported in this slang version."
 msgstr ""
 
 msgid "Set COLORTERM=truecolor if your terminal really supports true colors."
@@ -459,6 +441,27 @@ msgstr ""
 msgid "The TERM environment variable is unset!\n"
 msgstr "Biến môi trườn TERM chưa được xác định!\n"
 
+msgid "Cannot check SIGWINCH pipe"
+msgstr ""
+
+#, c-format
+msgid ""
+"\n"
+"Cannot create pipe for SIGWINCH: %s (%d)\n"
+msgstr ""
+
+#, c-format
+msgid ""
+"\n"
+"Cannot configure write end of SIGWINCH pipe: %s (%d)\n"
+msgstr ""
+
+#, c-format
+msgid ""
+"\n"
+"Cannot configure read end of SIGWINCH pipe: %s (%d)\n"
+msgstr ""
+
 #, c-format
 msgid ""
 "Screen size %dx%d is not supported.\n"
@@ -506,18 +509,6 @@ msgid ""
 "%s"
 msgstr ""
 
-msgid "Warning"
-msgstr "Cảnh báo"
-
-msgid "Pipe failed"
-msgstr ""
-
-msgid "Dup failed"
-msgstr ""
-
-msgid "Error dup'ing old error pipe"
-msgstr ""
-
 #, c-format
 msgid "Directory cache expired for %s"
 msgstr "Cache thư mục hết hạn cho %s"
@@ -563,7 +554,6 @@ msgstr "Tập tin tạm thời sẽ được tạo trong thư mục %s\n"
 msgid "Temporary files will not be created\n"
 msgstr "Tập tin tạm thời sẽ không được tạo ra\n"
 
-#, c-format
 msgid "Press any key to continue..."
 msgstr "Để tiếp tục nhấn phím bất kỳ..."
 
@@ -632,6 +622,9 @@ msgstr ""
 msgid "Print last working directory to specified file"
 msgstr "Ghi thư mục làm việc cuối cùng vào tập tin chỉ ra"
 
+msgid "<file>"
+msgstr ""
+
 msgid "Enables subshell support (default)"
 msgstr "Bật hỗ trợ shell con (mặc định)"
 
@@ -641,13 +634,13 @@ msgstr "Tắt hỗ trợ shell con"
 msgid "Log ftp dialog to specified file"
 msgstr "Ghi hội thoại FTP vào một tập tin"
 
-msgid "Set debug level"
-msgstr "Đặt mức độ tìm sửa lỗi (debug)"
-
 msgid "Launches the file viewer on a file"
 msgstr "Xem tập tin"
 
 msgid "Edit files"
+msgstr ""
+
+msgid "<file> ..."
 msgstr ""
 
 msgid "Forces xterm features"
@@ -688,6 +681,9 @@ msgstr "Yêu cầu chạy trong chế độ màu"
 
 msgid "Specifies a color configuration"
 msgstr "Xác định cấu hình màu sắc"
+
+msgid "<string>"
+msgstr ""
 
 msgid "Show mc with specified skin"
 msgstr ""
@@ -927,15 +923,6 @@ msgstr ""
 msgid "Two files are needed to compare"
 msgstr ""
 
-msgid "Choose syntax highlighting"
-msgstr ""
-
-msgid "< Auto >"
-msgstr "< Tự động >"
-
-msgid "< Reload Current Syntax >"
-msgstr "< Nạp lại cú pháp hiện thời >"
-
 #, c-format
 msgid "Loading: %3d%%"
 msgstr ""
@@ -968,6 +955,9 @@ msgid ""
 "Open it anyway?"
 msgstr ""
 
+msgid "Warning"
+msgstr "Cảnh báo"
+
 #, c-format
 msgid "Error reading from pipe: %s"
 msgstr ""
@@ -975,14 +965,6 @@ msgstr ""
 #, c-format
 msgid "Cannot open pipe for reading: %s"
 msgstr ""
-
-#, c-format
-msgid "Searching %s: %3d%%"
-msgstr ""
-
-#, c-format
-msgid "Searching %s"
-msgstr "Tìm %s"
 
 msgid "File has hard-links. Detach before saving?"
 msgstr ""
@@ -1029,12 +1011,6 @@ msgstr ""
 msgid "Save As"
 msgstr ""
 
-msgid "Block is large, you may not be able to undo this action"
-msgstr ""
-
-msgid "Collect completions"
-msgstr ""
-
 msgid "&Quick save"
 msgstr ""
 
@@ -1063,27 +1039,6 @@ msgid "&Overwrite"
 msgstr "&Ghi chèn"
 
 msgid "Cannot save file"
-msgstr ""
-
-msgid "Delete macro"
-msgstr ""
-
-msgid "Press macro hotkey:"
-msgstr ""
-
-msgid "Macro not deleted"
-msgstr ""
-
-msgid "Save macro"
-msgstr ""
-
-msgid "Press the macro's new hotkey:"
-msgstr ""
-
-msgid "Repeat last commands"
-msgstr ""
-
-msgid "Repeat times:"
 msgstr ""
 
 #, c-format
@@ -1119,13 +1074,6 @@ msgstr ""
 
 msgid "&Local"
 msgstr "&Nội bộ máy"
-
-msgid "Replace"
-msgstr ""
-
-#, c-format
-msgid "%ld replacements made"
-msgstr ""
 
 msgid "[NoName]"
 msgstr ""
@@ -1226,42 +1174,37 @@ msgstr ""
 
 msgid ""
 "Current text was modified without a file save.\n"
-"Continue discards these changes"
-msgstr ""
-
-msgid "In se&lection"
-msgstr ""
-
-msgid "&Find all"
-msgstr ""
-
-msgid "Enter replacement string:"
-msgstr ""
-
-msgid "Replace with:"
-msgstr ""
-
-msgid "&Replace"
-msgstr "&Thay thế"
-
-msgid "A&ll"
-msgstr "&Tất cả"
-
-msgid "&Skip"
-msgstr "&Bỏ qua"
-
-msgid "Confirm replace"
+"Continue discards these changes."
 msgstr ""
 
 msgid "Cancel"
 msgstr "Hủy bỏ"
 
-msgid ""
-"Current text was modified without a file save.\n"
-"Continue discards these changes."
+msgid "Collect completions"
 msgstr ""
 
 msgid "NoName"
+msgstr ""
+
+msgid "Save macro"
+msgstr ""
+
+msgid "Press the macro's new hotkey:"
+msgstr ""
+
+msgid "Delete macro"
+msgstr ""
+
+msgid "Press macro hotkey:"
+msgstr ""
+
+msgid "Macro not deleted"
+msgstr ""
+
+msgid "Repeat last commands"
+msgstr ""
+
+msgid "Repeat times:"
 msgstr ""
 
 msgid "&Open file..."
@@ -1271,6 +1214,9 @@ msgid "&New"
 msgstr ""
 
 msgid "&Close"
+msgstr ""
+
+msgid "&History..."
 msgstr ""
 
 msgid "Save &as..."
@@ -1549,12 +1495,51 @@ msgstr ""
 msgid "Editor options"
 msgstr ""
 
+msgid "In se&lection"
+msgstr ""
+
+msgid "&Find all"
+msgstr ""
+
+msgid "Enter replacement string:"
+msgstr ""
+
+msgid "Replace"
+msgstr ""
+
+msgid "Replace with:"
+msgstr ""
+
+msgid "&Replace"
+msgstr "&Thay thế"
+
+msgid "A&ll"
+msgstr "&Tất cả"
+
+msgid "&Skip"
+msgstr "&Bỏ qua"
+
+msgid "Confirm replace"
+msgstr ""
+
+#, c-format
+msgid "Searching %s: %3d%%"
+msgstr ""
+
+#, c-format
+msgid "Searching %s"
+msgstr "Tìm %s"
+
+#, c-format
+msgid "%ld replacements made"
+msgstr ""
+
 msgid ""
 "A user friendly text editor\n"
 "written for the Midnight Commander."
 msgstr ""
 
-msgid "Copyright (C) 1996-2016 the Free Software Foundation"
+msgid "Copyright (C) 1996-2021 the Free Software Foundation"
 msgstr ""
 
 msgid "About"
@@ -1674,6 +1659,15 @@ msgstr ""
 msgid "Select language"
 msgstr ""
 
+msgid "Choose syntax highlighting"
+msgstr ""
+
+msgid "< Auto >"
+msgstr "< Tự động >"
+
+msgid "< Reload Current Syntax >"
+msgstr "< Nạp lại cú pháp hiện thời >"
+
 msgid "Load syntax file"
 msgstr ""
 
@@ -1701,7 +1695,11 @@ msgstr ""
 msgid "The shell is already running a command"
 msgstr ""
 
-#, c-format
+msgid ""
+"Not an xterm or Linux console;\n"
+"the subshell cannot be toggled."
+msgstr ""
+
 msgid "Type 'exit' to return to the Midnight Commander"
 msgstr ""
 
@@ -1726,6 +1724,10 @@ msgstr "khác"
 msgid "Flag"
 msgstr "Cờ"
 
+#, c-format
+msgid "Permissions (octal): %o"
+msgstr ""
+
 msgid "Chown advanced command"
 msgstr ""
 
@@ -1734,6 +1736,15 @@ msgid ""
 "Cannot chmod \"%s\"\n"
 "%s"
 msgstr ""
+
+msgid "&Ignore"
+msgstr ""
+
+msgid "Ignore &all"
+msgstr ""
+
+msgid "&Retry"
+msgstr "&Thử lại"
 
 #, c-format
 msgid ""
@@ -1825,6 +1836,9 @@ msgstr ""
 msgid "Sa&fe delete"
 msgstr ""
 
+msgid "Safe overwrite"
+msgstr ""
+
 msgid "A&uto save setup"
 msgstr ""
 
@@ -1832,6 +1846,9 @@ msgid "Configure options"
 msgstr "Tùy chọn cấu hình"
 
 msgid "Skin:"
+msgstr ""
+
+msgid "&Shadows"
 msgstr ""
 
 msgid "Appearance"
@@ -1931,9 +1948,8 @@ msgstr ""
 msgid "User &mini status"
 msgstr ""
 
-#, fuzzy
 msgid "Listing format"
-msgstr "&Soạn thảo định dạng danh sách"
+msgstr ""
 
 msgid "Executable &first"
 msgstr ""
@@ -2042,16 +2058,111 @@ msgid "Background jobs"
 msgstr ""
 
 #, c-format
-msgid "Password for \\\\%s\\%s"
-msgstr "Mật khẩu cho \\\\%s\\%s"
+msgid ""
+"Cannot chdir to \"%s\"\n"
+"%s"
+msgstr ""
 
-msgid "Domain:"
-msgstr "Miền (domain):"
+msgid "Secure deletion"
+msgstr ""
 
-msgid "Username:"
-msgstr "Tên người dùng:"
+msgid "Undelete"
+msgstr ""
 
-msgid "SMB authentication"
+msgid "Synchronous updates"
+msgstr ""
+
+msgid "Synchronous directory updates"
+msgstr ""
+
+msgid "Immutable"
+msgstr ""
+
+msgid "Append only"
+msgstr ""
+
+msgid "No dump"
+msgstr ""
+
+msgid "No update atime"
+msgstr ""
+
+msgid "Compress"
+msgstr ""
+
+msgid "Compressed clusters"
+msgstr ""
+
+msgid "Compressed dirty file"
+msgstr ""
+
+msgid "Compression raw access"
+msgstr ""
+
+msgid "Encrypted inode"
+msgstr ""
+
+msgid "Journaled data"
+msgstr ""
+
+msgid "Indexed directory"
+msgstr ""
+
+msgid "No tail merging"
+msgstr ""
+
+msgid "Top of directory hierarchies"
+msgstr ""
+
+msgid "Inode uses extents"
+msgstr ""
+
+msgid "Huge_file"
+msgstr ""
+
+msgid "No COW"
+msgstr ""
+
+msgid "Direct access for files"
+msgstr ""
+
+msgid "Casefolded file"
+msgstr ""
+
+msgid "Inode has inline data"
+msgstr ""
+
+msgid "Project hierarchy"
+msgstr ""
+
+msgid "Verity protected inode"
+msgstr ""
+
+msgid "&Marked all"
+msgstr "Đánh &dấu tất cả"
+
+msgid "S&et marked"
+msgstr "Đá&nh dấu"
+
+msgid "C&lear marked"
+msgstr "&Xóa đánh dấu"
+
+msgid "Chattr command"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot chattr \"%s\"\n"
+"%s"
+msgstr ""
+
+msgid "Cannot change attributes on non-local filesystems"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot get flags of \"%s\"\n"
+"%s"
 msgstr ""
 
 msgid "set &user ID on execution"
@@ -2101,15 +2212,6 @@ msgstr ""
 
 msgid "Group name:"
 msgstr ""
-
-msgid "&Marked all"
-msgstr "Đánh &dấu tất cả"
-
-msgid "S&et marked"
-msgstr "Đá&nh dấu"
-
-msgid "C&lear marked"
-msgstr "&Xóa đánh dấu"
 
 msgid "Chmod command"
 msgstr " Câu lệnh chmod "
@@ -2240,11 +2342,6 @@ msgid ""
 "to use this command"
 msgstr ""
 
-msgid ""
-"Not an xterm or Linux console;\n"
-"the panels cannot be toggled."
-msgstr ""
-
 #, c-format
 msgid "'%s' is not a symbolic link"
 msgstr ""
@@ -2273,9 +2370,6 @@ msgstr ""
 msgid "Shell link to machine"
 msgstr ""
 
-msgid "SMB link to machine"
-msgstr ""
-
 msgid "Undelete files on an ext2 file system"
 msgstr ""
 
@@ -2301,15 +2395,6 @@ msgstr ""
 msgid "Cannot execute commands on non-local filesystems"
 msgstr ""
 
-#, c-format
-msgid ""
-"Cannot chdir to \"%s\"\n"
-"%s"
-msgstr ""
-
-msgid "Cannot read directory contents"
-msgstr "Không đọc được nội dung thư mục"
-
 msgid "Parameter"
 msgstr ""
 
@@ -2317,6 +2402,9 @@ msgstr ""
 msgid ""
 "Cannot create temporary command file\n"
 "%s"
+msgstr ""
+
+msgid "Pipe failed"
 msgstr ""
 
 #, c-format
@@ -2382,7 +2470,20 @@ msgstr "tập tin/thư mục"
 msgid " with source mask:"
 msgstr " với nhãn ban đầu:"
 
-msgid "Cannot make the hardlink"
+#, c-format
+msgid ""
+"Cannot stat hardlink source file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot create target hardlink \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid "Cannot create target hardlink \"%s\""
 msgstr ""
 
 #, c-format
@@ -2403,11 +2504,24 @@ msgid ""
 "%s"
 msgstr ""
 
-msgid "Ski&p all"
+#, c-format
+msgid ""
+"\"%s\"\n"
+"and\n"
+"\"%s\"\n"
+"are the same directory"
 msgstr ""
 
-msgid "&Retry"
-msgstr "&Thử lại"
+#, c-format
+msgid ""
+"\"%s\"\n"
+"and\n"
+"\"%s\"\n"
+"are the same file"
+msgstr ""
+
+msgid "Ski&p all"
+msgstr ""
 
 #, c-format
 msgid ""
@@ -2427,16 +2541,14 @@ msgstr "&Không"
 
 #, c-format
 msgid ""
-"Cannot stat file \"%s\"\n"
+"Cannot remove file \"%s\"\n"
 "%s"
 msgstr ""
 
 #, c-format
 msgid ""
-"\"%s\"\n"
-"and\n"
-"\"%s\"\n"
-"are the same file"
+"Cannot stat file \"%s\"\n"
+"%s"
 msgstr ""
 
 #, c-format
@@ -2451,18 +2563,6 @@ msgstr ""
 
 #, c-format
 msgid ""
-"Cannot remove file \"%s\"\n"
-"%s"
-msgstr ""
-
-#, c-format
-msgid ""
-"Cannot delete file \"%s\"\n"
-"%s"
-msgstr ""
-
-#, c-format
-msgid ""
 "Cannot remove directory \"%s\"\n"
 "%s"
 msgstr ""
@@ -2471,6 +2571,21 @@ msgstr ""
 msgid ""
 "Cannot overwrite directory \"%s\"\n"
 "%s"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot overwrite file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot move directory \"%s\" to \"%s\"\n"
+"%s"
+msgstr ""
+
+msgid "Cannot operate on \"..\"!"
 msgstr ""
 
 #, c-format
@@ -2600,30 +2715,7 @@ msgid ""
 msgstr ""
 
 #, c-format
-msgid ""
-"\"%s\"\n"
-"and\n"
-"\"%s\"\n"
-"are the same directory"
-msgstr ""
-
-#, c-format
-msgid ""
-"Cannot overwrite file \"%s\"\n"
-"%s"
-msgstr ""
-
-#, c-format
-msgid ""
-"Cannot move directory \"%s\" to \"%s\"\n"
-"%s"
-msgstr ""
-
-#, c-format
 msgid "Directories: %zu, total size: %s"
-msgstr ""
-
-msgid "Cannot operate on \"..\"!"
 msgstr ""
 
 msgid "Sorry, I could not put the job in background"
@@ -2655,19 +2747,14 @@ msgstr "%.2f KB/giây"
 msgid "%ld B/s"
 msgstr "%ld B/giây"
 
-msgid "Target file already exists!"
+msgid "New     :"
 msgstr ""
 
-#, c-format
-msgid "New     : %s, size %s"
+msgid "Existing:"
 msgstr ""
 
-#, c-format
-msgid "Existing: %s, size %s"
+msgid "Overwrite this file?"
 msgstr ""
-
-msgid "Overwrite this target?"
-msgstr "Khi đè lên tập tin này?"
 
 msgid "A&ppend"
 msgstr "&Thêm vào cuối"
@@ -2675,14 +2762,20 @@ msgstr "&Thêm vào cuối"
 msgid "&Reget"
 msgstr "&Lấy lại"
 
-msgid "Overwrite all targets?"
-msgstr "Khi đè lên mọi tập tin đích?"
+msgid "Overwrite all files?"
+msgstr ""
 
-msgid "&Update"
-msgstr "&Cập nhật"
+msgid "Don't overwrite with &zero length file"
+msgstr ""
 
-msgid "If &size differs"
-msgstr "&Nếu kích thước khác nhau"
+msgid "&Older"
+msgstr ""
+
+msgid "S&maller"
+msgstr ""
+
+msgid "&Size differs"
+msgstr ""
 
 msgid "File exists"
 msgstr ""
@@ -2756,6 +2849,221 @@ msgstr "Trong nền sa&u"
 msgid "Invalid source pattern '%s'"
 msgstr ""
 
+msgid "File listin&g"
+msgstr ""
+
+msgid "&Quick view"
+msgstr ""
+
+msgid "&Info"
+msgstr ""
+
+msgid "&Tree"
+msgstr "&Cây thư mục"
+
+msgid "&Listing format..."
+msgstr ""
+
+msgid "&Sort order..."
+msgstr "t&Hứ tự sắp xếp..."
+
+msgid "&Filter..."
+msgstr "&Lọc tập tin..."
+
+msgid "&Encoding..."
+msgstr ""
+
+msgid "FT&P link..."
+msgstr "kết nối &FTP..."
+
+msgid "S&hell link..."
+msgstr "kết nối &Shell..."
+
+msgid "S&FTP link..."
+msgstr ""
+
+msgid "Paneli&ze"
+msgstr ""
+
+msgid "&Rescan"
+msgstr ""
+
+msgid "&View"
+msgstr ""
+
+msgid "Vie&w file..."
+msgstr ""
+
+msgid "&Filtered view"
+msgstr ""
+
+msgid "&Copy"
+msgstr ""
+
+msgid "C&hmod"
+msgstr ""
+
+msgid "&Link"
+msgstr ""
+
+msgid "&Symlink"
+msgstr ""
+
+msgid "Relative symlin&k"
+msgstr ""
+
+msgid "Edit s&ymlink"
+msgstr ""
+
+msgid "Ch&own"
+msgstr ""
+
+msgid "&Advanced chown"
+msgstr ""
+
+msgid "Cha&ttr"
+msgstr ""
+
+msgid "&Rename/Move"
+msgstr ""
+
+msgid "&Mkdir"
+msgstr ""
+
+msgid "&Quick cd"
+msgstr ""
+
+msgid "Select &group"
+msgstr ""
+
+msgid "U&nselect group"
+msgstr ""
+
+msgid "&Invert selection"
+msgstr ""
+
+msgid "E&xit"
+msgstr ""
+
+msgid "&User menu"
+msgstr ""
+
+msgid "&Directory tree"
+msgstr "cây thư &Mục"
+
+msgid "&Find file"
+msgstr ""
+
+msgid "S&wap panels"
+msgstr ""
+
+msgid "Switch &panels on/off"
+msgstr ""
+
+msgid "&Compare directories"
+msgstr ""
+
+msgid "C&ompare files"
+msgstr ""
+
+msgid "E&xternal panelize"
+msgstr ""
+
+msgid "Show directory s&izes"
+msgstr ""
+
+msgid "Command &history"
+msgstr ""
+
+msgid "Viewed/edited files hi&story"
+msgstr ""
+
+msgid "Di&rectory hotlist"
+msgstr ""
+
+msgid "&Active VFS list"
+msgstr ""
+
+msgid "&Background jobs"
+msgstr ""
+
+msgid "Screen lis&t"
+msgstr ""
+
+msgid "&Undelete files (ext2fs only)"
+msgstr "&Phục hồi tập tin đã xóa (chỉ ext2fs)"
+
+msgid "&Listing format edit"
+msgstr "&Soạn thảo định dạng danh sách"
+
+msgid "Edit &extension file"
+msgstr "soạn thảo tập tin phần mở &Rộng"
+
+msgid "Edit &menu file"
+msgstr "soạ&N thảo tập tin trình đơn"
+
+msgid "Edit hi&ghlighting group file"
+msgstr ""
+
+msgid "&Configuration..."
+msgstr "&Cấu hình..."
+
+msgid "&Layout..."
+msgstr "&Vẻ ngoài..."
+
+msgid "&Panel options..."
+msgstr ""
+
+msgid "C&onfirmation..."
+msgstr ""
+
+msgid "&Appearance..."
+msgstr ""
+
+msgid "&Display bits..."
+msgstr "bit &Hiển thị..."
+
+msgid "&Virtual FS..."
+msgstr "&FS ảo..."
+
+msgid "Panels:"
+msgstr ""
+
+#, c-format
+msgid "You have %zu opened screen. Quit anyway?"
+msgid_plural "You have %zu opened screens. Quit anyway?"
+msgstr[0] ""
+
+msgid "The Midnight Commander"
+msgstr ""
+
+msgid "Do you really want to quit the Midnight Commander?"
+msgstr ""
+
+msgid "&Above"
+msgstr ""
+
+msgid "&Left"
+msgstr ""
+
+msgid "&Below"
+msgstr ""
+
+msgid "&Right"
+msgstr ""
+
+msgid "ButtonBar|Menu"
+msgstr ""
+
+msgid "ButtonBar|View"
+msgstr "Xem"
+
+msgid "ButtonBar|RenMov"
+msgstr ""
+
+msgid "ButtonBar|Mkdir"
+msgstr ""
+
 msgid "&Chdir"
 msgstr "&Chuyển thư mục"
 
@@ -2784,6 +3092,9 @@ msgstr ""
 msgid "&Find recursively"
 msgstr ""
 
+msgid "Follow s&ymlinks"
+msgstr ""
+
 msgid "S&kip hidden"
 msgstr ""
 
@@ -2801,9 +3112,6 @@ msgstr ""
 
 msgid "Fir&st hit"
 msgstr ""
-
-msgid "&Tree"
-msgstr "&Cây thư mục"
 
 msgid "Find File"
 msgstr "Tìm tập tin"
@@ -2825,6 +3133,14 @@ msgstr "Kết thúc"
 msgid "Finished (ignored %zu directory)"
 msgid_plural "Finished (ignored %zu directories)"
 msgstr[0] ""
+
+#, c-format
+msgid "Find File: \"%s\". Content: \"%s\""
+msgstr ""
+
+#, c-format
+msgid "Find File: \"%s\""
+msgstr ""
 
 msgid "Searching"
 msgstr "Tìm"
@@ -2992,6 +3308,16 @@ msgstr ""
 msgid "Links:      %d"
 msgstr ""
 
+msgid "Attributes: not supported"
+msgstr ""
+
+#, c-format
+msgid "Attributes: %s"
+msgstr ""
+
+msgid "Attributes: unavailable"
+msgstr ""
+
 #, c-format
 msgid "Mode:       %s (%04o)"
 msgstr ""
@@ -3038,216 +3364,6 @@ msgstr ""
 
 msgid "Layout"
 msgstr "Vẻ ngoài"
-
-msgid "File listin&g"
-msgstr ""
-
-msgid "&Quick view"
-msgstr ""
-
-msgid "&Info"
-msgstr ""
-
-#, fuzzy
-msgid "&Listing format..."
-msgstr "&Soạn thảo định dạng danh sách"
-
-msgid "&Sort order..."
-msgstr "t&Hứ tự sắp xếp..."
-
-msgid "&Filter..."
-msgstr "&Lọc tập tin..."
-
-msgid "&Encoding..."
-msgstr ""
-
-msgid "FT&P link..."
-msgstr "kết nối &FTP..."
-
-msgid "S&hell link..."
-msgstr "kết nối &Shell..."
-
-msgid "S&FTP link..."
-msgstr ""
-
-msgid "SM&B link..."
-msgstr "kết nối SM&B..."
-
-msgid "Paneli&ze"
-msgstr ""
-
-msgid "&Rescan"
-msgstr ""
-
-msgid "&View"
-msgstr ""
-
-msgid "Vie&w file..."
-msgstr ""
-
-msgid "&Filtered view"
-msgstr ""
-
-msgid "&Copy"
-msgstr ""
-
-msgid "C&hmod"
-msgstr ""
-
-msgid "&Link"
-msgstr ""
-
-msgid "&Symlink"
-msgstr ""
-
-msgid "Relative symlin&k"
-msgstr ""
-
-msgid "Edit s&ymlink"
-msgstr ""
-
-msgid "Ch&own"
-msgstr ""
-
-msgid "&Advanced chown"
-msgstr ""
-
-msgid "&Rename/Move"
-msgstr ""
-
-msgid "&Mkdir"
-msgstr ""
-
-msgid "&Quick cd"
-msgstr ""
-
-msgid "Select &group"
-msgstr ""
-
-msgid "U&nselect group"
-msgstr ""
-
-msgid "&Invert selection"
-msgstr ""
-
-msgid "E&xit"
-msgstr ""
-
-msgid "&User menu"
-msgstr ""
-
-msgid "&Directory tree"
-msgstr "cây thư &Mục"
-
-msgid "&Find file"
-msgstr ""
-
-msgid "S&wap panels"
-msgstr ""
-
-msgid "Switch &panels on/off"
-msgstr ""
-
-msgid "&Compare directories"
-msgstr ""
-
-msgid "C&ompare files"
-msgstr ""
-
-msgid "E&xternal panelize"
-msgstr ""
-
-msgid "Show directory s&izes"
-msgstr ""
-
-msgid "Command &history"
-msgstr ""
-
-msgid "Di&rectory hotlist"
-msgstr ""
-
-msgid "&Active VFS list"
-msgstr ""
-
-msgid "&Background jobs"
-msgstr ""
-
-msgid "Screen lis&t"
-msgstr ""
-
-msgid "&Undelete files (ext2fs only)"
-msgstr "&Phục hồi tập tin đã xóa (chỉ ext2fs)"
-
-msgid "&Listing format edit"
-msgstr "&Soạn thảo định dạng danh sách"
-
-msgid "Edit &extension file"
-msgstr "soạn thảo tập tin phần mở &Rộng"
-
-msgid "Edit &menu file"
-msgstr "soạ&N thảo tập tin trình đơn"
-
-msgid "Edit hi&ghlighting group file"
-msgstr ""
-
-msgid "&Configuration..."
-msgstr "&Cấu hình..."
-
-msgid "&Layout..."
-msgstr "&Vẻ ngoài..."
-
-msgid "&Panel options..."
-msgstr ""
-
-msgid "C&onfirmation..."
-msgstr ""
-
-msgid "&Appearance..."
-msgstr ""
-
-msgid "&Display bits..."
-msgstr "bit &Hiển thị..."
-
-msgid "&Virtual FS..."
-msgstr "&FS ảo..."
-
-msgid "Panels:"
-msgstr ""
-
-#, c-format
-msgid "You have %zu opened screen. Quit anyway?"
-msgid_plural "You have %zu opened screens. Quit anyway?"
-msgstr[0] ""
-
-msgid "The Midnight Commander"
-msgstr ""
-
-msgid "Do you really want to quit the Midnight Commander?"
-msgstr ""
-
-msgid "&Above"
-msgstr ""
-
-msgid "&Left"
-msgstr ""
-
-msgid "&Below"
-msgstr ""
-
-msgid "&Right"
-msgstr ""
-
-msgid "ButtonBar|Menu"
-msgstr ""
-
-msgid "ButtonBar|View"
-msgstr "Xem"
-
-msgid "ButtonBar|RenMov"
-msgstr ""
-
-msgid "ButtonBar|Mkdir"
-msgstr ""
 
 msgid "Memory exhausted!"
 msgstr ""
@@ -3386,6 +3502,9 @@ msgstr ""
 msgid "Do you really want to execute?"
 msgstr ""
 
+msgid "Cannot read directory contents"
+msgstr "Không đọc được nội dung thư mục"
+
 msgid "User supplied format looks invalid, reverting to default."
 msgstr ""
 "Định dạng người dùng đưa ra có vẻ không thích hợp, chuyển lại thành mặc định."
@@ -3408,11 +3527,18 @@ msgstr ""
 msgid "Enter command label:"
 msgstr ""
 
-msgid "Cannot invoke command."
-msgstr "Không thực hiện được câu lệnh."
+#, c-format
+msgid ""
+"External panelize:\n"
+"%s"
+msgstr ""
 
-msgid "Pipe close failed"
-msgstr "Đóng đường ống không thành công"
+#, c-format
+msgid ""
+"External panelize:\n"
+"failed to read data from child stdout:\n"
+"%s"
+msgstr ""
 
 msgid "Cannot run external panelize in a non-local directory"
 msgstr ""
@@ -3477,50 +3603,6 @@ msgid ""
 msgstr ""
 "Không ghi nhớ được vào tập tin %s:\n"
 "%s\n"
-
-msgid "Debug"
-msgstr ""
-
-msgid "ERROR:"
-msgstr ""
-
-msgid "True:"
-msgstr ""
-
-msgid "False:"
-msgstr ""
-
-msgid "Error calling program"
-msgstr ""
-
-msgid "Warning -- ignoring file"
-msgstr ""
-
-#, c-format
-msgid ""
-"File %s is not owned by root or you or is world writable.\n"
-"Using it may compromise your security"
-msgstr ""
-"Tập tin %s không thuộc quyền sở hữu của root, hay của bạn,\n"
-"hoặc ai cũng có thể ghi. Sử dụng tập tin này có thể không an toàn"
-
-msgid "Format error on file Extensions File"
-msgstr ""
-
-#, c-format
-msgid "The %%var macro has no default"
-msgstr ""
-
-#, c-format
-msgid "The %%var macro has no variable"
-msgstr ""
-
-#, c-format
-msgid "No suitable entries found in %s"
-msgstr ""
-
-msgid "User menu"
-msgstr ""
 
 msgid "Help file format error\n"
 msgstr ""
@@ -3610,6 +3692,12 @@ msgstr ""
 msgid "Home directory path is not absolute"
 msgstr ""
 
+msgid ""
+"GNU Midnight Commander\n"
+"is already running on this terminal.\n"
+"Subshell support will be disabled."
+msgstr ""
+
 #, c-format
 msgid ""
 "\n"
@@ -3635,15 +3723,6 @@ msgid ""
 "%s"
 msgstr ""
 
-msgid ""
-"GNU Midnight Commander is already\n"
-"running on this terminal.\n"
-"Subshell support will be disabled."
-msgstr ""
-"Một GNU Midnight Commander đã làm việc\n"
-"trên terminal này. Sẽ không có hỗ trợ\n"
-"shell con."
-
 #, c-format
 msgid "Cannot open named pipe %s\n"
 msgstr "Không mở được đường ống tên (named pipe) %s\n"
@@ -3655,51 +3734,64 @@ msgstr ""
 msgid "Warning: Cannot change to %s.\n"
 msgstr "Cảnh báo: Không chuyển được vào %s.\n"
 
-msgid "Using the S-Lang library with terminfo database\n"
+msgid "With builtin Editor and Aspell support"
 msgstr ""
 
-msgid "Using the ncurses library\n"
+msgid "With builtin Editor"
 msgstr ""
 
-msgid "Using the ncursesw library\n"
+msgid "With optional subshell support"
 msgstr ""
 
-msgid "With builtin Editor\n"
-msgstr "Với Trình soạn thảo nội trú\n"
-
-msgid "With optional subshell support\n"
+msgid "With subshell support as default"
 msgstr ""
 
-msgid "With subshell support as default\n"
+msgid "With support for background operations"
 msgstr ""
 
-msgid "With support for background operations\n"
-msgstr "Với hỗ trợ thao tác nền sau\n"
+msgid "With mouse support on xterm and Linux console"
+msgstr ""
 
-msgid "With mouse support on xterm and Linux console\n"
-msgstr "Với hỗ trợ chuột trong xterm và kênh giao tác Linux\n"
+msgid "With mouse support on xterm"
+msgstr ""
 
-msgid "With mouse support on xterm\n"
-msgstr "Với hỗ trợ chuột trong xterm\n"
+msgid "With support for X11 events"
+msgstr ""
 
-msgid "With support for X11 events\n"
-msgstr "Với hỗ trợ sự kiện X11\n"
+msgid "With internationalization support"
+msgstr ""
 
-msgid "With internationalization support\n"
-msgstr "Với hỗ trợ các ngôn ngữ khác\n"
+msgid "With multiple codepages support"
+msgstr ""
 
-msgid "With multiple codepages support\n"
-msgstr "Với hỗ trợ nhiều bảng mã\n"
+msgid "With ext2fs attributes support"
+msgstr ""
 
 #, c-format
 msgid "Built with GLib %d.%d.%d\n"
 msgstr ""
 
 #, c-format
-msgid "Virtual File Systems:"
+msgid "Built with S-Lang %s with terminfo database\n"
 msgstr ""
 
 #, c-format
+msgid "Built with ncurses %s\n"
+msgstr ""
+
+msgid "Built with ncurses (unknown version)"
+msgstr ""
+
+#, c-format
+msgid "Built with ncursesw %s\n"
+msgstr ""
+
+msgid "Built with ncursesw (unknown version)"
+msgstr ""
+
+msgid "Virtual File Systems:"
+msgstr ""
+
 msgid "Data types:"
 msgstr ""
 
@@ -3728,6 +3820,50 @@ msgid "User data"
 msgstr ""
 
 msgid "Cache directory:"
+msgstr ""
+
+msgid "Debug"
+msgstr ""
+
+msgid "ERROR:"
+msgstr ""
+
+msgid "True:"
+msgstr ""
+
+msgid "False:"
+msgstr ""
+
+msgid "Error calling program"
+msgstr ""
+
+msgid "Warning -- ignoring file"
+msgstr ""
+
+#, c-format
+msgid ""
+"File %s is not owned by root or you or is world writable.\n"
+"Using it may compromise your security"
+msgstr ""
+"Tập tin %s không thuộc quyền sở hữu của root, hay của bạn,\n"
+"hoặc ai cũng có thể ghi. Sử dụng tập tin này có thể không an toàn"
+
+msgid "Format error on file Extensions File"
+msgstr ""
+
+#, c-format
+msgid "The %%var macro has no default"
+msgstr ""
+
+#, c-format
+msgid "The %%var macro has no variable"
+msgstr ""
+
+#, c-format
+msgid "No suitable entries found in %s"
+msgstr ""
+
+msgid "User menu"
 msgstr ""
 
 #, c-format
@@ -3781,13 +3917,15 @@ msgstr ""
 #, c-format
 msgid ""
 "Cannot open %s archive\n"
+"%s:\n"
 "%s"
 msgstr ""
-"Không mở được tập tin nén %s\n"
-"%s"
 
-msgid "Inconsistent extfs archive"
-msgstr "Tập tin nén extfs không thích hợp"
+#, c-format
+msgid ""
+"EXTFS virtual file system:\n"
+"%s"
+msgstr ""
 
 #, c-format
 msgid "Warning: cannot open %s directory\n"
@@ -3954,6 +4092,12 @@ msgid ""
 msgstr ""
 
 #, c-format
+msgid ""
+"SFS virtual file system:\n"
+"%s"
+msgstr ""
+
+#, c-format
 msgid "%s: Warning: file %s not found\n"
 msgstr ""
 
@@ -3987,6 +4131,9 @@ msgstr ""
 msgid "sftp: %s"
 msgstr ""
 
+msgid "sftp: failed to convert remote host IP address into text form"
+msgstr ""
+
 #, c-format
 msgid "sftp: making connection to %s"
 msgstr ""
@@ -3996,6 +4143,50 @@ msgstr ""
 
 #, c-format
 msgid "sftp: connection to server failed: %s"
+msgstr ""
+
+msgid "sftp: found host key of unsupported type: RSA1"
+msgstr ""
+
+msgid "sftp: unknown host key type:"
+msgstr ""
+
+#, c-format
+msgid ""
+"Permanently added\n"
+"%s (%s)\n"
+"to the list of known hosts."
+msgstr ""
+
+msgid "sftp: cannot get the remote host key"
+msgstr ""
+
+msgid "sftp: unsupported key type, can't check remote host key"
+msgstr ""
+
+msgid "sftp: can't compute host key fingerprint hash"
+msgstr ""
+
+#, c-format
+msgid ""
+"The authenticity of host\n"
+"%s (%s)\n"
+"can't be established!\n"
+"%s key fingerprint hash is\n"
+"SHA1:%s.\n"
+"Do you want to add it to the list of known hosts and continue connecting?"
+msgstr ""
+
+#, c-format
+msgid ""
+"%s (%s)\n"
+"is found in the list of known hosts but\n"
+"KEYS DO NOT MATCH! THIS COULD BE A MITM ATTACK!\n"
+"Are you sure you want to add it to the list of known hosts and continue "
+"connecting?"
+msgstr ""
+
+msgid "sftp: host key verification failed"
 msgstr ""
 
 #, c-format
@@ -4012,10 +4203,14 @@ msgstr ""
 msgid "sftp: Password is empty."
 msgstr ""
 
-msgid "sftp: Failure establishing SSH session"
+msgid "sftp: failure establishing SSH session"
 msgstr ""
 
 msgid "sftp: No file handler data present for reading file"
+msgstr ""
+
+#, c-format
+msgid "sftp: socket error: %s"
 msgstr ""
 
 #, c-format
@@ -4023,33 +4218,6 @@ msgid "sftp: (Ctrl-G break) Listing... %s"
 msgstr ""
 
 msgid "sftp: Listing done."
-msgstr ""
-
-#, c-format
-msgid "reconnect to %s failed"
-msgstr ""
-
-msgid "Authentication failed"
-msgstr ""
-
-#, c-format
-msgid "Error %s creating directory %s"
-msgstr ""
-
-#, c-format
-msgid "Error %s removing directory %s"
-msgstr ""
-
-#, c-format
-msgid "%s opening remote file %s"
-msgstr ""
-
-#, c-format
-msgid "%s removing remote file %s"
-msgstr ""
-
-#, c-format
-msgid "%s renaming files\n"
 msgstr ""
 
 #, c-format
@@ -4247,8 +4415,18 @@ msgstr ""
 msgid "Cannot fetch a local copy of /ftp://some.host/editme.txt"
 msgstr ""
 
-#~ msgid "Listing mode"
-#~ msgstr "Dạng danh sách"
+#~ msgid "Set debug level"
+#~ msgstr "Đặt mức độ tìm sửa lỗi (debug)"
 
-#~ msgid "&Listing mode..."
-#~ msgstr "&Dạng danh sách..."
+#, c-format
+#~ msgid "Password for \\\\%s\\%s"
+#~ msgstr "Mật khẩu cho \\\\%s\\%s"
+
+#~ msgid "Domain:"
+#~ msgstr "Miền (domain):"
+
+#~ msgid "Username:"
+#~ msgstr "Tên người dùng:"
+
+#~ msgid "SM&B link..."
+#~ msgstr "kết nối SM&B..."

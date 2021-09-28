@@ -6,7 +6,7 @@
 .\"	David H. Martín Alonso <david.martin@telefonica.net>
 .\"
 .\"TOPICS "Índice de Contenidos:"
-.TH MC 1 "%DATE_OF_MAN_PAGE%" "MC Versión %DISTR_VERSION%" "GNU Midnight Commander"
+.TH MC 1 "%DATE_OF_MAN_PAGE%" "MC Versión %MAN_VERSION%" "GNU Midnight Commander"
 .\"SKIP_SECTION"
 .SH "NOMBRE"
 mc \- entorno visual para sistemas tipo Unix.
@@ -53,10 +53,6 @@ Muestra opciones de configuración compiladas.
 .TP
 .I \-d, \-\-nomouse
 Deshabilita el soporte de ratón.
-.TP
-.I \-D N, \-\-debuglevel=N
-Establece el nivel de depuración para el sistema de archivos virtual SMB.
-N puede estar en el rango 0\-10.
 .TP
 .I \-e [arch], \-\-edit[=arch]
 Iniciar el editor interno. Si se indica un archivo, editarlo. Véase la
@@ -157,7 +153,7 @@ Skins\&.
 .\"Skins"
 .TP
 .I \-t, \-\-termcap
-Usado solo si el código fue compilado con Slang y terminfo: hace que
+Usado solo si el código fue compilado con S\-Lang y terminfo: hace que
 Midnight Commander use el valor de la variable de entorno
 .B TERMCAP
 para obtener la información del terminal, en vez de la base de datos de
@@ -3108,10 +3104,7 @@ para manipular archivos a través de conexiones a shell como rsh o ssh.
 .PP
 Dependiendo de la forma en que fue compilado, puede disponer también de:
 .I sftpfs
-para manipular archivos en sistemas remotos a través de SFTP;
-.I SMBfs
-para  manipular archivos en sistemas remotos empleando el protocolo
-SMB (CIFS).
+para manipular archivos en sistemas remotos a través de SFTP.
 .PP
 Se facilita también un sistema de archivos genérico
 .I extfs
@@ -3268,37 +3261,6 @@ Ejemplos:
     sftp://pepe@maquina.ssh.edu:2222/privado
 .fi
 
-.\"NODE "  SMB File System"
-.SH "  Sistema de archivos SMB"
-El SMBfs permite manipular archivos en máquinas remotas con el protocolo
-denominado SMB (o CIFS). Esto incluye Windows Trabajo en Grupo, Windows
-9x/ME/XP, Windows NT, Windows 2000 y Samba. Para comenzar a usarlo,
-se puede emplear la "Conexión por SMB..." (accesible desde la barra de
-menús) o bien cambiar de directorio a un directorio virtual cuyo nombre
-sea de la forma:
-.PP
-.I smb://[usuario@]maquina[/recurso][/directorio\-remoto]
-.PP
-Los elementos
-.IR usuario ,
-.I recurso
-y
-.I directorio\-remoto
-son opcionales. El
-.IR usuario ,
-.I dominio
-y
-.I contraseña
-se pueden especificar en un cuadro de diálogo.
-.PP
-Ejemplos:
-.PP
-.nf
-    smb://maquina/Compartido
-    smb://otramaquina
-    smb://invitado@maquina/publico/leyes
-.fi
-
 .\"NODE "  Undelete File System"
 .SH "  Sistema de archivos de Recuperación"
 En sistemas Linux, si el programa de configuración nos preguntó si queríamos usar
@@ -3452,7 +3414,7 @@ el uso de color utilizando la base de datos de terminales y nuestro nombre de te
 estará confundido, por lo que deberemos forzar el modo en color o deshabilitar el modo de color
 usando el argumento \-c y \-b respectivamente.
 .PP
-Si el programa está compilado con el gestor pantallas Slang
+Si el programa está compilado con el gestor pantallas S\-Lang
 en lugar de ncurses, también chequeará la variable
 .BR COLORTERM ,
 si existe, lo que tiene el mismo efecto que la opción \-c.
@@ -3471,7 +3433,7 @@ color_terminals=linux,xterm
 color_terminals=nombre\-terminal1,nombre\-terminal2...
 .fi
 .PP
-El programa puede compilarse con ncurses y slang, ncurses no
+El programa puede compilarse con ncurses y S\-Lang, ncurses no
 ofrece la posibilidad de forzar el modo en color: ncurses utiliza la
 información de la base de datos de terminales.
 .PP
@@ -3855,9 +3817,9 @@ líneas dobles).
 .PP
 .I ¡¡¡ATENCIÓN!!!
 Si se compila Midnight Commander empleando la biblioteca de pantalla
-Ncurses, entonces el trazado de líneas está limitado. Es posible que
+ncurses, entonces el trazado de líneas está limitado. Es posible que
 solo se puedan utilizar líneas simples. Para consultas y comentarios
-contactar con los desarrolladores de Ncurses.
+contactar con los desarrolladores de ncurses.
 
 .PP
 Descripción de parámetros de la sección

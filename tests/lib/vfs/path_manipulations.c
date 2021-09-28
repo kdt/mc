@@ -1,6 +1,6 @@
 /* lib/vfs - test vfs_path_t manipulation functions
 
-   Copyright (C) 2011-2017
+   Copyright (C) 2011-2021
    Free Software Foundation, Inc.
 
    Written by:
@@ -37,31 +37,20 @@
 #include "src/vfs/local/local.c"
 
 
-struct vfs_s_subclass test_subclass1, test_subclass2, test_subclass3;
-struct vfs_class vfs_test_ops1, vfs_test_ops2, vfs_test_ops3;
+static struct vfs_class vfs_test_ops1, vfs_test_ops2, vfs_test_ops3;
 
 /* --------------------------------------------------------------------------------------------- */
 
 static void
 init_test_classes (void)
 {
-    test_subclass1.flags = VFS_S_REMOTE;
-    vfs_s_init_class (&vfs_test_ops1, &test_subclass1);
-
-    vfs_test_ops1.name = "testfs1";
-    vfs_test_ops1.flags = VFSF_NOLINKS;
-    vfs_test_ops1.prefix = "test1";
+    vfs_init_class (&vfs_test_ops1, "testfs1", VFSF_NOLINKS | VFSF_REMOTE, "test1");
     vfs_register_class (&vfs_test_ops1);
 
-    vfs_s_init_class (&vfs_test_ops2, &test_subclass2);
-    vfs_test_ops2.name = "testfs2";
-    vfs_test_ops2.prefix = "test2";
+    vfs_init_class (&vfs_test_ops2, "testfs2", VFSF_UNKNOWN, "test2");
     vfs_register_class (&vfs_test_ops2);
 
-    vfs_s_init_class (&vfs_test_ops3, &test_subclass3);
-    vfs_test_ops3.name = "testfs3";
-    vfs_test_ops3.prefix = "test3";
-    vfs_test_ops3.flags = VFSF_LOCAL;
+    vfs_init_class (&vfs_test_ops3, "testfs3", VFSF_LOCAL, "test3");
     vfs_register_class (&vfs_test_ops3);
 }
 
@@ -71,11 +60,10 @@ init_test_classes (void)
 static void
 setup (void)
 {
-
     str_init_strings (NULL);
 
     vfs_init ();
-    init_localfs ();
+    vfs_init_localfs ();
     vfs_setup_work_dir ();
 
     init_test_classes ();
@@ -174,7 +162,7 @@ START_PARAMETRIZED_TEST (test_vfs_path_tokens_count, test_vfs_path_tokens_count_
     /* then */
     mctest_assert_int_eq (tokens_count, data->expected_token_count);
 
-    vfs_path_free (vpath);
+    vfs_path_free (vpath, TRUE);
 }
 /* *INDENT-OFF* */
 END_PARAMETRIZED_TEST
@@ -303,7 +291,7 @@ START_PARAMETRIZED_TEST (test_vfs_path_tokens_get, test_vfs_path_tokens_get_ds)
     mctest_assert_str_eq (actual_path, data->expected_path);
 
     g_free (actual_path);
-    vfs_path_free (vpath);
+    vfs_path_free (vpath, TRUE);
 }
 /* *INDENT-OFF* */
 END_PARAMETRIZED_TEST
@@ -358,9 +346,9 @@ START_PARAMETRIZED_TEST (test_vfs_path_append_vpath, test_vfs_path_append_vpath_
     mctest_assert_int_eq (vfs_path_elements_count (vpath3), data->expected_element_count);
     mctest_assert_str_eq (vfs_path_as_str (vpath3), data->expected_path);
 
-    vfs_path_free (vpath1);
-    vfs_path_free (vpath2);
-    vfs_path_free (vpath3);
+    vfs_path_free (vpath1, TRUE);
+    vfs_path_free (vpath2, TRUE);
+    vfs_path_free (vpath3, TRUE);
 }
 /* *INDENT-OFF* */
 END_PARAMETRIZED_TEST
@@ -407,7 +395,7 @@ START_PARAMETRIZED_TEST (test_vfs_path_relative, test_vfs_path_relative_ds)
     mctest_assert_str_eq (vfs_path_get_last_path_str (vpath), data->expected_last_path_in_element);
     mctest_assert_str_eq (vfs_path_as_str (vpath), data->expected_path);
 
-    vfs_path_free (vpath);
+    vfs_path_free (vpath, TRUE);
 }
 /* *INDENT-OFF* */
 END_PARAMETRIZED_TEST
@@ -435,8 +423,8 @@ START_PARAMETRIZED_TEST (test_vfs_path_relative_clone, test_vfs_path_relative_ds
                           data->expected_last_path_in_element);
     mctest_assert_str_eq (vfs_path_as_str (cloned_vpath), data->expected_path);
 
-    vfs_path_free (vpath);
-    vfs_path_free (cloned_vpath);
+    vfs_path_free (vpath, TRUE);
+    vfs_path_free (cloned_vpath, TRUE);
 }
 /* *INDENT-OFF* */
 END_PARAMETRIZED_TEST
@@ -447,11 +435,9 @@ END_PARAMETRIZED_TEST
 int
 main (void)
 {
-    int number_failed;
+    TCase *tc_core;
 
-    Suite *s = suite_create (TEST_SUITE_NAME);
-    TCase *tc_core = tcase_create ("Core");
-    SRunner *sr;
+    tc_core = tcase_create ("Core");
 
     tcase_add_checked_fixture (tc_core, setup, teardown);
 
@@ -466,13 +452,7 @@ main (void)
                                    test_vfs_path_relative_ds);
     /* *********************************** */
 
-    suite_add_tcase (s, tc_core);
-    sr = srunner_create (s);
-    srunner_set_log (sr, "path_manipulations.log");
-    srunner_run_all (sr, CK_ENV);
-    number_failed = srunner_ntests_failed (sr);
-    srunner_free (sr);
-    return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    return mctest_run_all (tc_core);
 }
 
 /* --------------------------------------------------------------------------------------------- */

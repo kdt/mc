@@ -1,7 +1,7 @@
 /*
    Widget based utility functions.
 
-   Copyright (C) 1994-2017
+   Copyright (C) 1994-2021
    Free Software Foundation, Inc.
 
    Authors:
@@ -74,6 +74,7 @@ query_default_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm,
         {
             WDialog *prev_dlg = NULL;
             int ypos, xpos;
+            WRect r;
 
             /* get dialog under h */
             if (top_dlg != NULL)
@@ -101,11 +102,11 @@ query_default_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm,
             xpos = COLS / 2 - w->cols / 2;
 
             /* set position */
-            dlg_set_position (h, ypos, xpos, w->lines, w->cols);
+            rect_init (&r, ypos, xpos, w->lines, w->cols);
 
-            return MSG_HANDLED;
+            return dlg_default_callback (w, NULL, MSG_RESIZE, 0, &r);
         }
-        /* fallthrough */
+        MC_FALLTHROUGH;
 
     default:
         return dlg_default_callback (w, sender, msg, parm, data);
@@ -149,9 +150,8 @@ fg_message (int flags, const char *title, const char *text)
     d = do_create_message (flags, title, text);
     tty_getch ();
     dlg_run_done (d);
-    dlg_destroy (d);
+    widget_destroy (WIDGET (d));
 }
-
 
 /* --------------------------------------------------------------------------------------------- */
 /** Show message box from background */
@@ -273,6 +273,7 @@ query_dialog (const char *header, const char *text, int flags, int count, ...)
 {
     va_list ap;
     WDialog *query_dlg;
+    WGroup *g;
     WButton *button;
     int win_len = 0;
     int i;
@@ -291,6 +292,7 @@ query_dialog (const char *header, const char *text, int flags, int count, ...)
         for (i = 0; i < count; i++)
         {
             char *cp = va_arg (ap, char *);
+
             win_len += str_term_width1 (cp) + 6;
             if (strchr (cp, '&') != NULL)
                 win_len--;
@@ -307,14 +309,15 @@ query_dialog (const char *header, const char *text, int flags, int count, ...)
     query_dlg =
         dlg_create (TRUE, 0, 0, lines, cols, pos_flags, FALSE, query_colors, query_default_callback,
                     NULL, "[QueryBox]", header);
+    g = GROUP (query_dlg);
 
     if (count > 0)
     {
         WButton *defbutton = NULL;
 
-        add_widget_autopos (query_dlg, label_new (2, 3, text), WPOS_KEEP_TOP | WPOS_CENTER_HORZ,
-                            NULL);
-        add_widget (query_dlg, hline_new (lines - 4, -1, -1));
+        group_add_widget_autopos (g, label_new (2, 3, text), WPOS_KEEP_TOP | WPOS_CENTER_HORZ,
+                                  NULL);
+        group_add_widget (g, hline_new (lines - 4, -1, -1));
 
         cols = (cols - win_len - 2) / 2 + 2;
         va_start (ap, count);
@@ -329,7 +332,7 @@ query_dialog (const char *header, const char *text, int flags, int count, ...)
                 xpos--;
 
             button = button_new (lines - 3, cols, B_USER + i, NORMAL_BUTTON, cur_name, NULL);
-            add_widget (query_dlg, button);
+            group_add_widget (g, button);
             cols += xpos;
             if (i == sel_pos)
                 defbutton = button;
@@ -352,13 +355,13 @@ query_dialog (const char *header, const char *text, int flags, int count, ...)
         }
 
         /* free used memory */
-        dlg_destroy (query_dlg);
+        widget_destroy (WIDGET (query_dlg));
     }
     else
     {
-        add_widget_autopos (query_dlg, label_new (2, 3, text), WPOS_KEEP_TOP | WPOS_CENTER_HORZ,
-                            NULL);
-        add_widget (query_dlg, button_new (0, 0, 0, HIDDEN_BUTTON, "-", NULL));
+        group_add_widget_autopos (g, label_new (2, 3, text), WPOS_KEEP_TOP | WPOS_CENTER_HORZ,
+                                  NULL);
+        group_add_widget (g, button_new (0, 0, 0, HIDDEN_BUTTON, "-", NULL));
         last_query_dlg = query_dlg;
     }
     sel_pos = 0;
@@ -376,7 +379,7 @@ query_set_sel (int new_sel)
 /* --------------------------------------------------------------------------------------------- */
 /**
  * Create message dialog.  The caller must call dlg_run_done() and
- * dlg_destroy() to dismiss it.  Not safe to call from background.
+ * widget_destroy() to dismiss it.  Not safe to call from background.
  */
 
 WDialog *
@@ -579,17 +582,17 @@ void
 status_msg_init (status_msg_t * sm, const char *title, double delay, status_msg_cb init_cb,
                  status_msg_update_cb update_cb, status_msg_cb deinit_cb)
 {
-    guint64 start;
+    gint64 start;
 
     /* repaint screen to remove previous finished dialog */
     mc_refresh ();
 
-    start = mc_timer_elapsed (mc_global.timer);
+    start = g_get_real_time ();
 
     sm->dlg = dlg_create (TRUE, 0, 0, 7, MIN (MAX (40, COLS / 2), COLS), WPOS_CENTER, FALSE,
                           dialog_colors, NULL, NULL, NULL, title);
     sm->start = start;
-    sm->delay = (guint64) (delay * G_USEC_PER_SEC);
+    sm->delay = (gint64) (delay * G_USEC_PER_SEC);
     sm->block = FALSE;
 
     sm->init = init_cb;
@@ -624,7 +627,7 @@ status_msg_deinit (status_msg_t * sm)
 
     /* close and destroy dialog */
     dlg_run_done (sm->dlg);
-    dlg_destroy (sm->dlg);
+    widget_destroy (WIDGET (sm->dlg));
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -654,7 +657,7 @@ status_msg_common_update (status_msg_t * sm)
         /* dialog is not shown yet */
 
         /* do not change sm->start */
-        guint64 start = sm->start;
+        gint64 start = sm->start;
 
         if (mc_time_elapsed (&start, sm->delay))
             dlg_init (sm->dlg);
@@ -687,6 +690,7 @@ simple_status_msg_init_cb (status_msg_t * sm)
 {
     simple_status_msg_t *ssm = SIMPLE_STATUS_MSG (sm);
     Widget *wd = WIDGET (sm->dlg);
+    WGroup *wg = GROUP (sm->dlg);
 
     const char *b_name = N_("&Abort");
     int b_width;
@@ -702,10 +706,10 @@ simple_status_msg_init_cb (status_msg_t * sm)
 
     y = 2;
     ssm->label = label_new (y++, 3, "");
-    add_widget_autopos (sm->dlg, ssm->label, WPOS_KEEP_TOP | WPOS_CENTER_HORZ, NULL);
-    add_widget (sm->dlg, hline_new (y++, -1, -1));
+    group_add_widget_autopos (wg, ssm->label, WPOS_KEEP_TOP | WPOS_CENTER_HORZ, NULL);
+    group_add_widget (wg, hline_new (y++, -1, -1));
     b = WIDGET (button_new (y++, 3, B_CANCEL, NORMAL_BUTTON, b_name, NULL));
-    add_widget_autopos (sm->dlg, b, WPOS_KEEP_TOP | WPOS_CENTER_HORZ, NULL);
+    group_add_widget_autopos (wg, b, WPOS_KEEP_TOP | WPOS_CENTER_HORZ, NULL);
 
     widget_set_size (wd, wd->y, wd->x, y + 2, wd_width);
 }

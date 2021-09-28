@@ -1,7 +1,7 @@
 /*
    Extension dependent execution.
 
-   Copyright (C) 1994-2017
+   Copyright (C) 1994-2021
    Free Software Foundation, Inc.
 
    Written by:
@@ -53,6 +53,7 @@
 #include "src/setup.h"          /* use_file_to_check_type */
 #include "src/execute.h"
 #include "src/history.h"
+#include "src/usermenu.h"
 
 #include "src/consaver/cons.saver.h"
 #include "src/viewer/mcviewer.h"
@@ -61,8 +62,8 @@
 #include "src/selcodepage.h"    /* do_set_codepage */
 #endif
 
-#include "panel.h"              /* do_cd */
-#include "usermenu.h"
+#include "filemanager.h"        /* current_panel */
+#include "panel.h"              /* panel_cd */
 
 #include "ext.h"
 
@@ -70,9 +71,10 @@
 
 /*** file scope macro definitions ****************************************************************/
 
-#ifdef FILE_L
-#define FILE_CMD "file -L "
+#ifdef USE_FILE_CMD
+#define FILE_CMD "file -z " FILE_S FILE_L
 #else
+/* actually file is unused, but define some reasonable command */
 #define FILE_CMD "file "
 #endif
 
@@ -108,7 +110,7 @@ exec_cleanup_script (vfs_path_t * script_vpath)
     if (script_vpath != NULL)
     {
         (void) mc_unlink (script_vpath);
-        vfs_path_free (script_vpath);
+        vfs_path_free (script_vpath, TRUE);
     }
 }
 
@@ -128,7 +130,7 @@ exec_cleanup_file_name (const vfs_path_t * filename_vpath, gboolean has_changed)
         has_changed = localmtime != mystat.st_mtime;
     }
     mc_ungetlocalcopy (filename_vpath, localfilecopy_vpath, has_changed);
-    vfs_path_free (localfilecopy_vpath);
+    vfs_path_free (localfilecopy_vpath, TRUE);
     localfilecopy_vpath = NULL;
 }
 
@@ -175,7 +177,7 @@ exec_expand_format (char symbol, gboolean is_result_quoted)
 
 /* --------------------------------------------------------------------------------------------- */
 
-static char *
+static GString *
 exec_get_export_variables (const vfs_path_t * filename_vpath)
 {
     char *text;
@@ -217,12 +219,13 @@ exec_get_export_variables (const vfs_path_t * filename_vpath)
             g_free (text);
         }
     }
-    return g_string_free (export_vars_string, FALSE);
+
+    return export_vars_string;
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
-static char *
+static GString *
 exec_make_shell_string (const char *lc_data, const vfs_path_t * filename_vpath)
 {
     GString *shell_string;
@@ -274,7 +277,6 @@ exec_make_shell_string (const char *lc_data, const vfs_path_t * filename_vpath)
             else
             {
                 int i;
-                char *v;
 
                 i = check_format_view (lc_data);
                 if (i != 0)
@@ -295,8 +297,10 @@ exec_make_shell_string (const char *lc_data, const vfs_path_t * filename_vpath)
                     }
                     else
                     {
+                        char *v;
+
                         i = check_format_var (lc_data, &v);
-                        if (i > 0 && v != NULL)
+                        if (i > 0)
                         {
                             g_string_append (shell_string, v);
                             g_free (v);
@@ -345,7 +349,8 @@ exec_make_shell_string (const char *lc_data, const vfs_path_t * filename_vpath)
                 g_string_append_c (shell_string, *lc_data);
         }
     }                           /* for */
-    return g_string_free (shell_string, FALSE);
+
+    return shell_string;
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -353,25 +358,34 @@ exec_make_shell_string (const char *lc_data, const vfs_path_t * filename_vpath)
 static void
 exec_extension_view (void *target, char *cmd, const vfs_path_t * filename_vpath, int start_line)
 {
-    int def_hex_mode = mcview_default_hex_mode, changed_hex_mode = 0;
-    int def_nroff_flag = mcview_default_nroff_flag, changed_nroff_flag = 0;
+    mcview_mode_flags_t def_flags = {
+        /* *INDENT-OFF* */
+        .wrap = FALSE,
+        .hex = mcview_global_flags.hex,
+        .magic = FALSE,
+        .nroff = mcview_global_flags.nroff
+        /* *INDENT-ON* */
+    };
 
-    mcview_altered_hex_mode = 0;
-    mcview_altered_nroff_flag = 0;
-    if (def_hex_mode != mcview_default_hex_mode)
-        changed_hex_mode = 1;
-    if (def_nroff_flag != mcview_default_nroff_flag)
-        changed_nroff_flag = 1;
+    mcview_mode_flags_t changed_flags;
+
+    mcview_clear_mode_flags (&changed_flags);
+    mcview_altered_flags.hex = FALSE;
+    mcview_altered_flags.nroff = FALSE;
+    if (def_flags.hex != mcview_global_flags.hex)
+        changed_flags.hex = TRUE;
+    if (def_flags.nroff != mcview_global_flags.nroff)
+        changed_flags.nroff = TRUE;
 
     if (target == NULL)
         mcview_viewer (cmd, filename_vpath, start_line, 0, 0);
     else
         mcview_load ((WView *) target, cmd, vfs_path_as_str (filename_vpath), start_line, 0, 0);
 
-    if (changed_hex_mode && !mcview_altered_hex_mode)
-        mcview_default_hex_mode = def_hex_mode;
-    if (changed_nroff_flag && !mcview_altered_nroff_flag)
-        mcview_default_nroff_flag = def_nroff_flag;
+    if (changed_flags.hex && !mcview_altered_flags.hex)
+        mcview_global_flags.hex = def_flags.hex;
+    if (changed_flags.nroff && !mcview_altered_flags.nroff)
+        mcview_global_flags.nroff = def_flags.nroff;
 
     dialog_switch_process_pending ();
 }
@@ -379,7 +393,7 @@ exec_extension_view (void *target, char *cmd, const vfs_path_t * filename_vpath,
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-exec_extension_cd (void)
+exec_extension_cd (WPanel * panel)
 {
     char *q;
     vfs_path_t *p_vpath;
@@ -394,18 +408,18 @@ exec_extension_cd (void)
     q[1] = 0;
 
     p_vpath = vfs_path_from_str_flags (pbuffer, VPF_NO_CANON);
-    do_cd (p_vpath, cd_parse_command);
-    vfs_path_free (p_vpath);
+    panel_cd (panel, p_vpath, cd_parse_command);
+    vfs_path_free (p_vpath, TRUE);
 }
 
 
 /* --------------------------------------------------------------------------------------------- */
 
 static vfs_path_t *
-exec_extension (void *target, const vfs_path_t * filename_vpath, const char *lc_data,
-                int start_line)
+exec_extension (WPanel * panel, void *target, const vfs_path_t * filename_vpath,
+                const char *lc_data, int start_line)
 {
-    char *shell_string, *export_variables;
+    GString *shell_string, *export_variables;
     vfs_path_t *script_vpath = NULL;
     int cmd_file_fd;
     FILE *cmd_file;
@@ -424,14 +438,13 @@ exec_extension (void *target, const vfs_path_t * filename_vpath, const char *lc_
     do_local_copy = !vfs_file_is_local (filename_vpath);
 
     shell_string = exec_make_shell_string (lc_data, filename_vpath);
-
     if (shell_string == NULL)
         goto ret;
 
     if (is_cd)
     {
-        exec_extension_cd ();
-        g_free (shell_string);
+        exec_extension_cd (panel);
+        g_string_free (shell_string, TRUE);
         goto ret;
     }
 
@@ -447,6 +460,7 @@ exec_extension (void *target, const vfs_path_t * filename_vpath, const char *lc_
     {
         message (D_ERROR, MSG_ERROR,
                  _("Cannot create temporary command file\n%s"), unix_error_string (errno));
+        g_string_free (shell_string, TRUE);
         goto ret;
     }
 
@@ -456,12 +470,12 @@ exec_extension (void *target, const vfs_path_t * filename_vpath, const char *lc_
     export_variables = exec_get_export_variables (filename_vpath);
     if (export_variables != NULL)
     {
-        fprintf (cmd_file, "%s\n", export_variables);
-        g_free (export_variables);
+        fputs (export_variables->str, cmd_file);
+        g_string_free (export_variables, TRUE);
     }
 
-    fputs (shell_string, cmd_file);
-    g_free (shell_string);
+    fputs (shell_string->str, cmd_file);
+    g_string_free (shell_string, TRUE);
 
     /*
      * Make the script remove itself when it finishes.
@@ -500,10 +514,13 @@ exec_extension (void *target, const vfs_path_t * filename_vpath, const char *lc_
         if (mc_global.tty.console_flag != '\0')
         {
             handle_console (CONSOLE_SAVE);
-            if (output_lines && mc_global.keybar_visible)
-                show_console_contents (output_start_y,
-                                       LINES - mc_global.keybar_visible -
-                                       output_lines - 1, LINES - mc_global.keybar_visible - 1);
+            if (output_lines != 0 && mc_global.keybar_visible)
+            {
+                unsigned char end_line;
+
+                end_line = LINES - (mc_global.keybar_visible ? 1 : 0) - 1;
+                show_console_contents (output_start_y, end_line - output_lines, end_line);
+            }
         }
     }
 
@@ -706,7 +723,7 @@ regex_check_type (const vfs_path_t * filename_vpath, const char *ptr, gboolean c
             /* No data */
             content_string[0] = '\0';
         }
-        vfs_path_free (localfile_vpath);
+        vfs_path_free (localfile_vpath, TRUE);
     }
 
     if (got_data == -1)
@@ -1013,7 +1030,7 @@ regex_command_for (void *target, const vfs_path_t * filename_vpath, const char *
                         {
                             vfs_path_t *sv;
 
-                            sv = exec_extension (target, filename_vpath, r + 1,
+                            sv = exec_extension (current_panel, target, filename_vpath, r + 1,
                                                  view_at_line_number);
                             if (script_vpath != NULL)
                                 *script_vpath = sv;

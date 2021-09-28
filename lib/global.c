@@ -1,7 +1,7 @@
 /*
    Global structure for some library-related variables
 
-   Copyright (C) 2009-2017
+   Copyright (C) 2009-2021
    Free Software Foundation, Inc.
 
    Written by:
@@ -30,8 +30,9 @@
 
 #include <config.h>
 
+#include "mc-version.h"
+
 #include "global.h"
-#include "lib/timer.h"
 
 /* *INDENT-OFF* */
 #ifdef ENABLE_SUBSHELL
@@ -48,9 +49,12 @@
 /*** global variables ****************************************************************************/
 
 /* *INDENT-OFF* */
-mc_global_t mc_global = {
+mc_global_t mc_global =
+{
+    .mc_version = MC_CURRENT_VERSION,
+
     .mc_run_mode = MC_RUN_FULL,
-    .timer = NULL,
+    .run_from_parent_mc = FALSE,
     .midnight_shutdown = FALSE,
 
     .sysconfig_dir = NULL,
@@ -65,8 +69,8 @@ mc_global_t mc_global = {
 #endif /* !HAVE_CHARSET */
     .utf8_display = FALSE,
 
-    .message_visible = 1,
-    .keybar_visible = 1,
+    .message_visible = TRUE,
+    .keybar_visible = TRUE,
 
 #ifdef ENABLE_BACKGROUND
     .we_are_background = FALSE,
@@ -84,6 +88,7 @@ mc_global_t mc_global = {
     .tty =
     {
         .skin = NULL,
+        .shadows = TRUE,
         .setup_color_string = NULL,
         .term_color_string = NULL,
         .color_terminal_string = NULL,
@@ -104,8 +109,7 @@ mc_global_t mc_global = {
         .disable_colors = FALSE,
         .ugly_line_drawing = FALSE,
         .old_mouse = FALSE,
-        .alternate_plus_minus = FALSE,
-        .winch_flag = 0
+        .alternate_plus_minus = FALSE
     },
 
     .vfs =

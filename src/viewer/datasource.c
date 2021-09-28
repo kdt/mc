@@ -2,7 +2,7 @@
    Internal file viewer for the Midnight Commander
    Functions for datasources
 
-   Copyright (C) 1994-2017
+   Copyright (C) 1994-2021
    Free Software Foundation, Inc.
 
    Written by:
@@ -104,8 +104,6 @@ mcview_get_filesize (WView * view)
 {
     switch (view->datasource)
     {
-    case DS_NONE:
-        return 0;
     case DS_STDIO_PIPE:
     case DS_VFS_PIPE:
         return mcview_growbuf_filesize (view);
@@ -114,7 +112,6 @@ mcview_get_filesize (WView * view)
     case DS_STRING:
         return view->ds_string_len;
     default:
-        g_assert (!"Unknown datasource type");
         return 0;
     }
 }
@@ -147,6 +144,8 @@ mcview_get_ptr_file (WView * view, off_t byte_index)
 
 /* --------------------------------------------------------------------------------------------- */
 
+/* Invalid UTF-8 is reported as negative integers (one for each byte),
+ * see ticket 3783. */
 gboolean
 mcview_get_utf (WView * view, off_t byte_index, int *ch, int *ch_len)
 {
@@ -200,7 +199,8 @@ mcview_get_utf (WView * view, off_t byte_index, int *ch, int *ch_len)
 
     if (res < 0)
     {
-        *ch = (unsigned char) (*str);
+        /* Implicit conversion from signed char to signed int keeps negative values. */
+        *ch = *str;
         *ch_len = 1;
     }
     else
@@ -356,7 +356,7 @@ mcview_close_datasource (WView * view)
         MC_PTR_FREE (view->ds_string_data);
         break;
     default:
-        g_assert (!"Unknown datasource type");
+        break;
     }
     view->datasource = DS_NONE;
 }
@@ -385,7 +385,7 @@ mcview_load_command_output (WView * view, const char *command)
 
     mcview_close_datasource (view);
 
-    p = mc_popen (command, &error);
+    p = mc_popen (command, TRUE, TRUE, &error);
     if (p == NULL)
     {
         mcview_display (view);

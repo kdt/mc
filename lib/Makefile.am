@@ -42,8 +42,7 @@ libmc_la_SOURCES = \
 	serialize.c serialize.h \
 	shell.c shell.h \
 	stat-size.h \
-	timefmt.c timefmt.h \
-	timer.c timer.h
+	timefmt.c timefmt.h
 
 if USE_MAINTAINER_MODE
 libmc_la_SOURCES += logging.c logging.h
@@ -74,4 +73,4 @@ else
     libmc_la_LIBADD += $(GLIB_LIBS)
 endif
 
-libmc_la_LIBADD += $(PCRE_LIBS) $(LIBICONV) $(LIBINTL)
+libmc_la_LIBADD += $(PCRE_LIBS)

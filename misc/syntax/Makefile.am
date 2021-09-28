@@ -13,6 +13,7 @@ SYNTAXFILES =			\
 	cabal.syntax		\
 	changelog.syntax	\
 	cmake.syntax		\
+	cobol.syntax		\
 	cs.syntax		\
 	css.syntax		\
 	cuda.syntax		\
@@ -35,6 +36,7 @@ SYNTAXFILES =			\
 	glsl.syntax		\
 	go.syntax		\
 	haskell.syntax		\
+	hive.syntax		\
 	html.syntax		\
 	idl.syntax		\
 	ini.syntax		\
@@ -42,6 +44,8 @@ SYNTAXFILES =			\
 	jal.syntax		\
 	java.syntax		\
 	js.syntax		\
+	json.syntax		\
+	kotlin.syntax		\
 	latex.syntax		\
 	lisp.syntax		\
 	lkr.syntax		\
@@ -50,7 +54,9 @@ SYNTAXFILES =			\
 	m4.syntax		\
 	mail.syntax		\
 	makefile.syntax		\
+	markdown.syntax		\
 	ml.syntax		\
+	meson.syntax		\
 	named.syntax		\
 	nemerle.syntax		\
 	nroff.syntax		\
@@ -64,16 +70,19 @@ SYNTAXFILES =			\
 	povray.syntax		\
 	procmail.syntax		\
 	properties.syntax	\
+	protobuf.syntax		\
 	puppet.syntax		\
 	python.syntax		\
 	r.syntax		\
 	ruby.syntax		\
+	rust.syntax		\
 	sh.syntax		\
 	slang.syntax		\
 	smalltalk.syntax	\
 	spec.syntax		\
 	sql.syntax		\
 	strace.syntax 		\
+	swift.syntax		\
 	swig.syntax		\
 	syntax.syntax		\
 	tcl.syntax		\
@@ -84,6 +93,7 @@ SYNTAXFILES =			\
 	verilog.syntax		\
 	vhdl.syntax		\
 	xml.syntax		\
+	yabasic.syntax		\
 	yaml.syntax		\
 	yum-repo.syntax		\
 	yxx.syntax

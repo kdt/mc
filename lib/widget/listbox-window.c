@@ -1,7 +1,7 @@
 /*
    Widget based utility functions.
 
-   Copyright (C) 1994-2017
+   Copyright (C) 1994-2021
    Free Software Foundation, Inc.
 
    Authors:
@@ -109,7 +109,7 @@ create_listbox_window_centered (int center_y, int center_x, int lines, int cols,
                     NULL, NULL, help, title);
 
     listbox->list = listbox_new (2, 2, lines, cols, FALSE, NULL);
-    add_widget (listbox->dlg, listbox->list);
+    group_add_widget (GROUP (listbox->dlg), listbox->list);
 
     return listbox;
 }
@@ -132,7 +132,7 @@ run_listbox (Listbox * l)
 
     if (dlg_run (l->dlg) != B_CANCEL)
         val = l->list->pos;
-    dlg_destroy (l->dlg);
+    widget_destroy (WIDGET (l->dlg));
     g_free (l);
     return val;
 }
@@ -167,7 +167,7 @@ run_listbox_with_data (Listbox * l, const void *select)
         }
     }
 
-    dlg_destroy (l->dlg);
+    widget_destroy (WIDGET (l->dlg));
     g_free (l);
     return val;
 }

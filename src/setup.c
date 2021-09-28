@@ -1,7 +1,7 @@
 /*
    Setup loading/saving.
 
-   Copyright (C) 1994-2017
+   Copyright (C) 1994-2021
    Free Software Foundation, Inc.
 
    This file is part of the Midnight Commander.
@@ -36,11 +36,10 @@
 
 #include "lib/tty/tty.h"
 #include "lib/tty/key.h"
-#include "lib/mcconfig.h"
+#include "lib/mcconfig.h"       /* num_history_items_recorded */
 #include "lib/fileloc.h"
 #include "lib/timefmt.h"
 #include "lib/util.h"
-#include "lib/widget.h"
 
 #ifdef ENABLE_VFS_FTP
 #include "src/vfs/ftpfs/ftpfs.h"
@@ -54,7 +53,7 @@
 #endif
 
 #include "filemanager/dir.h"
-#include "filemanager/midnight.h"
+#include "filemanager/filemanager.h"
 #include "filemanager/tree.h"   /* xtree_mode */
 #include "filemanager/hotlist.h"        /* load/save/done hotlist */
 #include "filemanager/panelize.h"       /* load/save/done panelize */
@@ -64,7 +63,6 @@
 #include "args.h"
 #include "execute.h"            /* pause_after_run */
 #include "clipboard.h"
-#include "keybind-defaults.h"   /* keybind_lookup_action */
 
 #ifdef HAVE_CHARSET
 #include "selcodepage.h"
@@ -87,6 +85,8 @@ gboolean boot_current_is_left = TRUE;
 
 /* If on, default for "No" in delete operations */
 gboolean safe_delete = FALSE;
+/* If on, default for "No" in overwrite files */
+gboolean safe_overwrite = FALSE;
 
 /* Controls screen clearing before an exec */
 gboolean clear_before_exec = TRUE;
@@ -154,14 +154,14 @@ gboolean easy_patterns = TRUE;
 gboolean auto_save_setup = TRUE;
 
 /* If true, then the +, - and \ keys have their special meaning only if the
- * command line is emtpy, otherwise they behave like regular letters
+ * command line is empty, otherwise they behave like regular letters
  */
 gboolean only_leading_plus_minus = TRUE;
 
 /* Automatically fills name with current selected item name on mkdir */
 gboolean auto_fill_mkdir_name = TRUE;
 
-/* If set and you don't have subshell support,then C-o will give you a shell */
+/* If set and you don't have subshell support, then C-o will give you a shell */
 gboolean output_starts_shell = FALSE;
 
 /* If set, we execute the file command to check the file type */
@@ -256,19 +256,27 @@ static const struct
 {
     const char *opt_name;
     int *opt_addr;
-} layout [] = {
+} layout_int_options [] = {
+    { "output_lines", &output_lines },
+    { "left_panel_size", &panels_layout.left_panel_size },
+    { "top_panel_size", &panels_layout.top_panel_size },
+    { NULL, NULL }
+};
+
+static const struct
+{
+    const char *opt_name;
+    gboolean *opt_addr;
+} layout_bool_options [] = {
     { "message_visible", &mc_global.message_visible },
     { "keybar_visible", &mc_global.keybar_visible },
     { "xterm_title", &xterm_title },
-    { "output_lines", &output_lines },
     { "command_prompt", &command_prompt },
     { "menubar_visible", &menubar_visible },
     { "free_space", &free_space },
     { "horizontal_split", &panels_layout.horizontal_split },
     { "vertical_equal", &panels_layout.vertical_equal },
-    { "left_panel_size", &panels_layout.left_panel_size },
     { "horizontal_equal", &panels_layout.horizontal_equal },
-    { "top_panel_size", &panels_layout.top_panel_size },
     { NULL, NULL }
 };
 
@@ -293,6 +301,7 @@ static const struct
     { "confirm_directory_hotlist_delete", &confirm_directory_hotlist_delete },
     { "confirm_view_dir", &confirm_view_dir },
     { "safe_delete", &safe_delete },
+    { "safe_overwrite", &safe_overwrite },
 #ifndef HAVE_CHARSET
     { "eight_bit_clean", &mc_global.eight_bit_clean },
     { "full_eight_bits", &mc_global.full_eight_bits },
@@ -302,11 +311,13 @@ static const struct
     { "mouse_close_dialog", &mouse_close_dialog},
     { "fast_refresh", &fast_refresh },
     { "drop_menus", &drop_menus },
-    { "wrap_mode",  &mcview_global_wrap_mode },
+    { "wrap_mode",  &mcview_global_flags.wrap },
     { "old_esc_mode", &old_esc_mode },
     { "cd_symlinks", &mc_global.vfs.cd_symlinks },
     { "show_all_if_ambiguous", &mc_global.widget.show_all_if_ambiguous },
+#ifdef USE_FILE_CMD
     { "use_file_to_guess_type", &use_file_to_check_type },
+#endif
     { "alternate_plus_minus", &mc_global.tty.alternate_plus_minus },
     { "only_leading_plus_minus", &only_leading_plus_minus },
     { "show_output_starts_shell", &output_starts_shell },
@@ -349,6 +360,7 @@ static const struct
 #endif /* USE_INTERNAL_EDIT */
     { "editor_ask_filename_before_edit", &editor_ask_filename_before_edit },
     { "nice_rotating_dash", &nice_rotating_dash },
+    { "shadows", &mc_global.tty.shadows },
     { "mcview_remember_file_position", &mcview_remember_file_position },
     { "auto_fill_mkdir_name", &auto_fill_mkdir_name },
     { "copymove_persistent_attr", &copymove_persistent_attr },
@@ -426,90 +438,8 @@ static const struct
 };
 /* *INDENT-ON* */
 
-/*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
-
-/**
- * Get name of config file.
- *
- * @param subdir If not NULL, config is also searched in specified subdir.
- * @param config_file_name If relative, file if searched in standard paths.
- *
- * @return newly allocated string with config name or NULL if file is not found.
- */
-
-static char *
-load_setup_get_full_config_name (const char *subdir, const char *config_file_name)
-{
-    /*
-       TODO: IMHO, in future, this function shall be placed in mcconfig module.
-     */
-    char *lc_basename, *ret;
-    char *file_name;
-
-    if (config_file_name == NULL)
-        return NULL;
-
-    /* check for .keymap suffix */
-    if (g_str_has_suffix (config_file_name, ".keymap"))
-        file_name = g_strdup (config_file_name);
-    else
-        file_name = g_strconcat (config_file_name, ".keymap", (char *) NULL);
-
-    canonicalize_pathname (file_name);
-
-    if (g_path_is_absolute (file_name))
-        return file_name;
-
-    lc_basename = g_path_get_basename (file_name);
-    g_free (file_name);
-
-    if (lc_basename == NULL)
-        return NULL;
-
-    if (subdir != NULL)
-        ret = g_build_filename (mc_config_get_path (), subdir, lc_basename, (char *) NULL);
-    else
-        ret = g_build_filename (mc_config_get_path (), lc_basename, (char *) NULL);
-
-    if (exist_file (ret))
-    {
-        g_free (lc_basename);
-        canonicalize_pathname (ret);
-        return ret;
-    }
-    g_free (ret);
-
-    if (subdir != NULL)
-        ret = g_build_filename (mc_global.sysconfig_dir, subdir, lc_basename, (char *) NULL);
-    else
-        ret = g_build_filename (mc_global.sysconfig_dir, lc_basename, (char *) NULL);
-
-    if (exist_file (ret))
-    {
-        g_free (lc_basename);
-        canonicalize_pathname (ret);
-        return ret;
-    }
-    g_free (ret);
-
-    if (subdir != NULL)
-        ret = g_build_filename (mc_global.share_data_dir, subdir, lc_basename, (char *) NULL);
-    else
-        ret = g_build_filename (mc_global.share_data_dir, lc_basename, (char *) NULL);
-
-    g_free (lc_basename);
-
-    if (exist_file (ret))
-    {
-        canonicalize_pathname (ret);
-        return ret;
-    }
-
-    g_free (ret);
-    return NULL;
-}
-
+/*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
 static const char *
@@ -571,27 +501,6 @@ setup__move_panels_config_into_separate_file (const char *profile)
 
     mc_config_save_file (tmp_cfg, NULL);
     mc_config_deinit (tmp_cfg);
-}
-
-/* --------------------------------------------------------------------------------------------- */
-/**
-  Create new mc_config object from specified ini-file or
-  append data to existing mc_config object from ini-file
-*/
-
-static void
-load_setup_init_config_from_file (mc_config_t ** config, const char *fname, gboolean read_only)
-{
-    /*
-       TODO: IMHO, in future, this function shall be placed in mcconfig module.
-     */
-    if (exist_file (fname))
-    {
-        if (*config != NULL)
-            mc_config_read_file (*config, fname, read_only, TRUE);
-        else
-            *config = mc_config_init (fname, read_only);
-    }
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -667,34 +576,17 @@ static void
 load_layout (void)
 {
     size_t i;
-    int equal_split;
-    int first_panel_size;
-
-    /* legacy options */
-    panels_layout.horizontal_split = mc_config_get_int (mc_global.main_config, CONFIG_APP_SECTION,
-                                                        "horizontal_split", 0);
-    equal_split = mc_config_get_int (mc_global.main_config, "Layout", "equal_split", 1);
-    first_panel_size = mc_config_get_int (mc_global.main_config, "Layout", "first_panel_size", 1);
-    if (panels_layout.horizontal_split)
-    {
-        panels_layout.horizontal_equal = equal_split;
-        panels_layout.left_panel_size = first_panel_size;
-    }
-    else
-    {
-        panels_layout.vertical_equal = equal_split;
-        panels_layout.top_panel_size = first_panel_size;
-    }
 
     /* actual options override legacy ones */
-    for (i = 0; layout[i].opt_name != NULL; i++)
-        *layout[i].opt_addr = mc_config_get_int (mc_global.main_config, CONFIG_LAYOUT_SECTION,
-                                                 layout[i].opt_name, *layout[i].opt_addr);
+    for (i = 0; layout_int_options[i].opt_name != NULL; i++)
+        *layout_int_options[i].opt_addr =
+            mc_config_get_int (mc_global.main_config, CONFIG_LAYOUT_SECTION,
+                               layout_int_options[i].opt_name, *layout_int_options[i].opt_addr);
 
-    /* remove legacy options */
-    mc_config_del_key (mc_global.main_config, CONFIG_APP_SECTION, "horizontal_split");
-    mc_config_del_key (mc_global.main_config, "Layout", "equal_split");
-    mc_config_del_key (mc_global.main_config, "Layout", "first_panel_size");
+    for (i = 0; layout_bool_options[i].opt_name != NULL; i++)
+        *layout_bool_options[i].opt_addr =
+            mc_config_get_bool (mc_global.main_config, CONFIG_LAYOUT_SECTION,
+                                layout_bool_options[i].opt_name, *layout_bool_options[i].opt_addr);
 
     startup_left_mode = setup__load_panel_state ("New Left Panel");
     startup_right_mode = setup__load_panel_state ("New Right Panel");
@@ -765,115 +657,6 @@ load_keys_from_section (const char *terminal, mc_config_t * cfg)
     }
     g_strfreev (keys);
     g_free (section_name);
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-static void
-load_keymap_from_section (const char *section_name, GArray * keymap, mc_config_t * cfg)
-{
-    gchar **profile_keys, **keys;
-
-    if (section_name == NULL)
-        return;
-
-    keys = mc_config_get_keys (cfg, section_name, NULL);
-
-    for (profile_keys = keys; *profile_keys != NULL; profile_keys++)
-    {
-        gchar **values;
-
-        values = mc_config_get_string_list (cfg, section_name, *profile_keys, NULL);
-        if (values != NULL)
-        {
-            long action;
-
-            action = keybind_lookup_action (*profile_keys);
-            if (action > 0)
-            {
-                gchar **curr_values;
-
-                for (curr_values = values; *curr_values != NULL; curr_values++)
-                    keybind_cmd_bind (keymap, *curr_values, action);
-            }
-
-            g_strfreev (values);
-        }
-    }
-
-    g_strfreev (keys);
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-static mc_config_t *
-load_setup_get_keymap_profile_config (gboolean load_from_file)
-{
-    /*
-       TODO: IMHO, in future, this function shall be placed in mcconfig module.
-     */
-    mc_config_t *keymap_config;
-    char *share_keymap, *sysconfig_keymap;
-    char *fname, *fname2;
-
-    /* 0) Create default keymap */
-    keymap_config = create_default_keymap ();
-    if (!load_from_file)
-        return keymap_config;
-
-    /* load and merge global keymaps */
-
-    /* 1) /usr/share/mc (mc_global.share_data_dir) */
-    share_keymap = g_build_filename (mc_global.share_data_dir, GLOBAL_KEYMAP_FILE, (char *) NULL);
-    load_setup_init_config_from_file (&keymap_config, share_keymap, TRUE);
-
-    /* 2) /etc/mc (mc_global.sysconfig_dir) */
-    sysconfig_keymap =
-        g_build_filename (mc_global.sysconfig_dir, GLOBAL_KEYMAP_FILE, (char *) NULL);
-    load_setup_init_config_from_file (&keymap_config, sysconfig_keymap, TRUE);
-
-    /* then load and merge one of user-defined keymap */
-
-    /* 3) --keymap=<keymap> */
-    fname = load_setup_get_full_config_name (NULL, mc_args__keymap_file);
-    if (fname != NULL && strcmp (fname, sysconfig_keymap) != 0 && strcmp (fname, share_keymap) != 0)
-    {
-        load_setup_init_config_from_file (&keymap_config, fname, TRUE);
-        goto done;
-    }
-    g_free (fname);
-
-    /* 4) getenv("MC_KEYMAP") */
-    fname = load_setup_get_full_config_name (NULL, g_getenv ("MC_KEYMAP"));
-    if (fname != NULL && strcmp (fname, sysconfig_keymap) != 0 && strcmp (fname, share_keymap) != 0)
-    {
-        load_setup_init_config_from_file (&keymap_config, fname, TRUE);
-        goto done;
-    }
-    g_free (fname);
-
-    /* 5) main config; [Midnight Commander] -> keymap */
-    fname2 = mc_config_get_string (mc_global.main_config, CONFIG_APP_SECTION, "keymap", NULL);
-    if (fname2 != NULL && *fname2 != '\0')
-        fname = load_setup_get_full_config_name (NULL, fname2);
-    g_free (fname2);
-    if (fname != NULL && strcmp (fname, sysconfig_keymap) != 0 && strcmp (fname, share_keymap) != 0)
-    {
-        load_setup_init_config_from_file (&keymap_config, fname, TRUE);
-        goto done;
-    }
-    g_free (fname);
-
-    /* 6) ${XDG_CONFIG_HOME}/mc/mc.keymap */
-    fname = mc_config_get_full_path (GLOBAL_KEYMAP_FILE);
-    load_setup_init_config_from_file (&keymap_config, fname, TRUE);
-
-  done:
-    g_free (fname);
-    g_free (sysconfig_keymap);
-    g_free (share_keymap);
-
-    return keymap_config;
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -977,9 +760,14 @@ save_layout (void)
     size_t i;
 
     /* Save integer options */
-    for (i = 0; layout[i].opt_name != NULL; i++)
-        mc_config_set_int (mc_global.main_config, CONFIG_LAYOUT_SECTION, layout[i].opt_name,
-                           *layout[i].opt_addr);
+    for (i = 0; layout_int_options[i].opt_name != NULL; i++)
+        mc_config_set_int (mc_global.main_config, CONFIG_LAYOUT_SECTION,
+                           layout_int_options[i].opt_name, *layout_int_options[i].opt_addr);
+
+    /* Save boolean options */
+    for (i = 0; layout_bool_options[i].opt_name != NULL; i++)
+        mc_config_set_bool (mc_global.main_config, CONFIG_LAYOUT_SECTION,
+                            layout_bool_options[i].opt_name, *layout_bool_options[i].opt_addr);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -993,14 +781,14 @@ save_panel_types (void)
     if (mc_global.mc_run_mode != MC_RUN_FULL)
         return;
 
-    type = get_display_type (0);
+    type = get_panel_type (0);
     panel_save_type ("New Left Panel", type);
     if (type == view_listing)
-        panel_save_setup (left_panel, left_panel->panel_name);
-    type = get_display_type (1);
+        panel_save_setup (left_panel, left_panel->name);
+    type = get_panel_type (1);
     panel_save_type ("New Right Panel", type);
     if (type == view_listing)
-        panel_save_setup (right_panel, right_panel->panel_name);
+        panel_save_setup (right_panel, right_panel->name);
 
     {
         char *dirs;
@@ -1073,7 +861,6 @@ load_setup (void)
     const char *profile;
 
 #ifdef HAVE_CHARSET
-    char *buffer;
     const char *cbuffer;
 
     load_codepages_list ();
@@ -1135,6 +922,8 @@ load_setup (void)
 #ifdef HAVE_CHARSET
     if (codepages->len > 1)
     {
+        char *buffer;
+
         buffer =
             mc_config_get_string (mc_global.main_config, CONFIG_MISC_SECTION, "display_codepage",
                                   "");
@@ -1291,7 +1080,6 @@ setup_save_config_show_error (const char *filename, GError ** mcerror)
     }
 }
 
-
 /* --------------------------------------------------------------------------------------------- */
 
 void
@@ -1337,131 +1125,18 @@ load_anon_passwd (void)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-load_keymap_defs (gboolean load_from_file)
-{
-    /*
-     * Load keymap from GLOBAL_KEYMAP_FILE before ${XDG_CONFIG_HOME}/mc/mc.keymap, so that the user
-     * definitions override global settings.
-     */
-    mc_config_t *mc_global_keymap;
-
-    mc_global_keymap = load_setup_get_keymap_profile_config (load_from_file);
-
-    if (mc_global_keymap != NULL)
-    {
-        main_keymap = g_array_new (TRUE, FALSE, sizeof (global_keymap_t));
-        load_keymap_from_section (KEYMAP_SECTION_MAIN, main_keymap, mc_global_keymap);
-        main_x_keymap = g_array_new (TRUE, FALSE, sizeof (global_keymap_t));
-        load_keymap_from_section (KEYMAP_SECTION_MAIN_EXT, main_x_keymap, mc_global_keymap);
-
-        panel_keymap = g_array_new (TRUE, FALSE, sizeof (global_keymap_t));
-        load_keymap_from_section (KEYMAP_SECTION_PANEL, panel_keymap, mc_global_keymap);
-
-        dialog_keymap = g_array_new (TRUE, FALSE, sizeof (global_keymap_t));
-        load_keymap_from_section (KEYMAP_SECTION_DIALOG, dialog_keymap, mc_global_keymap);
-
-        input_keymap = g_array_new (TRUE, FALSE, sizeof (global_keymap_t));
-        load_keymap_from_section (KEYMAP_SECTION_INPUT, input_keymap, mc_global_keymap);
-
-        listbox_keymap = g_array_new (TRUE, FALSE, sizeof (global_keymap_t));
-        load_keymap_from_section (KEYMAP_SECTION_LISTBOX, listbox_keymap, mc_global_keymap);
-
-        tree_keymap = g_array_new (TRUE, FALSE, sizeof (global_keymap_t));
-        load_keymap_from_section (KEYMAP_SECTION_TREE, tree_keymap, mc_global_keymap);
-
-        help_keymap = g_array_new (TRUE, FALSE, sizeof (global_keymap_t));
-        load_keymap_from_section (KEYMAP_SECTION_HELP, help_keymap, mc_global_keymap);
-
-#ifdef USE_INTERNAL_EDIT
-        editor_keymap = g_array_new (TRUE, FALSE, sizeof (global_keymap_t));
-        load_keymap_from_section (KEYMAP_SECTION_EDITOR, editor_keymap, mc_global_keymap);
-        editor_x_keymap = g_array_new (TRUE, FALSE, sizeof (global_keymap_t));
-        load_keymap_from_section (KEYMAP_SECTION_EDITOR_EXT, editor_x_keymap, mc_global_keymap);
-#endif
-
-        viewer_keymap = g_array_new (TRUE, FALSE, sizeof (global_keymap_t));
-        load_keymap_from_section (KEYMAP_SECTION_VIEWER, viewer_keymap, mc_global_keymap);
-        viewer_hex_keymap = g_array_new (TRUE, FALSE, sizeof (global_keymap_t));
-        load_keymap_from_section (KEYMAP_SECTION_VIEWER_HEX, viewer_hex_keymap, mc_global_keymap);
-
-#ifdef USE_DIFF_VIEW
-        diff_keymap = g_array_new (TRUE, FALSE, sizeof (global_keymap_t));
-        load_keymap_from_section (KEYMAP_SECTION_DIFFVIEWER, diff_keymap, mc_global_keymap);
-#endif
-
-        mc_config_deinit (mc_global_keymap);
-    }
-
-    main_map = (global_keymap_t *) main_keymap->data;
-    main_x_map = (global_keymap_t *) main_x_keymap->data;
-    panel_map = (global_keymap_t *) panel_keymap->data;
-    dialog_map = (global_keymap_t *) dialog_keymap->data;
-    input_map = (global_keymap_t *) input_keymap->data;
-    listbox_map = (global_keymap_t *) listbox_keymap->data;
-    tree_map = (global_keymap_t *) tree_keymap->data;
-    help_map = (global_keymap_t *) help_keymap->data;
-#ifdef USE_INTERNAL_EDIT
-    editor_map = (global_keymap_t *) editor_keymap->data;
-    editor_x_map = (global_keymap_t *) editor_x_keymap->data;
-#endif
-    viewer_map = (global_keymap_t *) viewer_keymap->data;
-    viewer_hex_map = (global_keymap_t *) viewer_hex_keymap->data;
-#ifdef USE_DIFF_VIEW
-    diff_map = (global_keymap_t *) diff_keymap->data;
-#endif
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-void
-free_keymap_defs (void)
-{
-    if (main_keymap != NULL)
-        g_array_free (main_keymap, TRUE);
-    if (main_x_keymap != NULL)
-        g_array_free (main_x_keymap, TRUE);
-    if (panel_keymap != NULL)
-        g_array_free (panel_keymap, TRUE);
-    if (dialog_keymap != NULL)
-        g_array_free (dialog_keymap, TRUE);
-    if (input_keymap != NULL)
-        g_array_free (input_keymap, TRUE);
-    if (listbox_keymap != NULL)
-        g_array_free (listbox_keymap, TRUE);
-    if (tree_keymap != NULL)
-        g_array_free (tree_keymap, TRUE);
-    if (help_keymap != NULL)
-        g_array_free (help_keymap, TRUE);
-#ifdef USE_INTERNAL_EDIT
-    if (editor_keymap != NULL)
-        g_array_free (editor_keymap, TRUE);
-    if (editor_x_keymap != NULL)
-        g_array_free (editor_x_keymap, TRUE);
-#endif
-    if (viewer_keymap != NULL)
-        g_array_free (viewer_keymap, TRUE);
-    if (viewer_hex_keymap != NULL)
-        g_array_free (viewer_hex_keymap, TRUE);
-#ifdef USE_DIFF_VIEW
-    if (diff_keymap != NULL)
-        g_array_free (diff_keymap, TRUE);
-#endif
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-void
 panel_load_setup (WPanel * panel, const char *section)
 {
     size_t i;
     char *buffer, buffer2[BUF_TINY];
 
-    panel->sort_info.reverse = mc_config_get_int (mc_global.panels_config, section, "reverse", 0);
+    panel->sort_info.reverse =
+        mc_config_get_bool (mc_global.panels_config, section, "reverse", FALSE);
     panel->sort_info.case_sensitive =
-        mc_config_get_int (mc_global.panels_config, section, "case_sensitive",
-                           OS_SORT_CASE_SENSITIVE_DEFAULT);
+        mc_config_get_bool (mc_global.panels_config, section, "case_sensitive",
+                            OS_SORT_CASE_SENSITIVE_DEFAULT);
     panel->sort_info.exec_first =
-        mc_config_get_int (mc_global.panels_config, section, "exec_first", 0);
+        mc_config_get_bool (mc_global.panels_config, section, "exec_first", FALSE);
 
     /* Load sort order */
     buffer = mc_config_get_string (mc_global.panels_config, section, "sort_order", "name");
@@ -1514,10 +1189,11 @@ panel_save_setup (WPanel * panel, const char *section)
     char buffer[BUF_TINY];
     size_t i;
 
-    mc_config_set_int (mc_global.panels_config, section, "reverse", panel->sort_info.reverse);
-    mc_config_set_int (mc_global.panels_config, section, "case_sensitive",
-                       panel->sort_info.case_sensitive);
-    mc_config_set_int (mc_global.panels_config, section, "exec_first", panel->sort_info.exec_first);
+    mc_config_set_bool (mc_global.panels_config, section, "reverse", panel->sort_info.reverse);
+    mc_config_set_bool (mc_global.panels_config, section, "case_sensitive",
+                        panel->sort_info.case_sensitive);
+    mc_config_set_bool (mc_global.panels_config, section, "exec_first",
+                        panel->sort_info.exec_first);
 
     mc_config_set_string (mc_global.panels_config, section, "sort_order", panel->sort_field->id);
 

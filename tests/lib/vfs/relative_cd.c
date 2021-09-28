@@ -1,6 +1,6 @@
 /* lib/vfs - test vfs_path_t manipulation functions
 
-   Copyright (C) 2011-2017
+   Copyright (C) 2011-2021
    Free Software Foundation, Inc.
 
    Written by:
@@ -26,6 +26,8 @@
 
 #include "tests/mctest.h"
 
+#include <string.h>             /* memset() */
+
 #include "lib/strutil.h"
 #include "lib/vfs/xdirentry.h"
 #include "lib/vfs/path.h"
@@ -33,8 +35,8 @@
 #include "src/vfs/local/local.c"
 
 
-struct vfs_s_subclass test_subclass1;
-struct vfs_class vfs_test_ops1;
+static struct vfs_s_subclass vfs_test_subclass1;
+static struct vfs_class *vfs_test_ops1 = VFS_CLASS (&vfs_test_subclass1);
 
 static int test_chdir (const vfs_path_t * vpath);
 
@@ -62,7 +64,7 @@ test_chdir__init (void)
 static void
 test_chdir__deinit (void)
 {
-    vfs_path_free (test_chdir__vpath__captured);
+    vfs_path_free (test_chdir__vpath__captured, TRUE);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -71,25 +73,20 @@ test_chdir__deinit (void)
 static void
 setup (void)
 {
-
     str_init_strings (NULL);
 
     vfs_init ();
-    init_localfs ();
+    vfs_init_localfs ();
     vfs_setup_work_dir ();
 
-    test_subclass1.flags = VFS_S_REMOTE;
-    vfs_s_init_class (&vfs_test_ops1, &test_subclass1);
-
-    vfs_test_ops1.name = "testfs1";
-    vfs_test_ops1.flags = VFSF_NOLINKS;
-    vfs_test_ops1.prefix = "test1";
-    vfs_test_ops1.chdir = test_chdir;
-    vfs_register_class (&vfs_test_ops1);
+    memset (&vfs_test_subclass1, 0, sizeof (vfs_test_subclass1));
+    vfs_init_class (vfs_test_ops1, "testfs1", VFSF_NOLINKS | VFSF_REMOTE, "test1");
+    vfs_test_ops1->chdir = test_chdir;
+    vfs_register_class (vfs_test_ops1);
 
     mc_global.sysconfig_dir = (char *) TEST_SHARE_DIR;
 
-    vfs_local_ops.chdir = test_chdir;
+    vfs_local_ops->chdir = test_chdir;
 
     test_chdir__init ();
 }
@@ -152,7 +149,7 @@ START_PARAMETRIZED_TEST (test_relative_cd, test_relative_cd_ds)
         mctest_assert_int_eq (actual_result, 0);
         element = vfs_path_get_by_index (vpath, -1);
         mctest_assert_str_eq (element->path, data->expected_element_path);
-        vfs_path_free (vpath);
+        vfs_path_free (vpath, TRUE);
     }
 }
 /* *INDENT-OFF* */
@@ -176,7 +173,7 @@ START_TEST (test_vpath_to_str_filter)
     /* when */
     vpath = vfs_path_from_str ("/test1://some.host/dir");
     path_element = vfs_path_element_clone (vfs_path_get_by_index (vpath, -1));
-    vfs_path_free (vpath);
+    vfs_path_free (vpath, TRUE);
 
     last_vpath = vfs_path_new ();
     last_vpath->relative = TRUE;
@@ -189,7 +186,7 @@ START_TEST (test_vpath_to_str_filter)
     /* then */
     mctest_assert_str_eq (filtered_path, "test1://some.host/dir");
 
-    vfs_path_free (last_vpath);
+    vfs_path_free (last_vpath, TRUE);
     g_free (filtered_path);
 }
 /* *INDENT-OFF* */
@@ -201,11 +198,15 @@ END_TEST
 int
 main (void)
 {
-    int number_failed;
+    TCase *tc_core;
+    char *cwd;
 
-    Suite *s = suite_create (TEST_SUITE_NAME);
-    TCase *tc_core = tcase_create ("Core");
-    SRunner *sr;
+    tc_core = tcase_create ("Core");
+
+    /* writable directory where check creates temporary files */
+    cwd = g_get_current_dir ();
+    g_setenv ("TEMP", cwd, TRUE);
+    g_free (cwd);
 
     tcase_add_checked_fixture (tc_core, setup, teardown);
 
@@ -214,13 +215,7 @@ main (void)
     tcase_add_test (tc_core, test_vpath_to_str_filter);
     /* *********************************** */
 
-    suite_add_tcase (s, tc_core);
-    sr = srunner_create (s);
-    srunner_set_log (sr, "relative_cd.log");
-    srunner_run_all (sr, CK_ENV);
-    number_failed = srunner_ntests_failed (sr);
-    srunner_free (sr);
-    return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    return mctest_run_all (tc_core);
 }
 
 /* --------------------------------------------------------------------------------------------- */
