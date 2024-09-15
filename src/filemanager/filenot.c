@@ -3,7 +3,7 @@
    tree about the changes made to the directory
    structure.
 
-   Copyright (C) 2011-2021
+   Copyright (C) 2011-2024
    Free Software Foundation, Inc.
 
    Author:
@@ -52,13 +52,16 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
 static vfs_path_t *
-get_absolute_name (const vfs_path_t * vpath)
+get_absolute_name (const vfs_path_t *vpath)
 {
     if (vpath == NULL)
         return NULL;
@@ -72,7 +75,7 @@ get_absolute_name (const vfs_path_t * vpath)
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-my_mkdir_rec (const vfs_path_t * vpath, mode_t mode)
+my_mkdir_rec (const vfs_path_t *vpath, mode_t mode)
 {
     vfs_path_t *q;
     int result;
@@ -107,7 +110,7 @@ my_mkdir_rec (const vfs_path_t * vpath, mode_t mode)
 /* --------------------------------------------------------------------------------------------- */
 
 int
-my_mkdir (const vfs_path_t * vpath, mode_t mode)
+my_mkdir (const vfs_path_t *vpath, mode_t mode)
 {
     int result;
 

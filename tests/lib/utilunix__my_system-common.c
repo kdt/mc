@@ -1,7 +1,7 @@
 /*
    lib - common code for testing lib/utilinux:my_system() function
 
-   Copyright (C) 2013-2021
+   Copyright (C) 2013-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -42,7 +42,7 @@ static int sigemptyset__return_value = 0;
 
 /* @Mock */
 int
-sigemptyset (sigset_t * set)
+sigemptyset (sigset_t *set)
 {
     sigemptyset_set__captured = set;
     return sigemptyset__return_value;
@@ -100,23 +100,20 @@ sigaction (int signum, const struct sigaction *act, struct sigaction *oldact)
 static void
 sigaction__init (void)
 {
-    sigaction_signum__captured = g_ptr_array_new ();
-    sigaction_act__captured = g_ptr_array_new ();
-    sigaction_oldact__captured = g_ptr_array_new ();
+    sigaction_signum__captured = g_ptr_array_new_with_free_func (g_free);
+    sigaction_act__captured = g_ptr_array_new_with_free_func (g_free);
+    sigaction_oldact__captured = g_ptr_array_new_with_free_func (g_free);
 }
 
 static void
 sigaction__deinit (void)
 {
-    g_ptr_array_foreach (sigaction_signum__captured, (GFunc) g_free, NULL);
     g_ptr_array_free (sigaction_signum__captured, TRUE);
     sigaction_signum__captured = NULL;
 
-    g_ptr_array_foreach (sigaction_act__captured, (GFunc) g_free, NULL);
     g_ptr_array_free (sigaction_act__captured, TRUE);
     sigaction_act__captured = NULL;
 
-    g_ptr_array_foreach (sigaction_oldact__captured, (GFunc) g_free, NULL);
     g_ptr_array_free (sigaction_oldact__captured, TRUE);
     sigaction_oldact__captured = NULL;
 }
@@ -158,18 +155,16 @@ signal (int signum, sighandler_t handler)
 static void
 signal__init (void)
 {
-    signal_signum__captured = g_ptr_array_new ();
-    signal_handler__captured = g_ptr_array_new ();
+    signal_signum__captured = g_ptr_array_new_with_free_func (g_free);
+    signal_handler__captured = g_ptr_array_new_with_free_func (g_free);
 }
 
 static void
 signal__deinit (void)
 {
-    g_ptr_array_foreach (signal_signum__captured, (GFunc) g_free, NULL);
     g_ptr_array_free (signal_signum__captured, TRUE);
     signal_signum__captured = NULL;
 
-    g_ptr_array_foreach (signal_handler__captured, (GFunc) g_free, NULL);
     g_ptr_array_free (signal_handler__captured, TRUE);
     signal_handler__captured = NULL;
 }
@@ -222,13 +217,12 @@ execvp (const char *file, char *const argv[])
 static void
 execvp__init (void)
 {
-    execvp__args__captured = g_ptr_array_new ();
+    execvp__args__captured = g_ptr_array_new_with_free_func (g_free);
 }
 
 static void
 execvp__deinit (void)
 {
-    g_ptr_array_foreach (execvp__args__captured, (GFunc) g_free, NULL);
     g_ptr_array_free (execvp__args__captured, TRUE);
     execvp__args__captured = NULL;
     MC_PTR_FREE (execvp__file__captured);
@@ -239,7 +233,7 @@ execvp__deinit (void)
 #define VERIFY_SIGACTION__ACT_IGNORED(_pntr) { \
     struct sigaction *_act = (struct sigaction *) _pntr; \
     mctest_assert_ptr_eq (_act->sa_handler, SIG_IGN); \
-    mctest_assert_int_eq (_act->sa_flags, 0); \
+    ck_assert_int_eq (_act->sa_flags, 0); \
 }
 
 #define VERIFY_SIGACTION__IS_RESTORED(oldact_idx, act_idx) { \
@@ -251,14 +245,14 @@ execvp__deinit (void)
 
 /* @Verify */
 #define VERIFY_SIGACTION_CALLS() { \
-    mctest_assert_int_eq (sigaction_signum__captured->len, 6); \
+    ck_assert_int_eq (sigaction_signum__captured->len, 6); \
 \
-    mctest_assert_int_eq (*((int *) g_ptr_array_index(sigaction_signum__captured, 0)), SIGINT); \
-    mctest_assert_int_eq (*((int *) g_ptr_array_index(sigaction_signum__captured, 1)), SIGQUIT); \
-    mctest_assert_int_eq (*((int *) g_ptr_array_index(sigaction_signum__captured, 2)), SIGTSTP); \
-    mctest_assert_int_eq (*((int *) g_ptr_array_index(sigaction_signum__captured, 3)), SIGINT); \
-    mctest_assert_int_eq (*((int *) g_ptr_array_index(sigaction_signum__captured, 4)), SIGQUIT); \
-    mctest_assert_int_eq (*((int *) g_ptr_array_index(sigaction_signum__captured, 5)), SIGTSTP); \
+    ck_assert_int_eq (*((int *) g_ptr_array_index(sigaction_signum__captured, 0)), SIGINT); \
+    ck_assert_int_eq (*((int *) g_ptr_array_index(sigaction_signum__captured, 1)), SIGQUIT); \
+    ck_assert_int_eq (*((int *) g_ptr_array_index(sigaction_signum__captured, 2)), SIGTSTP); \
+    ck_assert_int_eq (*((int *) g_ptr_array_index(sigaction_signum__captured, 3)), SIGINT); \
+    ck_assert_int_eq (*((int *) g_ptr_array_index(sigaction_signum__captured, 4)), SIGQUIT); \
+    ck_assert_int_eq (*((int *) g_ptr_array_index(sigaction_signum__captured, 5)), SIGTSTP); \
 \
     VERIFY_SIGACTION__ACT_IGNORED(g_ptr_array_index(sigaction_act__captured, 0)); \
     VERIFY_SIGACTION__ACT_IGNORED(g_ptr_array_index(sigaction_act__captured, 1)); \
@@ -289,11 +283,11 @@ execvp__deinit (void)
 
 /* @Verify */
 #define VERIFY_SIGNAL_CALLS() { \
-    mctest_assert_int_eq (signal_signum__captured->len, 4); \
-    mctest_assert_int_eq (*((int *) g_ptr_array_index(signal_signum__captured, 0)), SIGINT); \
-    mctest_assert_int_eq (*((int *) g_ptr_array_index(signal_signum__captured, 1)), SIGQUIT); \
-    mctest_assert_int_eq (*((int *) g_ptr_array_index(signal_signum__captured, 2)), SIGTSTP); \
-    mctest_assert_int_eq (*((int *) g_ptr_array_index(signal_signum__captured, 3)), SIGCHLD); \
+    ck_assert_int_eq (signal_signum__captured->len, 4); \
+    ck_assert_int_eq (*((int *) g_ptr_array_index(signal_signum__captured, 0)), SIGINT); \
+    ck_assert_int_eq (*((int *) g_ptr_array_index(signal_signum__captured, 1)), SIGQUIT); \
+    ck_assert_int_eq (*((int *) g_ptr_array_index(signal_signum__captured, 2)), SIGTSTP); \
+    ck_assert_int_eq (*((int *) g_ptr_array_index(signal_signum__captured, 3)), SIGCHLD); \
     \
     VERIFY_SIGNAL_HANDLER_IS_SIG_DFL (0); \
     VERIFY_SIGNAL_HANDLER_IS_SIG_DFL (1); \

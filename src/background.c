@@ -2,7 +2,7 @@
 
 /* Background support.
 
-   Copyright (C) 1996-2021
+   Copyright (C) 1996-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -68,6 +68,10 @@ enum ReturnType
     Return_Integer
 };
 
+/*** forward declarations (file scope functions) *************************************************/
+
+static int background_attention (int fd, void *closure);
+
 /*** file scope variables ************************************************************************/
 
 /* File descriptor for talking to our parent */
@@ -78,13 +82,12 @@ static int from_parent_fd;
 
 TaskList *task_list = NULL;
 
-static int background_attention (int fd, void *closure);
-
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-register_task_running (file_op_context_t * ctx, pid_t pid, int fd, int to_child, char *info)
+register_task_running (file_op_context_t *ctx, pid_t pid, int fd, int to_child, char *info)
 {
     TaskList *new;
 
@@ -401,7 +404,7 @@ background_attention (int fd, void *closure)
  */
 
 static void
-parent_call_header (void *routine, int argc, enum ReturnType type, file_op_context_t * ctx)
+parent_call_header (void *routine, int argc, enum ReturnType type, file_op_context_t *ctx)
 {
     int have_ctx;
     ssize_t ret;
@@ -515,7 +518,7 @@ unregister_task_with_pid (pid_t pid)
  * -1 on failure
  */
 int
-do_background (file_op_context_t * ctx, char *info)
+do_background (file_op_context_t *ctx, char *info)
 {
     int comm[2];                /* control connection stream */
     int back_comm[2];           /* back connection */
@@ -550,7 +553,10 @@ do_background (file_op_context_t * ctx, char *info)
     {
         int nullfd;
 
+        (void) close (comm[0]);
         parent_fd = comm[1];
+
+        (void) close (back_comm[1]);
         from_parent_fd = back_comm[0];
 
         mc_global.we_are_background = TRUE;
@@ -577,6 +583,8 @@ do_background (file_op_context_t * ctx, char *info)
     }
     else
     {
+        (void) close (comm[1]);
+        (void) close (back_comm[0]);
         ctx->pid = pid;
         register_task_running (ctx, pid, comm[0], back_comm[1], info);
         return 1;
@@ -586,7 +594,7 @@ do_background (file_op_context_t * ctx, char *info)
 /* --------------------------------------------------------------------------------------------- */
 
 int
-parent_call (void *routine, file_op_context_t * ctx, int argc, ...)
+parent_call (void *routine, file_op_context_t *ctx, int argc, ...)
 {
     int ret;
     va_list ap;
@@ -617,7 +625,7 @@ parent_call_string (void *routine, int argc, ...)
 
 /* event callback */
 gboolean
-background_parent_call (const gchar * event_group_name, const gchar * event_name,
+background_parent_call (const gchar *event_group_name, const gchar *event_name,
                         gpointer init_data, gpointer data)
 {
     ev_background_parent_call_t *event_data = (ev_background_parent_call_t *) data;
@@ -636,7 +644,7 @@ background_parent_call (const gchar * event_group_name, const gchar * event_name
 
 /* event callback */
 gboolean
-background_parent_call_string (const gchar * event_group_name, const gchar * event_name,
+background_parent_call_string (const gchar *event_group_name, const gchar *event_name,
                                gpointer init_data, gpointer data)
 {
     ev_background_parent_call_t *event_data = (ev_background_parent_call_t *) data;

@@ -2,11 +2,11 @@
    Routines invoked by a function key
    They normally operate on the current panel.
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Written by:
-   Andrew Borodin <aborodin@vmail.ru>, 2013-2015
+   Andrew Borodin <aborodin@vmail.ru>, 2013-2022
 
    This file is part of the Midnight Commander.
 
@@ -58,6 +58,7 @@
 #include "lib/vfs/vfs.h"
 #include "lib/fileloc.h"
 #include "lib/strutil.h"
+#include "lib/file-entry.h"
 #include "lib/util.h"
 #include "lib/widget.h"
 #include "lib/keybind.h"        /* CK_Down, CK_History */
@@ -80,10 +81,8 @@
 #endif
 
 #include "fileopctx.h"
-#include "file.h"               /* file operation routines */
 #include "filenot.h"
 #include "hotlist.h"            /* hotlist_show() */
-#include "panel.h"              /* WPanel */
 #include "tree.h"               /* tree_chdir() */
 #include "filemanager.h"        /* change_panel() */
 #include "command.h"            /* cmdline */
@@ -91,7 +90,8 @@
 #include "ext.h"                /* regex_command() */
 #include "boxes.h"              /* cd_box() */
 #include "dir.h"
-#include "cd.h"                 /* cd_to() */
+#include "cd.h"
+#include "ioblksize.h"          /* IO_BUFSIZE */
 
 #include "cmd.h"                /* Our definitions */
 
@@ -114,6 +114,8 @@ enum CompareMode
     compare_thourough
 };
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 #ifdef ENABLE_VFS_NET
@@ -124,14 +126,18 @@ static const char *machine_str = N_("Enter machine name (F1 for details):");
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 /**
- * Run viewer (internal or external) on the currently selected file.
+ * Run viewer (internal or external) on the current file.
  * If @plain_view is TRUE, force internal viewer and raw mode (used for F13).
  */
 static void
-do_view_cmd (WPanel * panel, gboolean plain_view)
+do_view_cmd (WPanel *panel, gboolean plain_view)
 {
+    const file_entry_t *fe;
+
+    fe = panel_current_entry (panel);
+
     /* Directories are viewed by changing to them */
-    if (S_ISDIR (selection (panel)->st.st_mode) || link_isdir (selection (panel)))
+    if (S_ISDIR (fe->st.st_mode) || link_isdir (fe))
     {
         vfs_path_t *fname_vpath;
 
@@ -140,18 +146,16 @@ do_view_cmd (WPanel * panel, gboolean plain_view)
                           _("&Yes"), _("&No")) != 0)
             return;
 
-        fname_vpath = vfs_path_from_str (selection (panel)->fname->str);
+        fname_vpath = vfs_path_from_str (fe->fname->str);
         if (!panel_cd (panel, fname_vpath, cd_exact))
-            message (D_ERROR, MSG_ERROR, _("Cannot change directory"));
+            cd_error_message (fe->fname->str);
         vfs_path_free (fname_vpath, TRUE);
     }
     else
     {
-        int file_idx;
         vfs_path_t *filename_vpath;
 
-        file_idx = panel->selected;
-        filename_vpath = vfs_path_from_str (panel->dir.list[file_idx].fname->str);
+        filename_vpath = vfs_path_from_str (fe->fname->str);
         view_file (filename_vpath, plain_view, use_internal_view);
         vfs_path_free (filename_vpath, TRUE);
     }
@@ -162,49 +166,15 @@ do_view_cmd (WPanel * panel, gboolean plain_view)
 /* --------------------------------------------------------------------------------------------- */
 
 static inline void
-do_edit (const vfs_path_t * what_vpath)
+do_edit (const vfs_path_t *what_vpath)
 {
     edit_file_at_line (what_vpath, use_internal_edit, 0);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
-static void
-set_panel_filter_to (WPanel * p, char *filter)
-{
-    MC_PTR_FREE (p->filter);
-
-    /* Three ways to clear filter: NULL, "", "*" */
-    if (filter == NULL || filter[0] == '\0' || (filter[0] == '*' && filter[1] == '\0'))
-        g_free (filter);
-    else
-        p->filter = filter;
-    reread_cmd ();
-}
-
-/* --------------------------------------------------------------------------------------------- */
-/** Set a given panel filter expression */
-
-static void
-set_panel_filter (WPanel * p)
-{
-    char *reg_exp;
-    const char *x;
-
-    x = p->filter != NULL ? p->filter : easy_patterns ? "*" : ".";
-
-    reg_exp = input_dialog_help (_("Filter"),
-                                 _("Set expression for filtering filenames"),
-                                 "[Filter...]", MC_HISTORY_FM_PANEL_FILTER, x, FALSE,
-                                 INPUT_COMPLETE_FILENAMES);
-    if (reg_exp != NULL)
-        set_panel_filter_to (p, reg_exp);
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
 static int
-compare_files (const vfs_path_t * vpath1, const vfs_path_t * vpath2, off_t size)
+compare_files (const vfs_path_t *vpath1, const vfs_path_t *vpath2, off_t size)
 {
     int file1;
     int result = -1;            /* Different by default */
@@ -220,28 +190,8 @@ compare_files (const vfs_path_t * vpath1, const vfs_path_t * vpath2, off_t size)
         file2 = open (vfs_path_as_str (vpath2), O_RDONLY);
         if (file2 >= 0)
         {
-#ifdef HAVE_MMAP
-            char *data1;
-
-            /* Ugly if jungle */
-            data1 = mmap (0, size, PROT_READ, MAP_FILE | MAP_PRIVATE, file1, 0);
-            if (data1 != (char *) -1)
-            {
-                char *data2;
-
-                data2 = mmap (0, size, PROT_READ, MAP_FILE | MAP_PRIVATE, file2, 0);
-                if (data2 != (char *) -1)
-                {
-                    rotate_dash (TRUE);
-                    result = memcmp (data1, data2, size);
-                    munmap (data2, size);
-                }
-                munmap (data1, size);
-            }
-#else
-            /* Don't have mmap() :( Even more ugly :) */
-            char buf1[BUFSIZ], buf2[BUFSIZ];
-            int n1, n2;
+            char buf1[IO_BUFSIZE], buf2[IO_BUFSIZE];
+            ssize_t n1, n2;
 
             rotate_dash (TRUE);
             do
@@ -253,12 +203,12 @@ compare_files (const vfs_path_t * vpath1, const vfs_path_t * vpath2, off_t size)
             }
             while (n1 == n2 && n1 == sizeof (buf1) && memcmp (buf1, buf2, sizeof (buf1)) == 0);
             result = (n1 != n2) || memcmp (buf1, buf2, n1);
-#endif /* !HAVE_MMAP */
+            rotate_dash (FALSE);
+
             close (file2);
         }
         close (file1);
     }
-    rotate_dash (FALSE);
 
     return result;
 }
@@ -266,7 +216,7 @@ compare_files (const vfs_path_t * vpath1, const vfs_path_t * vpath2, off_t size)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-compare_dir (WPanel * panel, WPanel * other, enum CompareMode mode)
+compare_dir (WPanel *panel, const WPanel *other, enum CompareMode mode)
 {
     int i, j;
 
@@ -279,6 +229,7 @@ compare_dir (WPanel * panel, WPanel * other, enum CompareMode mode)
     for (i = 0; i < panel->dir.len; i++)
     {
         file_entry_t *source = &panel->dir.list[i];
+        const char *source_fname;
 
         /* Default: unmarked */
         file_mark (panel, i, 0);
@@ -287,10 +238,22 @@ compare_dir (WPanel * panel, WPanel * other, enum CompareMode mode)
         if (S_ISDIR (source->st.st_mode))
             continue;
 
+        source_fname = source->fname->str;
+        if (panel->is_panelized)
+            source_fname = x_basename (source_fname);
+
         /* Search the corresponding entry from the other panel */
         for (j = 0; j < other->dir.len; j++)
-            if (g_string_equal (source->fname, other->dir.list[j].fname))
+        {
+            const char *other_fname;
+
+            other_fname = other->dir.list[j].fname->str;
+            if (other->is_panelized)
+                other_fname = x_basename (other_fname);
+
+            if (strcmp (source_fname, other_fname) == 0)
                 break;
+        }
 
         if (j >= other->dir.len)
             /* Not found -> mark */
@@ -464,7 +427,7 @@ nice_cd (const char *text, const char *xtext, const char *help,
         cd_vpath = vfs_path_from_str_flags (cd_path, VPF_NO_CANON);
         if (!panel_do_cd (MENU_PANEL, cd_vpath, cd_parse_command))
         {
-            message (D_ERROR, MSG_ERROR, _("Cannot chdir to \"%s\""), cd_path);
+            cd_error_message (cd_path);
 
             if (save_type != view_listing)
                 create_panel (MENU_PANEL_IDX, save_type);
@@ -482,7 +445,7 @@ nice_cd (const char *text, const char *xtext, const char *help,
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-configure_panel_listing (WPanel * p, int list_format, int brief_cols, gboolean use_msformat,
+configure_panel_listing (WPanel *p, int list_format, int brief_cols, gboolean use_msformat,
                          char **user, char **status)
 {
     p->user_mini_status = use_msformat;
@@ -522,7 +485,7 @@ switch_to_listing (int panel_index)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-view_file_at_line (const vfs_path_t * filename_vpath, gboolean plain_view, gboolean internal,
+view_file_at_line (const vfs_path_t *filename_vpath, gboolean plain_view, gboolean internal,
                    long start_line, off_t search_start, off_t search_end)
 {
     gboolean ret = TRUE;
@@ -602,17 +565,17 @@ view_file_at_line (const vfs_path_t * filename_vpath, gboolean plain_view, gbool
  */
 
 gboolean
-view_file (const vfs_path_t * filename_vpath, gboolean plain_view, gboolean internal)
+view_file (const vfs_path_t *filename_vpath, gboolean plain_view, gboolean internal)
 {
     return view_file_at_line (filename_vpath, plain_view, internal, 0, 0, 0);
 }
 
 
 /* --------------------------------------------------------------------------------------------- */
-/** Run user's preferred viewer on the currently selected file */
+/** Run user's preferred viewer on the current file */
 
 void
-view_cmd (WPanel * panel)
+view_cmd (WPanel *panel)
 {
     do_view_cmd (panel, FALSE);
 }
@@ -621,14 +584,14 @@ view_cmd (WPanel * panel)
 /** Ask for file and run user's preferred viewer on it */
 
 void
-view_file_cmd (const WPanel * panel)
+view_file_cmd (const WPanel *panel)
 {
     char *filename;
     vfs_path_t *vpath;
 
     filename =
         input_expand_dialog (_("View file"), _("Filename:"),
-                             MC_HISTORY_FM_VIEW_FILE, selection (panel)->fname->str,
+                             MC_HISTORY_FM_VIEW_FILE, panel_current_entry (panel)->fname->str,
                              INPUT_COMPLETE_FILENAMES);
     if (filename == NULL)
         return;
@@ -640,9 +603,9 @@ view_file_cmd (const WPanel * panel)
 }
 
 /* --------------------------------------------------------------------------------------------- */
-/** Run plain internal viewer on the currently selected file */
+/** Run plain internal viewer on the current file */
 void
-view_raw_cmd (WPanel * panel)
+view_raw_cmd (WPanel *panel)
 {
     do_view_cmd (panel, TRUE);
 }
@@ -650,15 +613,15 @@ view_raw_cmd (WPanel * panel)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-view_filtered_cmd (const WPanel * panel)
+view_filtered_cmd (const WPanel *panel)
 {
     char *command;
     const char *initial_command;
 
     if (input_is_empty (cmdline))
-        initial_command = selection (panel)->fname->str;
+        initial_command = panel_current_entry (panel)->fname->str;
     else
-        initial_command = cmdline->buffer;
+        initial_command = input_get_ctext (cmdline);
 
     command =
         input_dialog (_("Filtered view"),
@@ -677,12 +640,16 @@ view_filtered_cmd (const WPanel * panel)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-edit_file_at_line (const vfs_path_t * what_vpath, gboolean internal, long start_line)
+edit_file_at_line (const vfs_path_t *what_vpath, gboolean internal, long start_line)
 {
 
 #ifdef USE_INTERNAL_EDIT
     if (internal)
-        edit_file (what_vpath, start_line);
+    {
+        const edit_arg_t arg = { (vfs_path_t *) what_vpath, start_line };
+
+        edit_file (&arg);
+    }
     else
 #endif /* USE_INTERNAL_EDIT */
     {
@@ -714,11 +681,11 @@ edit_file_at_line (const vfs_path_t * what_vpath, gboolean internal, long start_
 /* --------------------------------------------------------------------------------------------- */
 
 void
-edit_cmd (const WPanel * panel)
+edit_cmd (const WPanel *panel)
 {
     vfs_path_t *fname;
 
-    fname = vfs_path_from_str (selection (panel)->fname->str);
+    fname = vfs_path_from_str (panel_current_entry (panel)->fname->str);
     if (regex_command (fname, "Edit") == 0)
         do_edit (fname);
     vfs_path_free (fname, TRUE);
@@ -728,11 +695,11 @@ edit_cmd (const WPanel * panel)
 
 #ifdef USE_INTERNAL_EDIT
 void
-edit_cmd_force_internal (const WPanel * panel)
+edit_cmd_force_internal (const WPanel *panel)
 {
     vfs_path_t *fname;
 
-    fname = vfs_path_from_str (selection (panel)->fname->str);
+    fname = vfs_path_from_str (panel_current_entry (panel)->fname->str);
     if (regex_command (fname, "Edit") == 0)
         edit_file_at_line (fname, TRUE, 1);
     vfs_path_free (fname, TRUE);
@@ -770,76 +737,19 @@ edit_cmd_new (void)
 }
 
 /* --------------------------------------------------------------------------------------------- */
-/** Invoked by F5.  Copy, default to the other panel.  */
 
 void
-copy_cmd (WPanel * panel)
+mkdir_cmd (WPanel *panel)
 {
-    save_cwds_stat ();
-
-    if (panel_operate (panel, OP_COPY, FALSE))
-    {
-        update_panels (UP_OPTIMIZE, UP_KEEPSEL);
-        repaint_screen ();
-    }
-}
-
-/* --------------------------------------------------------------------------------------------- */
-/** Invoked by F6.  Move/rename, default to the other panel, ignore marks.  */
-
-void
-rename_cmd (WPanel * panel)
-{
-    save_cwds_stat ();
-
-    if (panel_operate (panel, OP_MOVE, FALSE))
-    {
-        update_panels (UP_OPTIMIZE, UP_KEEPSEL);
-        repaint_screen ();
-    }
-}
-
-/* --------------------------------------------------------------------------------------------- */
-/** Invoked by F15.  Copy, default to the same panel, ignore marks.  */
-
-void
-copy_cmd_local (WPanel * panel)
-{
-    save_cwds_stat ();
-
-    if (panel_operate (panel, OP_COPY, TRUE))
-    {
-        update_panels (UP_OPTIMIZE, UP_KEEPSEL);
-        repaint_screen ();
-    }
-}
-
-/* --------------------------------------------------------------------------------------------- */
-/** Invoked by F16.  Move/rename, default to the same panel.  */
-
-void
-rename_cmd_local (WPanel * panel)
-{
-    save_cwds_stat ();
-
-    if (panel_operate (panel, OP_MOVE, TRUE))
-    {
-        update_panels (UP_OPTIMIZE, UP_KEEPSEL);
-        repaint_screen ();
-    }
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-void
-mkdir_cmd (WPanel * panel)
-{
+    const file_entry_t *fe;
     char *dir;
     const char *name = "";
 
-    /* If 'on' then automatically fills name with current selected item name */
-    if (auto_fill_mkdir_name && !DIR_IS_DOTDOT (selection (panel)->fname->str))
-        name = selection (panel)->fname->str;
+    fe = panel_current_entry (panel);
+
+    /* If 'on' then automatically fills name with current item name */
+    if (auto_fill_mkdir_name && !DIR_IS_DOTDOT (fe->fname->str))
+        name = fe->fname->str;
 
     dir =
         input_expand_dialog (_("Create a new Directory"),
@@ -883,50 +793,6 @@ mkdir_cmd (WPanel * panel)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-delete_cmd (WPanel * panel)
-{
-    save_cwds_stat ();
-
-    if (panel_operate (panel, OP_DELETE, FALSE))
-    {
-        update_panels (UP_OPTIMIZE, UP_KEEPSEL);
-        repaint_screen ();
-    }
-}
-
-/* --------------------------------------------------------------------------------------------- */
-/** Invoked by F18.  Remove selected file, regardless of marked files.  */
-
-void
-delete_cmd_local (WPanel * panel)
-{
-    save_cwds_stat ();
-
-    if (panel_operate (panel, OP_DELETE, TRUE))
-    {
-        update_panels (UP_OPTIMIZE, UP_KEEPSEL);
-        repaint_screen ();
-    }
-}
-
-/* --------------------------------------------------------------------------------------------- */
-/** Invoked from the left/right menus */
-
-void
-filter_cmd (void)
-{
-    if (SELECTED_IS_PANEL)
-    {
-        WPanel *p;
-
-        p = MENU_PANEL;
-        set_panel_filter (p);
-    }
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-void
 reread_cmd (void)
 {
     panel_update_flags_t flag = UP_ONLY_CURRENT;
@@ -952,13 +818,13 @@ ext_cmd (void)
                             _("Which extension file you want to edit?"), D_NORMAL, 2,
                             _("&User"), _("&System Wide"));
 
-    extdir_vpath = vfs_path_build_filename (mc_global.sysconfig_dir, MC_LIB_EXT, (char *) NULL);
+    extdir_vpath = vfs_path_build_filename (mc_global.sysconfig_dir, MC_EXT_FILE, (char *) NULL);
 
     if (dir == 0)
     {
         vfs_path_t *buffer_vpath;
 
-        buffer_vpath = mc_config_get_full_vpath (MC_FILEBIND_FILE);
+        buffer_vpath = mc_config_get_full_vpath (MC_EXT_FILE);
         check_for_default (extdir_vpath, buffer_vpath);
         do_edit (buffer_vpath);
         vfs_path_free (buffer_vpath, TRUE);
@@ -969,7 +835,7 @@ ext_cmd (void)
         {
             vfs_path_free (extdir_vpath, TRUE);
             extdir_vpath =
-                vfs_path_build_filename (mc_global.share_data_dir, MC_LIB_EXT, (char *) NULL);
+                vfs_path_build_filename (mc_global.share_data_dir, MC_EXT_FILE, (char *) NULL);
         }
         do_edit (extdir_vpath);
     }
@@ -1083,7 +949,7 @@ edit_fhl_cmd (void)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-hotlist_cmd (WPanel * panel)
+hotlist_cmd (WPanel *panel)
 {
     char *target;
 
@@ -1117,7 +983,7 @@ hotlist_cmd (WPanel * panel)
 
 #ifdef ENABLE_VFS
 void
-vfs_list (WPanel * panel)
+vfs_list (WPanel *panel)
 {
     char *target;
     vfs_path_t *target_vpath;
@@ -1128,7 +994,7 @@ vfs_list (WPanel * panel)
 
     target_vpath = vfs_path_from_str (target);
     if (!panel_cd (current_panel, target_vpath, cd_exact))
-        message (D_ERROR, MSG_ERROR, _("Cannot change directory"));
+        cd_error_message (target);
     vfs_path_free (target_vpath, TRUE);
     g_free (target);
 }
@@ -1199,8 +1065,9 @@ swap_cmd (void)
 void
 link_cmd (link_type_t link_type)
 {
-    const char *filename = selection (current_panel)->fname->str;
+    const char *filename;
 
+    filename = panel_current_entry (current_panel)->fname->str;
     if (filename != NULL)
         do_link (link_type, filename);
 }
@@ -1213,7 +1080,7 @@ edit_symlink_cmd (void)
     const file_entry_t *fe;
     const char *p;
 
-    fe = selection (current_panel);
+    fe = panel_current_entry (current_panel);
     p = fe->fname->str;
 
     if (!S_ISLNK (fe->st.st_mode))
@@ -1317,15 +1184,15 @@ sftplink_cmd (void)
 
 /* --------------------------------------------------------------------------------------------- */
 
-#ifdef ENABLE_VFS_FISH
+#ifdef ENABLE_VFS_SHELL
 void
-fishlink_cmd (void)
+shelllink_cmd (void)
 {
     nice_cd (_("Shell link to machine"), _(machine_str),
              "[FIle transfer over SHell filesystem]", ":fishlink_cmd: Shell link to machine ",
              "sh://", 1, TRUE);
 }
-#endif /* ENABLE_VFS_FISH */
+#endif /* ENABLE_VFS_SHELL */
 
 /* --------------------------------------------------------------------------------------------- */
 
@@ -1342,7 +1209,7 @@ undelete_cmd (void)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-quick_cd_cmd (WPanel * panel)
+quick_cd_cmd (WPanel *panel)
 {
     char *p;
 
@@ -1364,10 +1231,11 @@ quick_cd_cmd (WPanel * panel)
  */
 
 void
-smart_dirsize_cmd (WPanel * panel)
+smart_dirsize_cmd (WPanel *panel)
 {
-    const file_entry_t *entry = &panel->dir.list[panel->selected];
+    const file_entry_t *entry;
 
+    entry = panel_current_entry (panel);
     if ((S_ISDIR (entry->st.st_mode) && DIR_IS_DOTDOT (entry->fname->str)) || panel->dirs_marked)
         dirsizes_cmd (panel);
     else
@@ -1377,9 +1245,11 @@ smart_dirsize_cmd (WPanel * panel)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-single_dirsize_cmd (WPanel * panel)
+single_dirsize_cmd (WPanel *panel)
 {
-    file_entry_t *entry = &panel->dir.list[panel->selected];
+    file_entry_t *entry;
+
+    entry = panel_current_entry (panel);
 
     if (S_ISDIR (entry->st.st_mode) && !DIR_IS_DOTDOT (entry->fname->str))
     {
@@ -1420,7 +1290,7 @@ single_dirsize_cmd (WPanel * panel)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-dirsizes_cmd (WPanel * panel)
+dirsizes_cmd (WPanel *panel)
 {
     int i;
     dirsize_status_msg_t dsm;
@@ -1431,7 +1301,7 @@ dirsizes_cmd (WPanel * panel)
 
     for (i = 0; i < panel->dir.len; i++)
         if (S_ISDIR (panel->dir.list[i].st.st_mode)
-            && ((panel->dirs_marked != 0 && panel->dir.list[i].f.marked)
+            && ((panel->dirs_marked != 0 && panel->dir.list[i].f.marked != 0)
                 || panel->dirs_marked == 0) && !DIR_IS_DOTDOT (panel->dir.list[i].fname->str))
         {
             vfs_path_t *p;
@@ -1517,7 +1387,7 @@ listing_cmd (void)
     p = PANEL (get_panel_widget (MENU_PANEL_IDX));
 
     p->is_panelized = FALSE;
-    set_panel_filter_to (p, NULL);      /* including panel reload */
+    panel_set_filter (p, NULL); /* including panel reload */
 }
 
 /* --------------------------------------------------------------------------------------------- */

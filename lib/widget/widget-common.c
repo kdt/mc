@@ -1,7 +1,7 @@
 /*
    Widgets for the Midnight Commander
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Authors:
@@ -10,7 +10,7 @@
    Jakub Jelinek, 1995
    Andrej Borsenkow, 1996
    Norbert Warmuth, 1997
-   Andrew Borodin <aborodin@vmail.ru>, 2009, 2010, 2011, 2012, 2013
+   Andrew Borodin <aborodin@vmail.ru>, 2009-2022
 
    This file is part of the Midnight Commander.
 
@@ -51,6 +51,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* maximum value of used widget ID */
@@ -80,15 +82,12 @@ widget_set_id (void)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-widget_default_resize (Widget * w, const WRect * r)
+widget_default_resize (Widget *w, const WRect *r)
 {
     if (r == NULL)
         return MSG_NOT_HANDLED;
 
-    w->y = r->y;
-    w->x = r->x;
-    w->lines = r->lines;
-    w->cols = r->cols;
+    w->rect = *r;
 
     return MSG_HANDLED;
 }
@@ -96,7 +95,7 @@ widget_default_resize (Widget * w, const WRect * r)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-widget_do_focus (Widget * w, gboolean enable)
+widget_do_focus (Widget *w, gboolean enable)
 {
     if (w != NULL && widget_get_state (WIDGET (w->owner), WST_VISIBLE | WST_FOCUSED))
         widget_set_state (w, WST_FOCUSED, enable);
@@ -110,7 +109,7 @@ widget_do_focus (Widget * w, gboolean enable)
  */
 
 static void
-widget_focus (Widget * w)
+widget_focus (Widget *w)
 {
     WGroup *g = w->owner;
 
@@ -137,7 +136,7 @@ widget_focus (Widget * w)
  * Put widget on top or bottom of Z-order.
  */
 static void
-widget_reorder (GList * l, gboolean set_top)
+widget_reorder (GList *l, gboolean set_top)
 {
     WGroup *g = WIDGET (l->data)->owner;
 
@@ -170,7 +169,7 @@ hotkey_cmp (const char *s1, const char *s2)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-widget_default_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
+widget_default_mouse_callback (Widget *w, mouse_msg_t msg, mouse_event_t *event)
 {
     /* do nothing */
     (void) w;
@@ -181,7 +180,7 @@ widget_default_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * even
 /* --------------------------------------------------------------------------------------------- */
 
 static const int *
-widget_default_get_colors (const Widget * w)
+widget_default_get_colors (const Widget *w)
 {
     const Widget *owner = CONST_WIDGET (w->owner);
 
@@ -263,7 +262,7 @@ hotkey_equal (const hotkey_t hotkey1, const hotkey_t hotkey2)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-hotkey_draw (Widget * w, const hotkey_t hotkey, gboolean focused)
+hotkey_draw (const Widget *w, const hotkey_t hotkey, gboolean focused)
 {
     if (hotkey.start[0] != '\0')
     {
@@ -308,14 +307,10 @@ hotkey_get_text (const hotkey_t hotkey)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-widget_init (Widget * w, int y, int x, int lines, int cols,
-             widget_cb_fn callback, widget_mouse_cb_fn mouse_callback)
+widget_init (Widget *w, const WRect *r, widget_cb_fn callback, widget_mouse_cb_fn mouse_callback)
 {
     w->id = widget_set_id ();
-    w->x = x;
-    w->y = y;
-    w->cols = cols;
-    w->lines = lines;
+    w->rect = *r;
     w->pos_flags = WPOS_KEEP_DEFAULT;
     w->callback = callback;
 
@@ -337,9 +332,6 @@ widget_init (Widget * w, int y, int x, int lines, int cols,
     w->make_global = widget_default_make_global;
     w->make_local = widget_default_make_local;
 
-    w->make_global = widget_default_make_global;
-    w->make_local = widget_default_make_local;
-
     w->find = widget_default_find;
     w->find_by_type = widget_default_find_by_type;
     w->find_by_id = widget_default_find_by_id;
@@ -353,7 +345,7 @@ widget_init (Widget * w, int y, int x, int lines, int cols,
 
 /* Default callback for widgets */
 cb_ret_t
-widget_default_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+widget_default_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     (void) sender;
     (void) parm;
@@ -389,7 +381,7 @@ widget_default_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm
  * @param enable  TRUE if specified options should be added, FALSE if options should be removed
  */
 void
-widget_set_options (Widget * w, widget_options_t options, gboolean enable)
+widget_set_options (Widget *w, widget_options_t options, gboolean enable)
 {
     if (enable)
         w->options |= options;
@@ -400,29 +392,29 @@ widget_set_options (Widget * w, widget_options_t options, gboolean enable)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-widget_adjust_position (widget_pos_flags_t pos_flags, int *y, int *x, int *lines, int *cols)
+widget_adjust_position (widget_pos_flags_t pos_flags, WRect *r)
 {
     if ((pos_flags & WPOS_FULLSCREEN) != 0)
     {
-        *y = 0;
-        *x = 0;
-        *lines = LINES;
-        *cols = COLS;
+        r->y = 0;
+        r->x = 0;
+        r->lines = LINES;
+        r->cols = COLS;
     }
     else
     {
         if ((pos_flags & WPOS_CENTER_HORZ) != 0)
-            *x = (COLS - *cols) / 2;
+            r->x = (COLS - r->cols) / 2;
 
         if ((pos_flags & WPOS_CENTER_VERT) != 0)
-            *y = (LINES - *lines) / 2;
+            r->y = (LINES - r->lines) / 2;
 
         if ((pos_flags & WPOS_TRYUP) != 0)
         {
-            if (*y > 3)
-                *y -= 2;
-            else if (*y == 3)
-                *y = 2;
+            if (r->y > 3)
+                r->y -= 2;
+            else if (r->y == 3)
+                r->y = 2;
         }
     }
 }
@@ -439,7 +431,7 @@ widget_adjust_position (widget_pos_flags_t pos_flags, int *y, int *x, int *lines
  */
 
 void
-widget_set_size (Widget * w, int y, int x, int lines, int cols)
+widget_set_size (Widget *w, int y, int x, int lines, int cols)
 {
     WRect r = { y, x, lines, cols };
 
@@ -448,9 +440,24 @@ widget_set_size (Widget * w, int y, int x, int lines, int cols)
 }
 
 /* --------------------------------------------------------------------------------------------- */
+/**
+ * Change widget position and size.
+ *
+ * @param w widget
+ * @param r WRect object that holds position and size
+ */
 
 void
-widget_selectcolor (Widget * w, gboolean focused, gboolean hotkey)
+widget_set_size_rect (Widget *w, WRect *r)
+{
+    send_message (w, NULL, MSG_RESIZE, 0, r);
+    widget_draw (w);
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+void
+widget_selectcolor (const Widget *w, gboolean focused, gboolean hotkey)
 {
     int color;
     const int *colors;
@@ -470,16 +477,16 @@ widget_selectcolor (Widget * w, gboolean focused, gboolean hotkey)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-widget_erase (Widget * w)
+widget_erase (Widget *w)
 {
     if (w != NULL)
-        tty_fill_region (w->y, w->x, w->lines, w->cols, ' ');
+        tty_fill_region (w->rect.y, w->rect.x, w->rect.lines, w->rect.cols, ' ');
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 void
-widget_set_visibility (Widget * w, gboolean make_visible)
+widget_set_visibility (Widget *w, gboolean make_visible)
 {
     if (widget_get_state (w, WST_VISIBLE) != make_visible)
         widget_set_state (w, WST_VISIBLE, make_visible);
@@ -519,7 +526,7 @@ widget_is_active (const void *w)
 /* --------------------------------------------------------------------------------------------- */
 
 cb_ret_t
-widget_draw (Widget * w)
+widget_draw (Widget *w)
 {
     cb_ret_t ret = MSG_NOT_HANDLED;
 
@@ -543,7 +550,7 @@ widget_draw (Widget * w)
   */
 
 void
-widget_replace (Widget * old_w, Widget * new_w)
+widget_replace (Widget *old_w, Widget *new_w)
 {
     WGroup *g = old_w->owner;
     gboolean should_focus = FALSE;
@@ -573,7 +580,8 @@ widget_replace (Widget * old_w, Widget * new_w)
     {
         GList *l;
 
-        for (l = group_get_widget_next_of (holder); widget_is_focusable (WIDGET (l->data));
+        for (l = group_get_widget_next_of (holder);
+             !widget_is_focusable (WIDGET (l->data)) && l != holder;
              l = group_get_widget_next_of (l))
             ;
 
@@ -597,7 +605,7 @@ widget_replace (Widget * old_w, Widget * new_w)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-widget_is_focusable (const Widget * w)
+widget_is_focusable (const Widget *w)
 {
     return (widget_get_options (w, WOP_SELECTABLE) && widget_get_state (w, WST_VISIBLE) &&
             !widget_get_state (w, WST_DISABLED));
@@ -614,7 +622,7 @@ widget_is_focusable (const Widget * w)
  */
 
 void
-widget_select (Widget * w)
+widget_select (Widget *w)
 {
     WGroup *g;
 
@@ -642,25 +650,9 @@ widget_select (Widget * w)
  */
 
 void
-widget_set_bottom (Widget * w)
+widget_set_bottom (Widget *w)
 {
     widget_reorder (widget_find (WIDGET (w->owner), w), FALSE);
-}
-
-/* --------------------------------------------------------------------------------------------- */
-/**
-  * Check whether two widgets are overlapped or not.
-  * @param a 1st widget
-  * @param b 2nd widget
-  *
-  * @return TRUE if widgets are overlapped, FALSE otherwise.
-  */
-
-gboolean
-widget_overlapped (const Widget * a, const Widget * b)
-{
-    return !((b->x >= a->x + a->cols)
-             || (a->x >= b->x + b->cols) || (b->y >= a->y + a->lines) || (a->y >= b->y + b->lines));
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -673,7 +665,7 @@ widget_overlapped (const Widget * a, const Widget * b)
   */
 
 long
-widget_lookup_key (Widget * w, int key)
+widget_lookup_key (Widget *w, int key)
 {
     if (w->ext_mode)
     {
@@ -695,18 +687,12 @@ widget_lookup_key (Widget * w, int key)
   */
 
 void
-widget_default_make_global (Widget * w, const WRect * delta)
+widget_default_make_global (Widget *w, const WRect *delta)
 {
     if (delta != NULL)
-    {
-        w->y += delta->y;
-        w->x += delta->x;
-    }
+        rect_move (&w->rect, delta->y, delta->x);
     else if (w->owner != NULL)
-    {
-        w->y += WIDGET (w->owner)->y;
-        w->x += WIDGET (w->owner)->x;
-    }
+        rect_move (&w->rect, WIDGET (w->owner)->rect.y, WIDGET (w->owner)->rect.x);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -720,18 +706,12 @@ widget_default_make_global (Widget * w, const WRect * delta)
   */
 
 void
-widget_default_make_local (Widget * w, const WRect * delta)
+widget_default_make_local (Widget *w, const WRect *delta)
 {
     if (delta != NULL)
-    {
-        w->y -= delta->y;
-        w->x -= delta->x;
-    }
+        rect_move (&w->rect, -delta->y, -delta->x);
     else if (w->owner != NULL)
-    {
-        w->y -= WIDGET (w->owner)->y;
-        w->x -= WIDGET (w->owner)->x;
-    }
+        rect_move (&w->rect, -WIDGET (w->owner)->rect.y, -WIDGET (w->owner)->rect.x);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -745,7 +725,7 @@ widget_default_make_local (Widget * w, const WRect * delta)
  */
 
 GList *
-widget_default_find (const Widget * w, const Widget * what)
+widget_default_find (const Widget *w, const Widget *what)
 {
     return (w != what
             || w->owner == NULL) ? NULL : g_list_find (CONST_GROUP (w->owner)->widgets, what);
@@ -763,7 +743,7 @@ widget_default_find (const Widget * w, const Widget * what)
  */
 
 Widget *
-widget_default_find_by_type (const Widget * w, widget_cb_fn cb)
+widget_default_find_by_type (const Widget *w, widget_cb_fn cb)
 {
     return (w->callback == cb ? WIDGET (w) : NULL);
 }
@@ -779,7 +759,7 @@ widget_default_find_by_type (const Widget * w, widget_cb_fn cb)
  */
 
 Widget *
-widget_default_find_by_id (const Widget * w, unsigned long id)
+widget_default_find_by_id (const Widget *w, unsigned long id)
 {
     return (w->id == id ? WIDGET (w) : NULL);
 }
@@ -797,7 +777,7 @@ widget_default_find_by_id (const Widget * w, unsigned long id)
  */
 
 cb_ret_t
-widget_default_set_state (Widget * w, widget_state_t state, gboolean enable)
+widget_default_set_state (Widget *w, widget_state_t state, gboolean enable)
 {
     gboolean ret = MSG_HANDLED;
     Widget *owner = WIDGET (GROUP (w->owner));
@@ -810,14 +790,23 @@ widget_default_set_state (Widget * w, widget_state_t state, gboolean enable)
     if (enable)
     {
         /* exclusive bits */
-        if ((state & WST_CONSTRUCT) != 0)
+        switch (state)
+        {
+        case WST_CONSTRUCT:
             w->state &= ~(WST_ACTIVE | WST_SUSPENDED | WST_CLOSED);
-        else if ((state & WST_ACTIVE) != 0)
+            break;
+        case WST_ACTIVE:
             w->state &= ~(WST_CONSTRUCT | WST_SUSPENDED | WST_CLOSED);
-        else if ((state & WST_SUSPENDED) != 0)
+            break;
+        case WST_SUSPENDED:
             w->state &= ~(WST_CONSTRUCT | WST_ACTIVE | WST_CLOSED);
-        else if ((state & WST_CLOSED) != 0)
+            break;
+        case WST_CLOSED:
             w->state &= ~(WST_CONSTRUCT | WST_ACTIVE | WST_SUSPENDED);
+            break;
+        default:
+            break;
+        }
     }
 
     if (owner == NULL)
@@ -841,7 +830,6 @@ widget_default_set_state (Widget * w, widget_state_t state, gboolean enable)
             }
         }
         break;
-
 
     case WST_DISABLED:
         ret = send_message (w, NULL, enable ? MSG_DISABLE : MSG_ENABLE, 0, NULL);
@@ -879,7 +867,7 @@ widget_default_set_state (Widget * w, widget_state_t state, gboolean enable)
  */
 
 void
-widget_default_destroy (Widget * w)
+widget_default_destroy (Widget *w)
 {
     send_message (w, NULL, MSG_DESTROY, 0, NULL);
     g_free (w);
@@ -889,15 +877,15 @@ widget_default_destroy (Widget * w)
 /* get mouse pointer location within widget */
 
 Gpm_Event
-mouse_get_local (const Gpm_Event * global, const Widget * w)
+mouse_get_local (const Gpm_Event *global, const Widget *w)
 {
     Gpm_Event local;
 
     memset (&local, 0, sizeof (local));
 
     local.buttons = global->buttons;
-    local.x = global->x - w->x;
-    local.y = global->y - w->y;
+    local.x = global->x - w->rect.x;
+    local.y = global->y - w->rect.y;
     local.type = global->type;
 
     return local;
@@ -906,10 +894,12 @@ mouse_get_local (const Gpm_Event * global, const Widget * w)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mouse_global_in_widget (const Gpm_Event * event, const Widget * w)
+mouse_global_in_widget (const Gpm_Event *event, const Widget *w)
 {
-    return (event->x > w->x) && (event->y > w->y) && (event->x <= w->x + w->cols)
-        && (event->y <= w->y + w->lines);
+    const WRect *r = &w->rect;
+
+    return (event->x > r->x) && (event->y > r->y) && (event->x <= r->x + r->cols)
+        && (event->y <= r->y + r->lines);
 }
 
 /* --------------------------------------------------------------------------------------------- */

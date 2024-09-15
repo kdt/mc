@@ -1,12 +1,12 @@
 /*
    Panel managing.
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Written by:
    Slava Zanko <slavazanko@gmail.com>, 2013
-   Andrew Borodin <aborodin@vmail.ru>, 2013
+   Andrew Borodin <aborodin@vmail.ru>, 2013-2023
 
    This file is part of the Midnight Commander.
 
@@ -34,9 +34,6 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <inttypes.h>           /* PRIuMAX */
-#ifdef ENABLE_EXT2FS_ATTR
-#include <e2p/e2p.h>            /* fgetflags() */
-#endif
 
 #include "lib/global.h"
 #include "lib/unixcompat.h"
@@ -71,15 +68,18 @@ struct WInfo
     gboolean ready;
 };
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 static struct my_statfs myfs_stats;
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-info_box (WInfo * info)
+info_box (WInfo *info)
 {
     Widget *w = WIDGET (info);
 
@@ -89,24 +89,25 @@ info_box (WInfo * info)
     tty_set_normal_attrs ();
     tty_setcolor (NORMAL_COLOR);
     widget_erase (w);
-    tty_draw_box (w->y, w->x, w->lines, w->cols, FALSE);
+    tty_draw_box (w->rect.y, w->rect.x, w->rect.lines, w->rect.cols, FALSE);
 
-    widget_gotoyx (w, 0, (w->cols - len - 2) / 2);
+    widget_gotoyx (w, 0, (w->rect.cols - len - 2) / 2);
     tty_printf (" %s ", title);
 
     widget_gotoyx (w, 2, 0);
     tty_print_alt_char (ACS_LTEE, FALSE);
-    widget_gotoyx (w, 2, w->cols - 1);
+    widget_gotoyx (w, 2, w->rect.cols - 1);
     tty_print_alt_char (ACS_RTEE, FALSE);
-    tty_draw_hline (w->y + 2, w->x + 1, ACS_HLINE, w->cols - 2);
+    tty_draw_hline (w->rect.y + 2, w->rect.x + 1, ACS_HLINE, w->rect.cols - 2);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-info_show_info (WInfo * info)
+info_show_info (WInfo *info)
 {
-    Widget *w = WIDGET (info);
+    const WRect *w = &CONST_WIDGET (info)->rect;
+    const file_entry_t *fe;
     static int i18n_adjust = 0;
     static const char *file_label;
     GString *buff;
@@ -136,7 +137,9 @@ info_show_info (WInfo * info)
 
     my_statfs (&myfs_stats, p_rp_cwd);
 
-    st = current_panel->dir.list[current_panel->selected].st;
+    fe = panel_current_entry (current_panel);
+
+    st = fe->st;
 
     /* Print only lines which fit */
 
@@ -163,11 +166,11 @@ info_show_info (WInfo * info)
             (myfs_stats.nfree == (uintmax_t) (-1) && myfs_stats.nodes == (uintmax_t) (-1)))
             tty_print_string (_("No node information"));
         else if (myfs_stats.nfree == (uintmax_t) (-1))
-            tty_printf ("%s -/%" PRIuMAX, _("Free nodes:"), myfs_stats.nodes);
+            tty_printf ("%s - / %" PRIuMAX, _("Free nodes:"), myfs_stats.nodes);
         else if (myfs_stats.nodes == (uintmax_t) (-1))
-            tty_printf ("%s %" PRIuMAX "/-", _("Free nodes:"), myfs_stats.nfree);
+            tty_printf ("%s %" PRIuMAX " / -", _("Free nodes:"), myfs_stats.nfree);
         else
-            tty_printf ("%s %" PRIuMAX "/%" PRIuMAX " (%d%%)",
+            tty_printf ("%s %" PRIuMAX " / %" PRIuMAX " (%d%%)",
                         _("Free nodes:"),
                         myfs_stats.nfree, myfs_stats.nodes,
                         myfs_stats.nodes == 0 ? 0 :
@@ -183,7 +186,7 @@ info_show_info (WInfo * info)
 
             size_trunc_len (buffer1, 5, myfs_stats.avail, 1, panels_options.kilobyte_si);
             size_trunc_len (buffer2, 5, myfs_stats.total, 1, panels_options.kilobyte_si);
-            tty_printf (_("Free space: %s/%s (%d%%)"), buffer1, buffer2,
+            tty_printf (_("Free space: %s / %s (%d%%)"), buffer1, buffer2,
                         myfs_stats.total == 0 ? 0 :
                         (int) (100 * (long double) myfs_stats.avail / myfs_stats.total));
         }
@@ -258,17 +261,15 @@ info_show_info (WInfo * info)
         MC_FALLTHROUGH;
     case 6:
         widget_gotoyx (w, 6, 3);
+
 #ifdef ENABLE_EXT2FS_ATTR
-        if (!vfs_current_is_local ())
-            tty_print_string (_("Attributes: not supported"));
-        else
         {
             vfs_path_t *vpath;
             unsigned long attr;
 
-            vpath = vfs_path_from_str (current_panel->dir.list[current_panel->selected].fname->str);
+            vpath = vfs_path_from_str (fe->fname->str);
 
-            if (fgetflags (vfs_path_as_str (vpath), &attr) == 0)
+            if (mc_fgetflags (vpath, &attr) == 0)
                 tty_printf (_("Attributes: %s"), chattr_get_as_str (attr));
             else
                 tty_print_string (_("Attributes: unavailable"));
@@ -276,8 +277,8 @@ info_show_info (WInfo * info)
             vfs_path_free (vpath, TRUE);
         }
 #else
-        tty_print_string (_("Attributes: not supported"));
-#endif
+        tty_print_string (_("Attributes: unavailable"));
+#endif /* ENABLE_EXT2FS_ATTR */
         MC_FALLTHROUGH;
     case 5:
         widget_gotoyx (w, 5, 3);
@@ -293,7 +294,7 @@ info_show_info (WInfo * info)
             const char *fname;
 
             widget_gotoyx (w, 3, 2);
-            fname = current_panel->dir.list[current_panel->selected].fname->str;
+            fname = fe->fname->str;
             str_printf (buff, file_label, str_trunc (fname, w->cols - i18n_adjust));
             tty_print_string (buff->str);
         }
@@ -329,7 +330,7 @@ info_hook (void *data)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-info_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+info_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     WInfo *info = (WInfo *) w;
 
@@ -360,14 +361,14 @@ info_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *da
 /* --------------------------------------------------------------------------------------------- */
 
 WInfo *
-info_new (int y, int x, int lines, int cols)
+info_new (const WRect *r)
 {
     WInfo *info;
     Widget *w;
 
     info = g_new (struct WInfo, 1);
     w = WIDGET (info);
-    widget_init (w, y, x, lines, cols, info_callback, NULL);
+    widget_init (w, r, info_callback, NULL);
 
     return info;
 }

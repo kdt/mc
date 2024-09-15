@@ -1,11 +1,11 @@
 /*
    Load and show history of edited and viewed files
 
-   Copyright (C) 2020-2021
+   Copyright (C) 2020-2024
    Free Software Foundation, Inc.
 
    Written by:
-   Andrew Borodin <aborodin@vmail.ru>, 2019.
+   Andrew Borodin <aborodin@vmail.ru>, 2019-2022
 
    This file is part of the Midnight Commander.
 
@@ -49,6 +49,8 @@ typedef struct file_history_data_t
     char *file_name;
     char *file_pos;
 } file_history_data_t;
+
+/*** forward declarations (file scope functions) *************************************************/
 
 /*** file scope variables ************************************************************************/
 
@@ -97,7 +99,7 @@ file_history_list_read (void)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-file_history_list_write (const GList * file_list)
+file_history_list_write (const GList *file_list)
 {
     char *fn;
     FILE *f;
@@ -147,7 +149,7 @@ file_history_list_write (const GList * file_list)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-file_history_create_item (history_descriptor_t * hd, void *data)
+file_history_create_item (history_descriptor_t *hd, void *data)
 {
     file_history_data_t *fhd = (file_history_data_t *) data;
     size_t width;
@@ -163,7 +165,7 @@ file_history_create_item (history_descriptor_t * hd, void *data)
 /* --------------------------------------------------------------------------------------------- */
 
 static void *
-file_history_release_item (history_descriptor_t * hd, WLEntry * le)
+file_history_release_item (history_descriptor_t *hd, WLEntry *le)
 {
     file_history_data_t *fhd;
 
@@ -203,7 +205,7 @@ file_history_free_item (void *data)
  * @return name of selected file, A newly allocated string.
  */
 char *
-show_file_history (const Widget * w, int *action)
+show_file_history (const Widget *w, int *action)
 {
     GList *file_list;
     size_t len;
@@ -217,7 +219,7 @@ show_file_history (const Widget * w, int *action)
 
     file_list = g_list_last (file_list);
 
-    history_descriptor_init (&hd, w->y, w->x, file_list, 0);
+    history_descriptor_init (&hd, w->rect.y, w->rect.x, file_list, 0);
     /* redefine list-specific functions */
     hd.create = file_history_create_item;
     hd.release = file_history_release_item;

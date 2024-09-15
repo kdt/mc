@@ -1,7 +1,7 @@
 /*
    paths to configuration files
 
-   Copyright (C) 2010-2021
+   Copyright (C) 2010-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -27,7 +27,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 
 #include "lib/global.h"
 #include "lib/fileloc.h"
@@ -42,6 +41,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 static gboolean xdg_vars_initialized = FALSE;
@@ -55,8 +56,7 @@ static const struct
 {
     char **basedir;
     const char *filename;
-} mc_config_files_reference[] =
-{
+} mc_config_files_reference[] = {
     /* *INDENT-OFF* */
     /* config */
     { &mc_config_str, MC_CONFIG_FILE },
@@ -64,16 +64,16 @@ static const struct
     { &mc_config_str, MC_HOTLIST_FILE },
     { &mc_config_str, GLOBAL_KEYMAP_FILE },
     { &mc_config_str, MC_USERMENU_FILE },
-    { &mc_config_str, EDIT_HOME_SYNTAX_FILE },
     { &mc_config_str, EDIT_HOME_MENU },
     { &mc_config_str, MC_PANELS_FILE },
 
     /* User should move this file with applying some changes in file */
-    { &mc_config_str, MC_FILEBIND_FILE },
+    { &mc_config_str, MC_EXT_FILE },
+    { &mc_config_str, MC_EXT_OLD_FILE },
 
     /* data */
     { &mc_data_str, MC_SKINS_DIR },
-    { &mc_data_str, FISH_PREFIX },
+    { &mc_data_str, VFS_SHELL_PREFIX },
     { &mc_data_str, MC_ASHRC_FILE },
     { &mc_data_str, MC_BASHRC_FILE },
     { &mc_data_str, MC_INPUTRC_FILE },
@@ -81,6 +81,7 @@ static const struct
     { &mc_data_str, MC_EXTFS_DIR },
     { &mc_data_str, MC_HISTORY_FILE },
     { &mc_data_str, MC_FILEPOS_FILE },
+    { &mc_data_str, EDIT_SYNTAX_FILE },
     { &mc_data_str, EDIT_HOME_CLIP_FILE },
     { &mc_data_str, MC_MACRO_FILE },
 
@@ -99,7 +100,7 @@ static const struct
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-mc_config_mkdir (const char *directory_name, GError ** mcerror)
+mc_config_mkdir (const char *directory_name, GError **mcerror)
 {
     mc_return_if_error (mcerror);
 
@@ -111,7 +112,7 @@ mc_config_mkdir (const char *directory_name, GError ** mcerror)
 /* --------------------------------------------------------------------------------------------- */
 
 static char *
-mc_config_init_one_config_path (const char *path_base, const char *subdir, GError ** mcerror)
+mc_config_init_one_config_path (const char *path_base, const char *subdir, GError **mcerror)
 {
     char *full_path;
 
@@ -142,7 +143,7 @@ mc_config_init_one_config_path (const char *path_base, const char *subdir, GErro
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mc_config_init_config_paths (GError ** mcerror)
+mc_config_init_config_paths (GError **mcerror)
 {
     const char *profile_root;
     char *dir;

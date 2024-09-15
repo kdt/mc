@@ -5,8 +5,6 @@
 #ifndef MC__QUICK_H
 #define MC__QUICK_H
 
-#include "lib/tty/mouse.h"
-
 /*** typedefs(not structures) and defined constants **********************************************/
 
 #define QUICK_CHECKBOX(txt, st, id_)                                            \
@@ -330,8 +328,8 @@ struct quick_widget_t
 
 typedef struct
 {
-    int y, x;                   /* if -1, then center the dialog */
-    int cols;                   /* heigth is calculated automatically */
+    WRect rect;                 /* if rect.x == -1 or rect.y == -1, then dialog is ceneterd;
+                                 * rect.lines is unused and ignored */
     const char *title;
     const char *help;
     quick_widget_t *widgets;
@@ -348,7 +346,7 @@ int quick_dialog_skip (quick_dialog_t * quick_dlg, int nskip);
 /*** inline functions ****************************************************************************/
 
 static inline int
-quick_dialog (quick_dialog_t * quick_dlg)
+quick_dialog (quick_dialog_t *quick_dlg)
 {
     return quick_dialog_skip (quick_dlg, 1);
 }

@@ -1,7 +1,7 @@
 /*
    ASCII strings utilities
 
-   Copyright (C) 2007-2021
+   Copyright (C) 2007-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -41,6 +41,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 static const char replch = '?';
@@ -50,7 +52,7 @@ static const char replch = '?';
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-str_ascii_insert_replace_char (GString * buffer)
+str_ascii_insert_replace_char (GString *buffer)
 {
     g_string_append_c (buffer, replch);
 }
@@ -166,7 +168,7 @@ str_ascii_iscombiningmark (const char *text)
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-str_ascii_toupper (const char *text, char **out, size_t * remain)
+str_ascii_toupper (const char *text, char **out, size_t *remain)
 {
     if (*remain <= 1)
         return FALSE;
@@ -180,7 +182,7 @@ str_ascii_toupper (const char *text, char **out, size_t * remain)
 /* --------------------------------------------------------------------------------------------- */
 
 static gboolean
-str_ascii_tolower (const char *text, char **out, size_t * remain)
+str_ascii_tolower (const char *text, char **out, size_t *remain)
 {
     if (*remain <= 1)
         return FALSE;
@@ -210,7 +212,7 @@ str_ascii_length2 (const char *text, int size)
 /* --------------------------------------------------------------------------------------------- */
 
 static gchar *
-str_ascii_conv_gerror_message (GError * mcerror, const char *def_msg)
+str_ascii_conv_gerror_message (GError *mcerror, const char *def_msg)
 {
     /* the same as str_utf8_conv_gerror_message() */
     if (mcerror != NULL)
@@ -222,7 +224,7 @@ str_ascii_conv_gerror_message (GError * mcerror, const char *def_msg)
 /* --------------------------------------------------------------------------------------------- */
 
 static estr_t
-str_ascii_vfs_convert_to (GIConv coder, const char *string, int size, GString * buffer)
+str_ascii_vfs_convert_to (GIConv coder, const char *string, int size, GString *buffer)
 {
     (void) coder;
     g_string_append_len (buffer, string, size);

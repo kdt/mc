@@ -1,7 +1,7 @@
 /*
    Editor macros engine
 
-   Copyright (C) 2001-2021
+   Copyright (C) 2001-2024
    Free Software Foundation, Inc.
 
    This file is part of the Midnight Commander.
@@ -26,7 +26,7 @@
 
 #include "lib/global.h"
 #include "lib/mcconfig.h"
-#include "lib/tty/key.h"        /* lookup_key*() */
+#include "lib/tty/key.h"        /* tty_keyname_to_keycode*() */
 #include "lib/keybind.h"        /* keybind_lookup_actionname() */
 #include "lib/fileloc.h"
 
@@ -43,6 +43,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* --------------------------------------------------------------------------------------------- */
@@ -50,7 +52,7 @@
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-edit_macro_comparator (gconstpointer * macro1, gconstpointer * macro2)
+edit_macro_comparator (gconstpointer *macro1, gconstpointer *macro2)
 {
     const macros_t *m1 = (const macros_t *) macro1;
     const macros_t *m2 = (const macros_t *) macro2;
@@ -70,7 +72,7 @@ edit_macro_sort_by_hotkey (void)
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-edit_get_macro (WEdit * edit, int hotkey)
+edit_get_macro (WEdit *edit, int hotkey)
 {
     macros_t *array_start;
     macros_t *result;
@@ -95,7 +97,7 @@ edit_get_macro (WEdit * edit, int hotkey)
 
 /** returns FALSE on error */
 static gboolean
-edit_delete_macro (WEdit * edit, int hotkey)
+edit_delete_macro (WEdit *edit, int hotkey)
 {
     mc_config_t *macros_config = NULL;
     const char *section_name = "editor";
@@ -104,14 +106,13 @@ edit_delete_macro (WEdit * edit, int hotkey)
     char *skeyname;
 
     /* clear array of actions for current hotkey */
-    while ((indx = edit_get_macro (edit, hotkey) != -1))
+    while ((indx = edit_get_macro (edit, hotkey)) != -1)
     {
         macros_t *macros;
 
         macros = &g_array_index (macros_list, struct macros_t, indx);
         g_array_free (macros->macro, TRUE);
         g_array_remove_index (macros_list, indx);
-        edit_macro_sort_by_hotkey ();
     }
 
     macros_fname = mc_config_get_full_path (MC_MACRO_FILE);
@@ -121,7 +122,7 @@ edit_delete_macro (WEdit * edit, int hotkey)
     if (macros_config == NULL)
         return FALSE;
 
-    skeyname = lookup_key_by_code (hotkey);
+    skeyname = tty_keycode_to_keyname (hotkey);
     while (mc_config_del_key (macros_config, section_name, skeyname))
         ;
     g_free (skeyname);
@@ -136,7 +137,7 @@ edit_delete_macro (WEdit * edit, int hotkey)
 
 /** returns FALSE on error */
 gboolean
-edit_store_macro_cmd (WEdit * edit)
+edit_store_macro_cmd (WEdit *edit)
 {
     int i;
     int hotkey;
@@ -170,7 +171,7 @@ edit_store_macro_cmd (WEdit * edit)
 
     edit_push_undo_action (edit, KEY_PRESS + edit->start_display);
 
-    skeyname = lookup_key_by_code (hotkey);
+    skeyname = tty_keycode_to_keyname (hotkey);
 
     for (i = 0; i < macro_index; i++)
     {
@@ -222,7 +223,7 @@ edit_store_macro_cmd (WEdit * edit)
 /** return FALSE on error */
 
 gboolean
-edit_load_macro_cmd (WEdit * edit)
+edit_load_macro_cmd (WEdit *edit)
 {
     mc_config_t *macros_config = NULL;
     gchar **profile_keys, **keys;
@@ -248,10 +249,9 @@ edit_load_macro_cmd (WEdit * edit)
     {
         int hotkey;
         GArray *macros = NULL;
-        macros_t macro;
 
         values = mc_config_get_string_list (macros_config, section_name, *profile_keys, NULL);
-        hotkey = lookup_key (*profile_keys, NULL);
+        hotkey = tty_keyname_to_keycode (*profile_keys, NULL);
 
         for (curr_values = values; *curr_values != NULL && *curr_values[0] != '\0'; curr_values++)
         {
@@ -295,8 +295,11 @@ edit_load_macro_cmd (WEdit * edit)
 
         if (macros != NULL)
         {
-            macro.hotkey = hotkey;
-            macro.macro = macros;
+            macros_t macro = {
+                .hotkey = hotkey,
+                .macro = macros
+            };
+
             g_array_append_val (macros_list, macro);
         }
 
@@ -313,7 +316,7 @@ edit_load_macro_cmd (WEdit * edit)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-edit_delete_macro_cmd (WEdit * edit)
+edit_delete_macro_cmd (WEdit *edit)
 {
     int hotkey;
 
@@ -326,7 +329,7 @@ edit_delete_macro_cmd (WEdit * edit)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-edit_repeat_macro_cmd (WEdit * edit)
+edit_repeat_macro_cmd (WEdit *edit)
 {
     gboolean ok;
     char *f;
@@ -368,7 +371,7 @@ edit_repeat_macro_cmd (WEdit * edit)
 
 /** returns FALSE on error */
 gboolean
-edit_execute_macro (WEdit * edit, int hotkey)
+edit_execute_macro (WEdit *edit, int hotkey)
 {
     gboolean res = FALSE;
 
@@ -406,7 +409,7 @@ edit_execute_macro (WEdit * edit, int hotkey)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-edit_begin_end_macro_cmd (WEdit * edit)
+edit_begin_end_macro_cmd (WEdit *edit)
 {
     /* edit is a pointer to the widget */
     if (edit != NULL)
@@ -420,7 +423,7 @@ edit_begin_end_macro_cmd (WEdit * edit)
  /* --------------------------------------------------------------------------------------------- */
 
 void
-edit_begin_end_repeat_cmd (WEdit * edit)
+edit_begin_end_repeat_cmd (WEdit *edit)
 {
     /* edit is a pointer to the widget */
     if (edit != NULL)

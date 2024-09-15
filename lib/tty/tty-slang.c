@@ -2,7 +2,7 @@
    Interface to the terminal controlling library.
    Slang wrapper.
 
-   Copyright (C) 2005-2021
+   Copyright (C) 2005-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -74,6 +74,8 @@ int reset_hp_softkeys = 0;
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* Various saved termios settings that we control here */
@@ -92,8 +94,7 @@ static const struct
 {
     int key_code;
     const char *key_name;
-} key_table[] =
-{
+} key_table[] = {
     /* *INDENT-OFF* */
     { KEY_F (0), "k0" },
     { KEY_F (1), "k1" },

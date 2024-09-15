@@ -1,7 +1,7 @@
 /*
    8bit strings utilities
 
-   Copyright (C) 2007-2021
+   Copyright (C) 2007-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -56,6 +56,8 @@ static inline int char_##func_name(char c)     \
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 static const char replch = '?';
@@ -77,7 +79,7 @@ DECLARE_CTYPE_WRAPPER (tolower)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-str_8bit_insert_replace_char (GString * buffer)
+str_8bit_insert_replace_char (GString *buffer)
 {
     g_string_append_c (buffer, replch);
 }
@@ -193,7 +195,7 @@ str_8bit_iscombiningmark (const char *text)
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-str_8bit_toupper (const char *text, char **out, size_t * remain)
+str_8bit_toupper (const char *text, char **out, size_t *remain)
 {
     if (*remain <= 1)
         return FALSE;
@@ -207,7 +209,7 @@ str_8bit_toupper (const char *text, char **out, size_t * remain)
 /* --------------------------------------------------------------------------------------------- */
 
 static gboolean
-str_8bit_tolower (const char *text, char **out, size_t * remain)
+str_8bit_tolower (const char *text, char **out, size_t *remain)
 {
     if (*remain <= 1)
         return FALSE;
@@ -237,7 +239,7 @@ str_8bit_length2 (const char *text, int size)
 /* --------------------------------------------------------------------------------------------- */
 
 static gchar *
-str_8bit_conv_gerror_message (GError * mcerror, const char *def_msg)
+str_8bit_conv_gerror_message (GError *mcerror, const char *def_msg)
 {
     GIConv conv;
     gchar *ret;
@@ -270,7 +272,7 @@ str_8bit_conv_gerror_message (GError * mcerror, const char *def_msg)
 /* --------------------------------------------------------------------------------------------- */
 
 static estr_t
-str_8bit_vfs_convert_to (GIConv coder, const char *string, int size, GString * buffer)
+str_8bit_vfs_convert_to (GIConv coder, const char *string, int size, GString *buffer)
 {
     estr_t result = ESTR_SUCCESS;
 
@@ -675,13 +677,14 @@ str_8bit_casecmp (const char *s1, const char *s2)
 
     return strcasecmp (s1, s2);
 #else
-    gint c1, c2;
 
     g_return_val_if_fail (s1 != NULL, 0);
     g_return_val_if_fail (s2 != NULL, 0);
 
-    while (*s1 != '\0' && *s2 != '\0')
+    for (; *s1 != '\0' && *s2 != '\0'; s1++, s2++)
     {
+        gint c1, c2;
+
         /* According to A. Cox, some platforms have islower's that
          * don't work right on non-uppercase
          */
@@ -689,8 +692,6 @@ str_8bit_casecmp (const char *s1, const char *s2)
         c2 = isupper ((guchar) * s2) ? tolower ((guchar) * s2) : *s2;
         if (c1 != c2)
             return (c1 - c2);
-        s1++;
-        s2++;
     }
 
     return (((gint) (guchar) * s1) - ((gint) (guchar) * s2));
@@ -714,11 +715,12 @@ str_8bit_ncasecmp (const char *s1, const char *s2)
 #ifdef HAVE_STRNCASECMP
     return strncasecmp (s1, s2, n);
 #else
-    gint c1, c2;
 
-    while (n != 0 && *s1 != '\0' && *s2 != '\0')
+    for (; *s1 != '\0' && *s2 != '\0'; s1++, s2++)
     {
-        n -= 1;
+        gint c1, c2;
+
+        n--;
         /* According to A. Cox, some platforms have islower's that
          * don't work right on non-uppercase
          */
@@ -726,8 +728,6 @@ str_8bit_ncasecmp (const char *s1, const char *s2)
         c2 = isupper ((guchar) * s2) ? tolower ((guchar) * s2) : *s2;
         if (c1 != c2)
             return (c1 - c2);
-        s1++;
-        s2++;
     }
 
     if (n == 0)

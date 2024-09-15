@@ -1,7 +1,7 @@
 /*
    Widgets for the Midnight Commander
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Authors:
@@ -10,7 +10,7 @@
    Jakub Jelinek, 1995
    Andrej Borsenkow, 1996
    Norbert Warmuth, 1997
-   Andrew Borodin <aborodin@vmail.ru>, 2009, 2010, 2013, 2016
+   Andrew Borodin <aborodin@vmail.ru>, 2009-2022
 
    This file is part of the Midnight Commander.
 
@@ -49,6 +49,8 @@ const global_keymap_t *radio_map = NULL;
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* --------------------------------------------------------------------------------------------- */
@@ -56,7 +58,7 @@ const global_keymap_t *radio_map = NULL;
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-radio_execute_cmd (WRadio * r, long command)
+radio_execute_cmd (WRadio *r, long command)
 {
     cb_ret_t ret = MSG_HANDLED;
     Widget *w = WIDGET (r);
@@ -105,7 +107,7 @@ radio_execute_cmd (WRadio * r, long command)
 
 /* Return MSG_HANDLED if we want a redraw */
 static cb_ret_t
-radio_key (WRadio * r, int key)
+radio_key (WRadio *r, int key)
 {
     long command;
 
@@ -118,7 +120,7 @@ radio_key (WRadio * r, int key)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-radio_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+radio_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     WRadio *r = RADIO (w);
     int i;
@@ -164,7 +166,7 @@ radio_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *d
             {
                 widget_selectcolor (w, i == r->pos && focused, FALSE);
                 widget_gotoyx (w, i, 0);
-                tty_draw_hline (w->y + i, w->x, ' ', w->cols);
+                tty_draw_hline (w->rect.y + i, w->rect.x, ' ', w->rect.cols);
                 tty_print_string ((r->sel == i) ? "(*) " : "( ) ");
                 hotkey_draw (w, r->texts[i], i == r->pos && focused);
             }
@@ -186,7 +188,7 @@ radio_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *d
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-radio_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
+radio_mouse_callback (Widget *w, mouse_msg_t msg, mouse_event_t *event)
 {
     switch (msg)
     {
@@ -213,6 +215,7 @@ radio_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
 WRadio *
 radio_new (int y, int x, int count, const char **texts)
 {
+    WRect r0 = { y, x, count, 1 };
     WRadio *r;
     Widget *w;
     int i, wmax = 0;
@@ -233,7 +236,8 @@ radio_new (int y, int x, int count, const char **texts)
     }
 
     /* 4 is width of "(*) " */
-    widget_init (w, y, x, count, 4 + wmax, radio_callback, radio_mouse_callback);
+    r0.cols = 4 + wmax;
+    widget_init (w, &r0, radio_callback, radio_mouse_callback);
     w->options |= WOP_SELECTABLE | WOP_WANT_CURSOR | WOP_WANT_HOTKEY;
     w->keymap = radio_map;
 

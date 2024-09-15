@@ -77,7 +77,7 @@ Print the last working directory to the specified file.  This option is
 not meant to be used directly.  Instead, it's used from a special shell
 script that automatically changes the current directory of the shell to
 the last directory Midnight Commander was in. Source the file
-.B %libexecdir%/mc/mc.sh
+.B %pkglibexecdir%/mc.sh
 (bash and zsh users) or
 .B %libexecdir%/mc.csh
 (tcsh users) respectively to define
@@ -294,7 +294,7 @@ the input lines in the query dialogs.
 Hotkey bindings may be read from external file (keymap\-file).
 Initially, Midnight Commander creates key bindings using keymap defined
 in the source code. Then, two files
-.B %prefix%/share/mc/mc.keymap
+.B %pkgdatadir%/mc.keymap
 and
 .B %sysconfdir%/mc/mc.keymap
 are loaded always, sequentially reassigned key bindings defined earlier.
@@ -331,7 +331,7 @@ or without it). Search of keymap\-file will occur in (to the first one found):
 .B %sysconfdir%/mc/
 .br
 3)
-.B %prefix%/share/mc/
+.B %pkgdatadir%/
 
 .\"NODE "  Miscellaneous Keys"
 .SH "  Miscellaneous Keys"
@@ -945,9 +945,27 @@ menu (option
 .SH "    Filter..."
 The filter command allows you to specify a shell pattern (for example
 .BR "*.tar.gz" )
-which the files must match to be shown. Regardless
-of the filter pattern, the directories and the links to directories
-are always shown in the directory panel.
+which the files and directories must match to be shown.
+The
+.\"LINK2"
+input line
+.\"Input Line Keys"
+allow enter the pattern of file/directory names that will be shown
+in the panel.
+.PP
+When
+.I Files only
+checkbox is on, only files will be matched to the filter, and all
+directories will be shown. Otherwise, as files as directories will
+be filtered. When
+.I Shell Patterns
+checkbox is on, the regular expression is much like the filename globbing
+in the shell (* standing for zero or more characters and ? standing
+for one character). Otherwise, the matching of files/directories is done
+with normal regular expressions (see ed(1)). When
+.I Case sensitive
+checkbox is on, the filtering will be case sensitive characters. Otherwise,
+the case will be ignored.
 .\"NODE "    Reread"
 .SH "    Reread"
 The reread command reload the list of files in the directory. It is
@@ -1223,8 +1241,7 @@ The "Compare directories" command compares the directory
 panels with each other. You can then use the Copy (F5) command to make
 the panels identical. There are three compare methods. The quick method
 compares only file size and file date. The thorough method makes a
-full byte\-by\-byte compare. The thorough method is not available if the
-machine does not support the mmap(2) system call.  The size\-only
+full byte\-by\-byte compare. The size\-only
 compare method just compares the file sizes and does not check the
 contents or the date times, it just checks the file size.
 .PP
@@ -1465,87 +1482,14 @@ description.
 .\"NODE "    Edit Extension File"
 .SH "    Edit Extension File"
 This will invoke your editor on the file
-.IR ~/.config/mc/mc.ext .
-The format of this file following:
-.PP
-All lines starting with # or empty lines are thrown away.
-.PP
-Lines starting in the first column should have following format:
-.PP
-.IR keyword/expr ,
-i.e. everything after the slash until new line is
-.IR expr .
-.PP
-.I keyword
-can be:
-.TP
-.I shell
-\-
-.I expr
-is an extension (no wildcards).  File matches it its name ends
-with
-.IR expr .
-Example:
-.I shell/.tar
-matches
-.IR *.tar .
-.TP
-.I regex
-\-
-.I expr
-is a regular expression.  File matches if its name matches the regular
-expression.
-.TP
-.I directory
-\-
-.I expr
-is a regular expression.  File matches if it is a directory and its name
-matches the regular expression.
-.TP
-.I type
-\-
-.I expr
-is a regular expression.  File matches if the output of
-.I file %f
-without the initial "filename:" part matches regular expression
-.IR expr .
-.TP
-.I default
-\- matches any file.
-.I expr
-is ignored.
-.TP
-.I include
-\- denotes a common section.
-.I expr
-is the name of the section.
-.PP
-Other lines should start with a space or tab and should be of the format:
-.I keyword=command
-(with no spaces around =), where
-.I keyword
-should be:
-.I Open
-(invoked on Enter or double click),
-.I View
-(F3),
-.I Edit
-(F4) or
-.I Include
-(to add rules from the common section).
-.I command
-is any one\-line shell command, with the simple
-.\"LINK2"
-macro substitution\&.
-.\"Macro Substitution"
-.PP
-Rules are matched from top to bottom, thus the order is important.  If
-the appropriate action is missing, search continues as if this rule
-didn't match (i.e. if a file matches the first and second entry and View
-action is missing in the first one, then on pressing F3 the View action
-from the second entry will be used).
-.I default
-should match all the actions.
+.IR ~/.config/mc/mc.ext.ini .
+If this file does not exist and you are not root, it will be copied from
+.IR %sysconfdir%/mc/mc.ext.ini .
+If you are root, you can choose the file to edit: user's
+.I ~/.config/mc/mc.ext.ini
+or system\-wide
+.IR %sysconfdir%/mc/mc.ext.ini .
+The format of this file is described in detail in it.
 .\"NODE "    Background jobs"
 .SH "    Background Jobs"
 This lets you control the state of any background Midnight Commander
@@ -1560,7 +1504,7 @@ file .mc.menu from the current directory is used if it exists,
 but only if it is owned by user or root and is not world\-writable.
 If no such file found, ~/.config/mc/menu is tried in the same way,
 and otherwise mc uses the default system\-wide menu
-%prefix%/share/mc/mc.menu.
+%pkgdatadir%/mc.menu.
 .PP
 The format of the menu file is very simple. Lines that start with
 anything but space or tab are considered entries for the menu (in
@@ -2227,7 +2171,7 @@ FTP File System
 for examples.
 .PP
 If this option is set, the program will do two things: consult the
-%prefix%/lib/mc/mc.no_proxy file for lines containing host names that
+%sysconfdir%/mc/mc.no_proxy file for lines containing host names that
 are local (if the host name starts with a dot, it is assumed to be a
 domain) and to assume that any hostnames without dots in their names are
 directly accessible.  All other hosts will be accessed through the
@@ -2251,7 +2195,7 @@ from the ~/.config/mc/ini file.
 If this file doesn't exist, the system\-wide file
 .B %sysconfdir%/mc/mc.ini
 is used. If this file doesn't exist, the system\-wide file
-.B %prefix%/share/mc/mc.ini
+.B %pkgdatadir%/mc.ini
 is used. If this file doesn't exist, MC uses the default settings.
 .PP
 The
@@ -2957,7 +2901,7 @@ and vice versa.
 .TP
 .B F8
 Toggle Raw/Parsed mode: This will show the file as found on disk or if
-a processing filter has been specified in the mc.ext file, then the
+a processing filter has been specified in the mc.ext.ini file, then the
 output from the filter. Current mode is always the other than written
 on the button label, since on the button is the mode which you enter
 by that key.
@@ -3083,7 +3027,7 @@ selection dialog.
 will format the currently highlighted block (plain text or C or C++
 code or another). This is controlled by the
 file
-.B %prefix%/share/mc/edit.indent.rc
+.B %pkgdatadir%/edit.indent.rc
 which is copied to
 .B ~/.local/share/mc/mcedit/edit.indent.rc
 in your home directory the first time you use it.
@@ -3193,7 +3137,7 @@ used to manipulate tar and compressed tar files; the
 .IR undelfs ,
 used to recover deleted files on ext2 file systems (the default file
 system for Linux systems),
-.I fish
+.I shell
 (for manipulating files over shell connections such as rsh and ssh).
 If the code was compiled with
 .I sftpfs
@@ -3262,7 +3206,7 @@ tar file by using the following syntax:
 .PP
 .I /filename.tar/utar://[dir\-inside\-tar]
 .PP
-The mc.ext file already provides a shortcut for tar files, this means
+The mc.ext.ini file already provides a shortcut for tar files, this means
 that usually you just point to a tar file and press return to enter
 into the tar file, see the
 .\"LINK2"
@@ -3280,10 +3224,9 @@ Examples:
 The latter specifies the full path of the tar archive.
 .\"NODE "  FIle transfer over SHell filesystem"
 .SH "  FIle transfer over SHell filesystem"
-The fish file system is a network based file system that allows you to
+The shell file system is a network based file system that allows you to
 manipulate the files in a remote machine as if they were local. To use
-this, the other side has to either run fish server, or has to have
-bash\-compatible shell.
+this, the other side has to have bash\-compatible shell.
 .PP
 To connect to a remote machine, you just need to chdir
 into a special directory which name is in the following
@@ -3569,8 +3512,8 @@ dhotnormal, dhotfocus, dtitle. Error dialog colors are: errdfocus, errdhotnormal
 errdhotfocus, errdtitle.  Help colors are: helpnormal, helpitalic, helpbold,
 helplink, helpslink, helptitle.  Viewer colors are: viewnormal, viewbold,
 viewunderline, viewselected. Editor colors are: editnormal, editbold, editmarked,
-editwhitespace, editlinestate. Popup menu colors are: pmenunormal, pmenusel,
-pmenutitle.
+editwhitespace, editnonprintable, editlinestate. Popup menu colors are: pmenunormal,
+pmenusel, pmenutitle.
 .PP
 .I header
 determines the color of panel header, the line that contains column titles
@@ -3678,7 +3621,7 @@ in config file.
 .B %sysconfdir%/mc/skins/default.ini
 .br
 5) File
-.B %prefix%/share/mc/skins/default.ini
+.B %pkgdatadir%/skins/default.ini
 
 .PP
 Command line option, environment variable and parameter in config file may
@@ -3692,7 +3635,7 @@ or without it). Search of skin\-file will occur in (to the first one found):
 .B %sysconfdir%/mc/skins/
 .br
 3)
-.B %prefix%/share/mc/skins/
+.B %pkgdatadir%/skins/
 .br
 
 .PP
@@ -4016,7 +3959,7 @@ Skins
 .\"Skins"
 section.
 .PP
-Rules of filenames highlight are placed in %prefix%/share/mc/filehighlight.ini file
+Rules of filenames highlight are placed in %pkgdatadir%/filehighlight.ini file
 (~/.config/mc/filehighlight.ini).
 Name of section in this file must be equal to parameters names in
 [filehighlight] section (in current skin\-file).
@@ -4142,7 +4085,7 @@ the panel.
 If this variable is on (the default) it will spawn the file command to
 match the file types listed on the
 .\"LINK2"
-mc.ext file\&.
+mc.ext.ini file\&.
 .\"Edit Extension File"
 .TP
 .I xtree_mode
@@ -4150,7 +4093,7 @@ If this variable is on (default is off) when you browse the file system
 on a Tree panel, it will automatically reload the other panel with the
 contents of the selected directory.
 .TP
-.I fish_directory_timeout
+.I shell_directory_timeout
 This variable holds the lifetime of a directory cache entry in seconds. The
 default value is 900 seconds.
 .TP
@@ -4284,31 +4227,31 @@ Full paths below may vary between installations.  They are also affected
 by the
 .B MC_DATADIR
 environment variable. If it's set, its value is used instead of
-%prefix%/share/mc in the paths below.
+%pkgdatadir% in the paths below.
 .PP
-.I %prefix%/share/mc/help/mc.hlp
+.I %pkgdatadir%/help/mc.hlp
 .IP
 The help file for the program.
 .PP
-.I %prefix%/share/mc/mc.ext
+.I %pkgdatadir%/mc.ext.ini
 .IP
 The default system\-wide extensions file.
 .PP
-.I ~/.config/mc/mc.ext
+.I ~/.config/mc/mc.ext.ini
 .IP
 User's own extension, view configuration and edit configuration
 file.  They override the contents of the system wide files if present.
 .PP
 .I %sysconfdir%/mc/mc.ini
 .RE
-.I %prefix%/share/mc/mc.ini
+.I %pkgdatadir%/mc.ini
 .IP
 System\-wide setup files for Midnight Commander, used only if the user
 doesn't have his own
 .B ~/.config/mc/ini
-file. If %sysconfdir%/mc/mc.ini exists, %prefix%/share/mc/mc.ini isn't used.
+file. If %sysconfdir%/mc/mc.ini exists, %pkgdatadir%/mc.ini isn't used.
 .PP
-.I %prefix%/share/mc/mc.lib
+.I %pkgdatadir%/mc.lib
 .IP
 Global settings for Midnight Commander. Settings in this file
 affect all users, whether they have ~/.config/mc/ini or not.  Currently, only
@@ -4322,11 +4265,11 @@ are loaded from mc.lib.
 User's own setup. If this file is present then the setup is loaded
 from here instead of the system\-wide startup file.
 .PP
-.I %prefix%/share/mc/hints/mc.hint
+.I %pkgdatadir%/hints/mc.hint
 .IP
 This file contains the hints displayed by the program.
 .PP
-.I %prefix%/share/mc/mc.menu
+.I %pkgdatadir%/mc.menu
 .IP
 This file contains the default system\-wide applications menu.
 .PP
@@ -4365,7 +4308,7 @@ tcsh(1), zsh(1).
 .PP
 .nf
 Midnight Commander's page on the World Wide Web:
-	http://www.midnight\-commander.org/
+	https://www.midnight\-commander.org/
 .fi
 .\"NODE "AUTHORS"
 .SH "AUTHORS"
@@ -4377,7 +4320,7 @@ See the file TODO in the distribution for information on what remains to
 be done.
 .PP
 If you want to report a problem with the program, please create bugreport
-at http://www.midnight\-commander.org/.
+at https://www.midnight\-commander.org/.
 .PP
 Provide a detailed description of the bug, the version of the program
 you are running

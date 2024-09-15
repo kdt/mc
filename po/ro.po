@@ -8,18 +8,18 @@
 # 666ac67b8cef279621e9f9f0d4368bd5_672ede5, 2018
 # 7ad110ef65cb8fea3e45887cffdf497a_28ca6f3 <3e77beb79c064caff61514bbc685d086_451299>, 2016
 # Nicolae Crefelean, 2014,2019
-# Simona Iacob <s@zp1.net>, 2021
+# Simona Iacob <s@zp1.net>, 2021-2023
 # Slava Zanko <slavazanko@gmail.com>, 2011
 # Sorin Sfirlogea, 2016
 # Vitalie Ciubotaru <vitalie@ciubotaru.tk>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: Midnight Commander\n"
-"Report-Msgid-Bugs-To: http://www.midnight-commander.org/\n"
-"POT-Creation-Date: 2021-09-26 10:06+0300\n"
-"PO-Revision-Date: 2021-07-26 20:16+0000\n"
-"Last-Translator: Transifex Bot <>\n"
-"Language-Team: Romanian (http://www.transifex.com/mc/mc/language/ro/)\n"
+"Report-Msgid-Bugs-To: https://www.midnight-commander.org/\n"
+"POT-Creation-Date: 2024-08-23 19:20+0200\n"
+"PO-Revision-Date: 2010-12-29 10:19+0000\n"
+"Last-Translator: Simona Iacob <s@zp1.net>, 2021-2023\n"
+"Language-Team: Romanian (http://app.transifex.com/mc/mc/language/ro/)\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -537,6 +537,9 @@ msgstr ""
 "Eroare neașteptată în select() se accesează datele dintr-un proces copil :\n"
 "%s"
 
+msgid "Cannot close pipe descriptor (p == NULL)"
+msgstr "Nu se poate închide descriptorul de țeavă (p == NULL)"
+
 #, c-format
 msgid ""
 "Unexpected error in waitpid():\n"
@@ -567,28 +570,10 @@ msgid "Changes to file lost"
 msgstr "S-au pierdut schimbările efectuate în fișier"
 
 #, c-format
-msgid "%s is not a directory\n"
-msgstr "%s nu este un dosar\n"
-
-#, c-format
-msgid "Directory %s is not owned by you\n"
-msgstr "Nu dețineți dosarul %s\n"
-
-#, c-format
-msgid "Cannot set correct permissions for directory %s\n"
-msgstr "Nu pot seta permisiunile corecte pentru dosarul %s\n"
-
-#, c-format
-msgid "Cannot create temporary directory %s: %s\n"
-msgstr "Nu pot crea dosarul temporar %s: %s\n"
-
-#, c-format
-msgid "Temporary files will be created in %s\n"
-msgstr "Fișierele temporare vor fi create în %s\n"
-
-#, c-format
-msgid "Temporary files will not be created\n"
-msgstr "Nu vor fi create fișiere temporare\n"
+msgid ""
+"Cannot create temporary directory %s: %s.\n"
+"Temporary files will not be created\n"
+msgstr ""
 
 msgid "Press any key to continue..."
 msgstr "Apăsați o tastă pentru a continua..."
@@ -741,30 +726,13 @@ msgid ""
 "                 errdhotfocus\n"
 "   Menus:        menunormal, menuhot, menusel, menuhotsel, menuinactive\n"
 "   Popup menus:  pmenunormal, pmenusel, pmenutitle\n"
-"   Editor:       editnormal, editbold, editmarked, editwhitespace,\n"
+"   Editor:       editnormal, editbold, editmarked, editwhitespace, "
+"editnonprintable,\n"
 "                 editlinestate, editbg, editframe, editframeactive\n"
 "                 editframedrag\n"
 "   Viewer:       viewnormal,viewbold, viewunderline, viewselected\n"
 "   Help:         helpnormal, helpitalic, helpbold, helplink, helpslink\n"
 msgstr ""
-"--colors KEYWORD={FORE},{BACK},{ATTR}:KEYWORD2=...\n"
-"\n"
-"{FORE}, {BACK} and {ATTR} can be omitted, and the default will be used\n"
-"\n"
-" Keywords:\n"
-"   Global:       errors, disabled, reverse, gauge, header\n"
-"                 input, inputmark, inputunchanged, commandlinemark\n"
-"                 bbarhotkey, bbarbutton, statusbar\n"
-"   File display: normal, selected, marked, markselect\n"
-"   Dialog boxes: dnormal, dfocus, dhotnormal, dhotfocus, errdhotnormal,\n"
-"                 errdhotfocus\n"
-"   Menus:        menunormal, menuhot, menusel, menuhotsel, menuinactive\n"
-"   Popup menus:  pmenunormal, pmenusel, pmenutitle\n"
-"   Editor:       editnormal, editbold, editmarked, editwhitespace,\n"
-"                 editlinestate, editbg, editframe, editframeactive\n"
-"                 editframedrag\n"
-"   Viewer:       viewnormal,viewbold, viewunderline, viewselected\n"
-"   Help:         helpnormal, helpitalic, helpbold, helplink, helpslink\n"
 
 #. TRANSLATORS: don't translate color names and attributes
 msgid ""
@@ -828,11 +796,14 @@ msgstr "Opțiuni terminal"
 msgid "Arguments parse error!"
 msgstr "Eroare de interpretare a argumentelor!"
 
+msgid "MC is built without builtin editor."
+msgstr ""
+
 msgid "No arguments given to the viewer."
 msgstr "Nu au fost date argumente către vizualizator."
 
-msgid "Two files are required to envoke the diffviewer."
-msgstr "Sunt necesare două fișiere pentru a invoca vizualizatorul de diferențe"
+msgid "Two files are required to invoke the diffviewer."
+msgstr "Sunt necesare două fișiere pentru a invoca diffviewer."
 
 msgid "Background protocol error"
 msgstr "Eroare în protocolul de fundal"
@@ -1215,9 +1186,10 @@ msgstr "Mai întâi trebuie să evidențiezi un bloc de text"
 msgid "Run sort"
 msgstr "Rulează sortarea"
 
-msgid "Enter sort options (see manpage) separated by whitespace:"
+msgid "Enter sort options (see sort(1) manpage) separated by whitespace:"
 msgstr ""
-"Introdu opțiunile de sortare (vezi pagina de manual) separate prin spațiu:"
+"Introduceți opțiunile de sortare (a se vedea pagina(1) de manual sort) "
+"separate prin spații albe:"
 
 msgid "Sort"
 msgstr "Sortare"
@@ -1633,8 +1605,8 @@ msgstr ""
 "Un editor de text ușor de utilizat\n"
 "creat pentru Midnight Commander."
 
-msgid "Copyright (C) 1996-2021 the Free Software Foundation"
-msgstr "Copyright (C) 1996-2021 Fundația pentru Software Liber"
+msgid "Copyright (C) 1996-2024 the Free Software Foundation"
+msgstr ""
 
 msgid "About"
 msgstr "Despre"
@@ -2169,11 +2141,10 @@ msgstr "Sarcini în fundal"
 
 #, c-format
 msgid ""
-"Cannot chdir to \"%s\"\n"
+"Cannot change directory to\n"
+"%s\n"
 "%s"
 msgstr ""
-"Nu se poate chdir în \"%s\"\n"
-"%s"
 
 msgid "Secure deletion"
 msgstr "Ștergere securizată"
@@ -2269,9 +2240,6 @@ msgid ""
 msgstr ""
 "Nu se poate chattr \"%s\"\n"
 "%s"
-
-msgid "Cannot change attributes on non-local filesystems"
-msgstr "Nu se pot modifica atributele pe sisteme de fișiere non-locale"
 
 #, c-format
 msgid ""
@@ -2374,15 +2342,6 @@ msgstr "Introdu numele mașinii (F1 pentru detalii):"
 msgid "Files tagged, want to cd?"
 msgstr "Există fișiere marcate, doriți să cd?"
 
-msgid "Cannot change directory"
-msgstr "Nu pot deschide directorul %s"
-
-msgid "Filter"
-msgstr "Filtru"
-
-msgid "Set expression for filtering filenames"
-msgstr "Folosește expresia pentru filtrarea numelor de fișiere"
-
 #, c-format
 msgid "Link %s to:"
 msgstr "Leagă %s la:"
@@ -2397,10 +2356,6 @@ msgstr "legătură: %s"
 #, c-format
 msgid "symlink: %s"
 msgstr "legătură: %s"
-
-#, c-format
-msgid "Cannot chdir to \"%s\""
-msgstr "Nu se poate chdir în \"%s\""
 
 msgid "View file"
 msgstr "Vizualizare fișier"
@@ -2530,29 +2485,44 @@ msgid "Pipe failed"
 msgstr "Pipe a eșuat"
 
 #, c-format
-msgid " %s%s file error"
-msgstr " %s%s eroare fișier"
+msgid ""
+"You have an outdated %s file.\n"
+"Midnight Commander now uses %s file.\n"
+"Please copy your modifications of the old file to the new one."
+msgstr ""
+"Aveți un fișier neactualizat %s.\n"
+"Midnight Commander folosește acum %s fișierul.\n"
+"Vă rugăm să copiați modificările din fișierul vechi în cel nou."
 
 #, c-format
 msgid ""
-"The format of the %smc.ext file has changed with version 3.0. It seems that "
-"the installation failed. Please fetch a fresh copy from the Midnight "
-"Commander package."
+"The format of the\n"
+"%s%s\n"
+"file has changed with version 4.0.\n"
+"It seems that the installation has failed.\n"
+"Please fetch a fresh copy from the Midnight Commander package."
 msgstr ""
-"Formatul fișierului %smc.ext a fost schimbat în versiunea 3.0. Se pare că "
-"instalarea a eșuat. Te rog să obții o copie din pachetul Midnight Commander."
-
-#, c-format
-msgid "%s file error"
-msgstr "%s eroare fișier"
+"Formatul de\n"
+"%s%s\n"
+"s-a modificat odată cu versiunea 4.0.\n"
+"Se pare că instalarea a eșuat.\n"
+"Vă rugăm să obțineți o copie nouă din pachetul Midnight Commander."
 
 #, c-format
 msgid ""
-"The format of the %s file has changed with version 3.0. You may either want "
-"to copy it from %smc.ext or use that file as an example of how to write it."
+"The format of the\n"
+"%s\n"
+"file has changed with version 4.0.\n"
+"You may either want to copy it from\n"
+"%s%s\n"
+"or use that file as an example of how to write it."
 msgstr ""
-"Formatul fișierului %s a fost schimbat în versiunea 3.0. Vei putea să îl "
-"copiezi din %smc.ext sau poți folosi acel fișier ca exemplu."
+"Formatul de\n"
+"%s\n"
+"s-a modificat odată cu versiunea 4.0.\n"
+"Este posibil să doriți să îl copiați de la\n"
+"%s%s\n"
+"sau folosiți fișierul respectiv ca exemplu de scriere a acestuia."
 
 msgid "DialogTitle|Copy"
 msgstr "DialogTitle|Copiere"
@@ -2762,6 +2732,18 @@ msgstr ""
 
 #, c-format
 msgid ""
+"Cannot get attributes of source file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot set attributes of target file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
 "Cannot create special file \"%s\"\n"
 "%s"
 msgstr ""
@@ -2846,6 +2828,15 @@ msgstr ""
 msgid "(stalled)"
 msgstr "(oprit)"
 
+msgid "Incomplete file was retrieved"
+msgstr "A fost recuperat un fișier incomplet"
+
+msgid "&Keep"
+msgstr "&Păstrează"
+
+msgid "&Continue copy"
+msgstr "&Continuați să copiați"
+
 #, c-format
 msgid ""
 "Cannot close source file \"%s\"\n"
@@ -2862,11 +2853,11 @@ msgstr ""
 "Nu se poate închide fișierul destinație \"%s\"\n"
 "%s"
 
-msgid "Incomplete file was retrieved. Keep it?"
-msgstr "Fișierul a fost transferat incomplet. Îl păstrez?"
-
-msgid "&Keep"
-msgstr "&Păstrează"
+#, c-format
+msgid ""
+"Cannot set attributes for target file \"%s\"\n"
+"%s"
+msgstr ""
 
 #, c-format
 msgid ""
@@ -2875,6 +2866,12 @@ msgid ""
 msgstr ""
 "Nu se poate găsi dosarul sursă \"%s\"\n"
 "%s"
+
+#, c-format
+msgid ""
+"Cannot get attributes of source directory \"%s\"\n"
+"%s"
+msgstr ""
 
 #, c-format
 msgid ""
@@ -2930,8 +2927,8 @@ msgid "Con&tinue"
 msgstr "Con&tinuă"
 
 #, c-format
-msgid "%d:%02d.%02d"
-msgstr "%d:%02d.%02d"
+msgid "%d:%02d:%02d"
+msgstr "%d:%02d:%02d"
 
 #, c-format
 msgid "ETA %s"
@@ -2986,8 +2983,8 @@ msgid "Background process: File exists"
 msgstr "Sarcină în fundal: Fișierul există"
 
 #, c-format
-msgid "Files processed: %zu/%zu"
-msgstr "Fișiere procesate: %zu/%zu"
+msgid "Files processed: %zu / %zu"
+msgstr "Fișiere prelucrate: %zu / %zu"
 
 #, c-format
 msgid "Files processed: %zu"
@@ -3014,8 +3011,8 @@ msgid " Total: %s "
 msgstr " Total: %s "
 
 #, c-format
-msgid " Total: %s/%s "
-msgstr " Total: %s/%s "
+msgid " Total: %s / %s "
+msgstr " Total: %s / %s "
 
 msgid "Source"
 msgstr "Sursă"
@@ -3067,7 +3064,7 @@ msgid "&Listing format..."
 msgstr "formatul de  &listare "
 
 msgid "&Sort order..."
-msgstr "&Ordinea sortării..."
+msgstr "&Ordinea de sortare..."
 
 msgid "&Filter..."
 msgstr "&Filtru..."
@@ -3081,8 +3078,8 @@ msgstr "Conectare FT&P..."
 msgid "S&hell link..."
 msgstr "Conectare s&hell..."
 
-msgid "S&FTP link..."
-msgstr "Conectare S&FTP..."
+msgid "SFTP li&nk..."
+msgstr "SFTP li&nk..."
 
 msgid "Paneli&ze"
 msgstr "Paneli&zare"
@@ -3466,8 +3463,8 @@ msgid "No space information"
 msgstr "Nu există date despre spațiul folosit"
 
 #, c-format
-msgid "Free space: %s/%s (%d%%)"
-msgstr "Spațiu liber: %s/%s (%d%%)"
+msgid "Free space: %s / %s (%d%%)"
+msgstr "Spațiul liber: %s / %s (%d%%)"
 
 #, c-format
 msgid "Type:       %s"
@@ -3519,9 +3516,6 @@ msgstr "Proprietar: %s/%s"
 #, c-format
 msgid "Links:      %d"
 msgstr "Legături: %d"
-
-msgid "Attributes: not supported"
-msgstr "Atribute: nu este acceptat"
 
 #, c-format
 msgid "Attributes: %s"
@@ -3712,6 +3706,9 @@ msgstr "Selectează"
 
 msgid "Unselect"
 msgstr "Deselectează"
+
+msgid "Filter"
+msgstr "Filtru"
 
 msgid "Do you really want to execute?"
 msgstr "Chiar dorești să execuți?"
@@ -3968,11 +3965,11 @@ msgstr "Terminalul este încă activ. Ieși oricum?"
 msgid "Warning: Cannot change to %s.\n"
 msgstr "Atenție: Nu se poate schimba în %s.\n"
 
-msgid "With builtin Editor and Aspell support"
-msgstr "Cu editor încorporat și suport Aspell"
+msgid "With builtin editor and aspell support"
+msgstr ""
 
-msgid "With builtin Editor"
-msgstr "Cu editor încorporat"
+msgid "With builtin editor"
+msgstr ""
 
 msgid "With optional subshell support"
 msgstr "Cu suport opțional pentru subshell-uri"
@@ -4022,6 +4019,10 @@ msgstr "Construit cu ncursesw %s\n"
 
 msgid "Built with ncursesw (unknown version)"
 msgstr "Construit cu ncursesw (versiune necunoscută)"
+
+#, c-format
+msgid "Built with libssh2 %d.%d.%d\n"
+msgstr "Construit cu libssh2 %d.%d.%d\n"
 
 msgid "Virtual File Systems:"
 msgstr "Sistem virtual de fișiere:"
@@ -4148,6 +4149,15 @@ msgstr ""
 "Sfârșit de fișier (EOF) neașteptat\n"
 "%s"
 
+msgid "Inconsistent archive"
+msgstr "Arhivă inconsistentă"
+
+#, c-format
+msgid ""
+"Cannot open %s archive\n"
+"%s"
+msgstr ""
+
 #, c-format
 msgid ""
 "Cannot open %s archive\n"
@@ -4166,68 +4176,24 @@ msgstr ""
 "Sistem de fișiere virtuale EXTFS:\n"
 "%s"
 
+msgid ""
+"EXTFS virtual file system:\n"
+"wrong file name"
+msgstr ""
+
+msgid ""
+"EXTFS virtual file system:\n"
+"wrong archive name"
+msgstr ""
+
+msgid ""
+"EXTFS virtual file system:\n"
+"cannot build command"
+msgstr ""
+
 #, c-format
 msgid "Warning: cannot open %s directory\n"
 msgstr "Atenție: nu se poate deschide dosarul %s\n"
-
-#, c-format
-msgid "fish: Disconnecting from %s"
-msgstr "fish: Se deconectează de la %s"
-
-msgid "fish: Waiting for initial line..."
-msgstr "fish: Se așteptă linia inițială..."
-
-msgid "Sorry, we cannot do password authenticated connections for now."
-msgstr ""
-"Ne pare rău, deocamdată nu se pot efectua conectări autentificate prin "
-"parolă."
-
-#, c-format
-msgid "fish: Password is required for %s"
-msgstr "fish: Este necesară o parolă pentru %s"
-
-msgid "fish: Sending password..."
-msgstr "fish: Se trimite parola..."
-
-msgid "fish: Sending initial line..."
-msgstr "fish: Se trimite linia inițială..."
-
-msgid "fish: Handshaking version..."
-msgstr "fish: Se negociază versiunea..."
-
-msgid "fish: Getting host info..."
-msgstr "fish: Se obțin informații despre gazdă..."
-
-#, c-format
-msgid "fish: Reading directory %s..."
-msgstr "fish: Citesc dosarul %s..."
-
-#, c-format
-msgid "%s: done."
-msgstr "%s: efectuat."
-
-#, c-format
-msgid "%s: failure"
-msgstr "%s: eșec"
-
-#, c-format
-msgid "fish: store %s: sending command..."
-msgstr "fish: stochează %s: trimit comanda..."
-
-msgid "fish: Local read failed, sending zeros"
-msgstr "fish: Citirea locală a eșuat, trimit zero-uri"
-
-msgid "fish: storing file"
-msgstr "fish: se stochează fișierul"
-
-msgid "Aborting transfer..."
-msgstr "Abandonez transferul..."
-
-msgid "Error reported after abort."
-msgstr "S-a raportat o eroare după abandon."
-
-msgid "Aborted transfer would be successful."
-msgstr "Transferul abandonat va reuși."
 
 #, c-format
 msgid "ftpfs: Disconnecting from %s"
@@ -4282,6 +4248,21 @@ msgstr "ftpfs: conectarea la server a eșuat: %s"
 msgid "Waiting to retry... %d (Control-G to cancel)"
 msgstr "Se reîncearcă... %d (Control-G pentru a renunța)"
 
+#, c-format
+msgid "ftpfs: could not make address-to-name translation: %s"
+msgstr "ftpfs: nu a putut face traducerea de la adresă la nume: %s"
+
+#, c-format
+msgid "ftpfs: try reconnect to server, attempt %u"
+msgstr "ftpfs: încercați să vă reconectați la server, încercați %u"
+
+#, c-format
+msgid "ftpfs: could not get socket name: %s"
+msgstr "ftpfs: nu a putut obține numele socket-ului: %s"
+
+msgid "ftpfs: could not reconnect to server"
+msgstr "ftpfs: nu s-a putut reconecta la server"
+
 msgid "ftpfs: invalid address family"
 msgstr "ftpfs: familie de adrese incorectă"
 
@@ -4323,6 +4304,14 @@ msgstr "(întâi chdir)"
 
 msgid "ftpfs: failed; nowhere to fallback to"
 msgstr "ftpfs: eșec; nu mai există nici o variantă la care să revin"
+
+#, c-format
+msgid "%s: failure"
+msgstr "%s: eșec"
+
+#, c-format
+msgid "%s: done."
+msgstr "%s: efectuat."
 
 msgid "ftpfs: storing file"
 msgstr "ftpfs: se stochează fișierul"
@@ -4378,6 +4367,8 @@ msgstr "sftp: %s"
 
 msgid "sftp: failed to convert remote host IP address into text form"
 msgstr ""
+"sftp: nu a reușit să convertească adresa IP a gazdei la distanță în format "
+"text"
 
 #, c-format
 msgid "sftp: making connection to %s"
@@ -4391,10 +4382,10 @@ msgid "sftp: connection to server failed: %s"
 msgstr "sftp: conectarea la server a eșuat: %s"
 
 msgid "sftp: found host key of unsupported type: RSA1"
-msgstr ""
+msgstr "sftp: a fost găsită o cheie gazdă de tip neacceptat: RSA1"
 
 msgid "sftp: unknown host key type:"
-msgstr ""
+msgstr "sftp: gazdă necunoscută tip cheie:"
 
 #, c-format
 msgid ""
@@ -4402,15 +4393,19 @@ msgid ""
 "%s (%s)\n"
 "to the list of known hosts."
 msgstr ""
+"Adăugat permanent\n"
+"%s (%s)\n"
+"la lista de gazde cunoscute."
 
 msgid "sftp: cannot get the remote host key"
-msgstr ""
+msgstr "sftp: nu se poate obține cheia gazdei la distanță"
 
 msgid "sftp: unsupported key type, can't check remote host key"
 msgstr ""
+"sftp: tip de cheie neacceptat, nu se poate verifica cheia gazdei la distanță"
 
 msgid "sftp: can't compute host key fingerprint hash"
-msgstr ""
+msgstr "sftp: nu poate calcula hash-ul de amprentă a cheii gazdă"
 
 #, c-format
 msgid ""
@@ -4421,6 +4416,12 @@ msgid ""
 "SHA1:%s.\n"
 "Do you want to add it to the list of known hosts and continue connecting?"
 msgstr ""
+"Autenticitatea găzduirii\n"
+"%s (%s)\n"
+"nu poate fi stabilită!\n"
+"%s hash-ul amprentei cheie este\n"
+"SHA1:%s.\n"
+"Doriți să o adăugați la lista de gazde cunoscute și să continuați conectarea?"
 
 #, c-format
 msgid ""
@@ -4430,9 +4431,14 @@ msgid ""
 "Are you sure you want to add it to the list of known hosts and continue "
 "connecting?"
 msgstr ""
+"%s (%s)\n"
+"se găsește în lista de gazde cunoscute, dar\n"
+"CHEILE NU SE POTRIVESC! ACESTA AR PUTEA FI UN ATAC MITM!\n"
+"Sunteți sigur că doriți să o adăugați la lista de gazde cunoscute și să "
+"continuați conectarea?"
 
 msgid "sftp: host key verification failed"
-msgstr ""
+msgstr "sftp: verificarea cheii gazdă a eșuat"
 
 #, c-format
 msgid "sftp: Enter passphrase for %s "
@@ -4449,7 +4455,7 @@ msgid "sftp: Password is empty."
 msgstr "sftp: Parola este goală."
 
 msgid "sftp: failure establishing SSH session"
-msgstr ""
+msgstr "sftp: eșec la stabilirea sesiunii SSH"
 
 msgid "sftp: No file handler data present for reading file"
 msgstr "sftp: Nu există date de manipulare a citirii fișierului"
@@ -4466,12 +4472,52 @@ msgid "sftp: Listing done."
 msgstr "sftp: Afișarea a fost efectuată."
 
 #, c-format
-msgid ""
-"Cannot open tar archive\n"
-"%s"
+msgid "shell: Disconnecting from %s"
 msgstr ""
-"Nu pot deschide arhiva tar\n"
-"%s"
+
+msgid "shell: Waiting for initial line..."
+msgstr ""
+
+msgid "Sorry, we cannot do password authenticated connections for now."
+msgstr ""
+"Ne pare rău, deocamdată nu se pot efectua conectări autentificate prin "
+"parolă."
+
+#, c-format
+msgid "shell: Password is required for %s"
+msgstr ""
+
+msgid "shell: Sending password..."
+msgstr ""
+
+msgid "shell: Sending initial line..."
+msgstr ""
+
+msgid "shell: Getting host info..."
+msgstr ""
+
+#, c-format
+msgid "shell: Reading directory %s..."
+msgstr ""
+
+#, c-format
+msgid "shell: store %s: sending command..."
+msgstr ""
+
+msgid "shell: Local read failed, sending zeros"
+msgstr ""
+
+msgid "shell: storing file"
+msgstr ""
+
+msgid "Aborting transfer..."
+msgstr "Abandonez transferul..."
+
+msgid "Error reported after abort."
+msgstr "S-a raportat o eroare după abandon."
+
+msgid "Aborted transfer would be successful."
+msgstr "Transferul abandonat va reuși."
 
 msgid "Inconsistent tar archive"
 msgstr "Arhivă tar trunchiată"
@@ -4481,11 +4527,20 @@ msgstr "Sfârșit de fișier (EOF) neașteptat în fișierul arhivă"
 
 #, c-format
 msgid ""
-"%s\n"
-"doesn't look like a tar archive."
+"Cannot open tar archive\n"
+"%s"
 msgstr ""
+"Nu pot deschide arhiva tar\n"
+"%s"
+
+#, c-format
+msgid ""
 "%s\n"
-"nu pare a fi o arhivă tar."
+"doesn't look like a tar archive"
+msgstr ""
+
+msgid "tar: mc_lseek not stopped at a record boundary"
+msgstr ""
 
 msgid "undelfs: error"
 msgstr "undelfs: eroare"
@@ -4678,55 +4733,3 @@ msgstr "Continuă de la început?"
 
 msgid "Cannot fetch a local copy of /ftp://some.host/editme.txt"
 msgstr "Nu se poate aduce o copie locală a /ftp://some.host/editme.txt"
-
-#~ msgid "Set debug level"
-#~ msgstr "Nivelul de depanare"
-
-#~ msgid "<integer>"
-#~ msgstr "<integer>"
-
-#, c-format
-#~ msgid "Password for \\\\%s\\%s"
-#~ msgstr "Parola pentru \\\\%s\\%s"
-
-#~ msgid "Domain:"
-#~ msgstr "Domeniu:"
-
-#~ msgid "Username:"
-#~ msgstr "Nume proprietar:"
-
-#~ msgid "SMB authentication"
-#~ msgstr "Autentificare SMB"
-
-#~ msgid "SMB link to machine"
-#~ msgstr "Legătură SMB către mașina"
-
-#~ msgid "SM&B link..."
-#~ msgstr "Conectare SM&B..."
-
-#, c-format
-#~ msgid "reconnect to %s failed"
-#~ msgstr "reconectarea la %s a eșuat"
-
-#~ msgid "Authentication failed"
-#~ msgstr "Autentificarea a eșuat"
-
-#, c-format
-#~ msgid "Error %s creating directory %s"
-#~ msgstr "Eroare %s la crearea dosarului %s"
-
-#, c-format
-#~ msgid "Error %s removing directory %s"
-#~ msgstr "Eroare %s la ștergerea dosarului %s"
-
-#, c-format
-#~ msgid "%s opening remote file %s"
-#~ msgstr "%s se deschide fișierul de la distanță %s"
-
-#, c-format
-#~ msgid "%s removing remote file %s"
-#~ msgstr "%s se șterge fișierul de la distanță %s"
-
-#, c-format
-#~ msgid "%s renaming files\n"
-#~ msgstr "%s se redenumesc fișierele\n"

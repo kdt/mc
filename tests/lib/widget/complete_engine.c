@@ -1,7 +1,7 @@
 /*
    lib/widget - tests for autocomplete feature
 
-   Copyright (C) 2013-2021
+   Copyright (C) 2013-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -33,7 +33,7 @@
 /* --------------------------------------------------------------------------------------------- */
 
 void complete_engine_fill_completions (WInput * in);
-char **try_complete (char *text, int *lc_start, int *lc_end, input_complete_t flags);
+GPtrArray *try_complete (char *text, int *lc_start, int *lc_end, input_complete_t flags);
 
 /* --------------------------------------------------------------------------------------------- */
 
@@ -47,10 +47,10 @@ static int try_complete__lc_end__captured;
 static input_complete_t try_complete__flags__captured;
 
 /* @ThenReturnValue */
-static char **try_complete__return_value;
+static GPtrArray *try_complete__return_value;
 
 /* @Mock */
-char **
+GPtrArray *
 try_complete (char *text, int *lc_start, int *lc_end, input_complete_t flags)
 {
     try_complete__text__captured = g_strdup (text);
@@ -198,19 +198,17 @@ START_PARAMETRIZED_TEST (test_complete_engine_fill_completions,
     /* given */
     WInput *w_input;
 
-    w_input = g_new (WInput, 1);
-    w_input->buffer = g_strdup (data->input_buffer);
+    w_input = input_new (1, 1, NULL, 100, data->input_buffer, NULL, data->input_completion_flags);
     w_input->point = data->input_point;
-    w_input->completion_flags = data->input_completion_flags;
 
     /* when */
     complete_engine_fill_completions (w_input);
 
     /* then */
     mctest_assert_str_eq (try_complete__text__captured, data->input_buffer);
-    mctest_assert_int_eq (try_complete__lc_start__captured, data->expected_start);
-    mctest_assert_int_eq (try_complete__lc_end__captured, data->expected_end);
-    mctest_assert_int_eq (try_complete__flags__captured, data->input_completion_flags);
+    ck_assert_int_eq (try_complete__lc_start__captured, data->expected_start);
+    ck_assert_int_eq (try_complete__lc_end__captured, data->expected_end);
+    ck_assert_int_eq (try_complete__flags__captured, data->input_completion_flags);
 }
 /* *INDENT-OFF* */
 END_PARAMETRIZED_TEST

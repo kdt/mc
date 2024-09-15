@@ -1,7 +1,7 @@
 /*
    Utilities for VFS modules.
 
-   Copyright (C) 1988-2021
+   Copyright (C) 1988-2024
    Free Software Foundation, Inc.
 
    Copyright (C) 1995, 1996 Miguel de Icaza
@@ -38,9 +38,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if !defined (HAVE_UTIMENSAT) && defined (HAVE_UTIME_H)
+#include <utime.h>
+#endif
+
 #include "lib/global.h"
 #include "lib/unixcompat.h"
-#include "lib/util.h"           /* mc_mkstemps() */
 #include "lib/widget.h"         /* message() */
 #include "lib/strutil.h"        /* INVALID_CONV */
 
@@ -67,11 +70,13 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
-
 
 /* --------------------------------------------------------------------------------------------- */
 /*** public functions ****************************************************************************/
@@ -89,7 +94,8 @@ vfs_get_local_username (void)
 
     p_i = getpwuid (geteuid ());
 
-    return (p_i && p_i->pw_name) ? g_strdup (p_i->pw_name) : g_strdup ("anonymous");    /* Unknown UID, strange */
+    /* Unknown UID, strange */
+    return (p_i != NULL && p_i->pw_name != NULL) ? g_strdup (p_i->pw_name) : g_strdup ("anonymous");
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -99,8 +105,6 @@ vfs_get_local_username (void)
  * This file should be modified for non-unix systems to do something
  * reasonable.
  */
-
-/* --------------------------------------------------------------------------------------------- */
 
 int
 vfs_finduid (const char *uname)
@@ -119,10 +123,8 @@ vfs_finduid (const char *uname)
 
         g_strlcpy (saveuname, uname, TUNMLEN);
         pw = getpwnam (uname);
-        if (pw)
-        {
+        if (pw != NULL)
             saveuid = pw->pw_uid;
-        }
         else
         {
             static int my_uid = GUID_DEFAULT_CONST;
@@ -133,6 +135,7 @@ vfs_finduid (const char *uname)
             saveuid = my_uid;
         }
     }
+
     return saveuid;
 }
 
@@ -155,10 +158,8 @@ vfs_findgid (const char *gname)
 
         g_strlcpy (savegname, gname, TGNMLEN);
         gr = getgrnam (gname);
-        if (gr)
-        {
+        if (gr != NULL)
             savegid = gr->gr_gid;
-        }
         else
         {
             static int my_gid = GUID_DEFAULT_CONST;
@@ -169,6 +170,7 @@ vfs_findgid (const char *gname)
             savegid = my_gid;
         }
     }
+
     return savegid;
 }
 
@@ -177,11 +179,11 @@ vfs_findgid (const char *gname)
  * Create a temporary file with a name resembling the original.
  * This is needed e.g. for local copies requested by extfs.
  * Some extfs scripts may look at the extension.
- * We also protect stupid scripts agains dangerous names.
+ * We also protect stupid scripts against dangerous names.
  */
 
 int
-vfs_mkstemps (vfs_path_t ** pname_vpath, const char *prefix, const char *param_basename)
+vfs_mkstemps (vfs_path_t **pname_vpath, const char *prefix, const char *param_basename)
 {
     const char *p;
     GString *suffix;
@@ -254,12 +256,12 @@ vfs_url_split (const char *path, int default_port, vfs_url_flags_t flags)
 
     if ((flags & URL_NOSLASH) == 0)
     {
-        char *dir = pcopy;
+        char *dir;
 
         /* locate path component */
-        while (!IS_PATH_SEP (*dir) && *dir != '\0')
-            dir++;
-        if (*dir == '\0')
+        dir = strchr (pcopy, PATH_SEP);
+
+        if (dir == NULL)
             path_element->path = g_strdup (PATH_SEP_STR);
         else
         {
@@ -358,7 +360,7 @@ vfs_url_split (const char *path, int default_port, vfs_url_flags_t flags)
 
 /* --------------------------------------------------------------------------------------------- */
 
-void __attribute__ ((noreturn)) vfs_die (const char *m)
+void __attribute__((noreturn)) vfs_die (const char *m)
 {
     message (D_ERROR, _("Internal error:"), "%s", m);
     exit (EXIT_FAILURE);
@@ -371,6 +373,105 @@ vfs_get_password (const char *msg)
 {
     return input_dialog (msg, _("Password:"), MC_HISTORY_VFS_PASSWORD, INPUT_PASSWORD,
                          INPUT_COMPLETE_NONE);
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+int
+vfs_utime (const char *path, mc_timesbuf_t *times)
+{
+#ifdef HAVE_UTIMENSAT
+    return utimensat (AT_FDCWD, path, *times, AT_SYMLINK_NOFOLLOW);
+#else
+    return utime (path, times);
+#endif
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+void
+vfs_get_timespecs_from_timesbuf (mc_timesbuf_t *times, mc_timespec_t *atime, mc_timespec_t *mtime)
+{
+#ifdef HAVE_UTIMENSAT
+    atime->tv_sec = (*times)[0].tv_sec;
+    atime->tv_nsec = (*times)[0].tv_nsec;
+    mtime->tv_sec = (*times)[1].tv_sec;
+    mtime->tv_nsec = (*times)[1].tv_nsec;
+#else
+    atime->tv_sec = times->actime;
+    atime->tv_nsec = 0;
+    mtime->tv_sec = times->modtime;
+    mtime->tv_nsec = 0;
+#endif
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+void
+vfs_get_timesbuf_from_stat (const struct stat *s, mc_timesbuf_t *times)
+{
+#ifdef HAVE_UTIMENSAT
+#ifdef HAVE_STRUCT_STAT_ST_MTIM
+    /* POSIX IEEE Std 1003.1-2008 should be the preferred way
+     *
+     * AIX has internal type st_timespec_t conflicting with timespec, so assign per field, for details see:
+     * https://github.com/libuv/libuv/pull/4404
+     */
+    (*times)[0].tv_sec = s->st_atim.tv_sec;
+    (*times)[0].tv_nsec = s->st_atim.tv_nsec;
+    (*times)[1].tv_sec = s->st_mtim.tv_sec;
+    (*times)[1].tv_nsec = s->st_mtim.tv_nsec;
+#elif HAVE_STRUCT_STAT_ST_MTIMESPEC
+    /* Modern BSD solution */
+    (*times)[0] = s->st_atimespec;
+    (*times)[1] = s->st_mtimespec;
+#elif HAVE_STRUCT_STAT_ST_MTIMENSEC
+    /* Legacy BSD solution */
+    (*times)[0].tv_sec = s->st_atime;
+    (*times)[0].tv_nsec = s->st_atimensec;
+    (*times)[1].tv_sec = s->st_mtime;
+    (*times)[1].tv_nsec = s->st_mtimensec;
+#else
+#error "Found utimensat for nanosecond timestamps, but unsupported struct stat format!"
+#endif
+#else
+    times->actime = s->st_atime;
+    times->modtime = s->st_mtime;
+#endif
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+void
+vfs_copy_stat_times (const struct stat *src, struct stat *dst)
+{
+    dst->st_atime = src->st_atime;
+    dst->st_mtime = src->st_mtime;
+    dst->st_ctime = src->st_ctime;
+
+#ifdef HAVE_STRUCT_STAT_ST_MTIM
+    dst->st_atim.tv_nsec = src->st_atim.tv_nsec;
+    dst->st_mtim.tv_nsec = src->st_mtim.tv_nsec;
+    dst->st_ctim.tv_nsec = src->st_ctim.tv_nsec;
+#elif HAVE_STRUCT_STAT_ST_MTIMESPEC
+    dst->st_atimespec.tv_nsec = src->st_atimespec.tv_nsec;
+    dst->st_mtimespec.tv_nsec = src->st_mtimespec.tv_nsec;
+    dst->st_ctimespec.tv_nsec = src->st_ctimespec.tv_nsec;
+#elif HAVE_STRUCT_STAT_ST_MTIMENSEC
+    dst->st_atimensec = src->st_atimensec;
+    dst->st_mtimensec = src->st_mtimensec;
+    dst->st_ctimensec = src->st_ctimensec;
+#endif
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+void
+vfs_zero_stat_times (struct stat *s)
+{
+    const struct stat empty = { 0 };
+
+    vfs_copy_stat_times (&empty, s);
 }
 
 /* --------------------------------------------------------------------------------------------- */

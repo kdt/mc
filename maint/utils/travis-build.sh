@@ -29,7 +29,7 @@ set -x
 
 function do_build() {
     make
-    make -k check || true
+    make -k check
     make install
 }
 
@@ -92,7 +92,6 @@ mkdir -p build-all-disabled && pushd $_
     --disable-nls \
     --disable-vfs \
     --disable-background \
-    --without-mmap \
     --without-x \
     --without-gpm-mouse \
     --without-internal-edit \

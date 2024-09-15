@@ -1,7 +1,7 @@
 /*
    Directory panel listing format editor -- for the Midnight Commander
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -83,6 +83,8 @@ struct listmode_label
     char *text;
 };
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 static WListbox *l_listmode;
@@ -104,6 +106,7 @@ static char *s_itemwidth[3] = { "Free width", "Fixed width", "Growable width" };
 
 static WRadio *radio_itemwidth;
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
@@ -117,14 +120,14 @@ select_new_item (void)
 
     possible_items = panel_get_user_possible_fields (NULL);
 
-    mylistbox = create_listbox_window (20, 12, "Add listing format item", listmode_section);
+    mylistbox = listbox_window_new (20, 12, "Add listing format item", listmode_section);
     for (i = 0; possible_items[i]; i++)
     {
         listbox_add_item (mylistbox->list, LISTBOX_APPEND_AT_END, 0, possible_items[i], NULL,
                           FALSE);
     }
 
-    i = run_listbox (mylistbox);
+    i = listbox_run (mylistbox);
     if (i >= 0)
         ret = g_strdup (possible_items[i]);
 
@@ -271,7 +274,7 @@ init_listmode (char *oldlistformat)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-listmode_done (WDialog * h)
+listmode_done (WDialog *h)
 {
     widget_destroy (WIDGET (h));
     if (0)
@@ -299,7 +302,7 @@ collect_new_format (void)
     last = NULL;
     for (i = 0;; i++)
     {
-        listbox_select_entry (l_listmode, i);
+        listbox_set_current (l_listmode, i);
         listbox_get_current (l_listmode, &text, &extra);
         if (text == last)
             break;

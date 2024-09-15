@@ -1,7 +1,7 @@
 /*
    Interface to the terminal controlling library.
 
-   Copyright (C) 2005-2021
+   Copyright (C) 2005-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -68,10 +68,13 @@ int mc_tty_frm[MC_TTY_FRM_MAX];
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 static SIG_ATOMIC_VOLATILE_T got_interrupt = 0;
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
@@ -101,6 +104,7 @@ sigintr_handler (int signo)
  *         foot*
  *         screen*
  *         tmux*
+ *         contour*
  */
 gboolean
 tty_check_term (gboolean force_xterm)
@@ -124,7 +128,8 @@ tty_check_term (gboolean force_xterm)
         || strncmp (termvalue, "alacritty", 9) == 0
         || strncmp (termvalue, "foot", 4) == 0
         || strncmp (termvalue, "screen", 6) == 0
-        || strncmp (termvalue, "tmux", 4) == 0;
+        || strncmp (termvalue, "tmux", 4) == 0
+        || strncmp (termvalue, "contour", 7) == 0;
     /* *INDENT-ON* */
 }
 

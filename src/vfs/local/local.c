@@ -1,7 +1,7 @@
 /*
    Virtual File System: local file system.
 
-   Copyright (C) 1995-2021
+   Copyright (C) 1995-2024
    Free Software Foundation, Inc.
 
    This file is part of the Midnight Commander.
@@ -26,11 +26,15 @@
  */
 
 #include <config.h>
+
 #include <errno.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef ENABLE_EXT2FS_ATTR
+#include <e2p/e2p.h>            /* fgetflags(), fsetflags() */
+#endif
 
 #include "lib/global.h"
 
@@ -45,6 +49,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 static struct vfs_s_subclass local_subclass;
@@ -54,24 +60,15 @@ static struct vfs_class *vfs_local_ops = VFS_CLASS (&local_subclass);
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
-/**
- * Note: Some of this functions are not static. This has rather good
- * reason: exactly same functions would have to appear in sfs.c. This
- * saves both computer's memory and my work.  <pavel@ucw.cz>
- */
-
-
-/* --------------------------------------------------------------------------------------------- */
-
 static void *
-local_open (const vfs_path_t * vpath, int flags, mode_t mode)
+local_open (const vfs_path_t *vpath, int flags, mode_t mode)
 {
     int *local_info;
     int fd;
-    const vfs_path_element_t *path_element;
+    const char *path;
 
-    path_element = vfs_path_get_by_index (vpath, -1);
-    fd = open (path_element->path, NO_LINEAR (flags), mode);
+    path = vfs_path_get_last_path_str (vpath);
+    fd = open (path, NO_LINEAR (flags), mode);
     if (fd == -1)
         return 0;
 
@@ -84,22 +81,22 @@ local_open (const vfs_path_t * vpath, int flags, mode_t mode)
 /* --------------------------------------------------------------------------------------------- */
 
 static void *
-local_opendir (const vfs_path_t * vpath)
+local_opendir (const vfs_path_t *vpath)
 {
     DIR **local_info;
     DIR *dir = NULL;
-    const vfs_path_element_t *path_element;
+    const char *path;
 
-    path_element = vfs_path_get_by_index (vpath, -1);
+    path = vfs_path_get_last_path_str (vpath);
 
-    /* On Linux >= 5.1, MC sometimes shows empty directpries on mounted CIFS shares.
+    /* On Linux >= 5.1, MC sometimes shows empty directories on mounted CIFS shares.
      * Rereading directory restores the directory content.
      *
      * Reopen directory, if first readdir() returns NULL and errno == EINTR.
      */
     while (dir == NULL)
     {
-        dir = opendir (path_element->path);
+        dir = opendir (path);
         if (dir == NULL)
             return NULL;
 
@@ -145,100 +142,117 @@ local_closedir (void *data)
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-local_stat (const vfs_path_t * vpath, struct stat *buf)
+local_stat (const vfs_path_t *vpath, struct stat *buf)
 {
-    const vfs_path_element_t *path_element;
+    const char *path;
 
-    path_element = vfs_path_get_by_index (vpath, -1);
-    return stat (path_element->path, buf);
+    path = vfs_path_get_last_path_str (vpath);
+    return stat (path, buf);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-local_lstat (const vfs_path_t * vpath, struct stat *buf)
+local_lstat (const vfs_path_t *vpath, struct stat *buf)
 {
-    const vfs_path_element_t *path_element;
+    const char *path;
 
-    path_element = vfs_path_get_by_index (vpath, -1);
+    path = vfs_path_get_last_path_str (vpath);
 #ifndef HAVE_STATLSTAT
-    return lstat (path_element->path, buf);
+    return lstat (path, buf);
 #else
-    return statlstat (path_element->path, buf);
+    return statlstat (path, buf);
 #endif
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-local_chmod (const vfs_path_t * vpath, mode_t mode)
+local_chmod (const vfs_path_t *vpath, mode_t mode)
 {
-    const vfs_path_element_t *path_element;
+    const char *path;
 
-    path_element = vfs_path_get_by_index (vpath, -1);
-    return chmod (path_element->path, mode);
+    path = vfs_path_get_last_path_str (vpath);
+    return chmod (path, mode);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-local_chown (const vfs_path_t * vpath, uid_t owner, gid_t group)
+local_chown (const vfs_path_t *vpath, uid_t owner, gid_t group)
 {
-    const vfs_path_element_t *path_element;
+    const char *path;
 
-    path_element = vfs_path_get_by_index (vpath, -1);
-    return chown (path_element->path, owner, group);
+    path = vfs_path_get_last_path_str (vpath);
+    return chown (path, owner, group);
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+#ifdef ENABLE_EXT2FS_ATTR
+
+static int
+local_fgetflags (const vfs_path_t *vpath, unsigned long *flags)
+{
+    const char *path;
+
+    path = vfs_path_get_last_path_str (vpath);
+    return fgetflags (path, flags);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-local_utime (const vfs_path_t * vpath, mc_timesbuf_t * times)
+local_fsetflags (const vfs_path_t *vpath, unsigned long flags)
 {
-    int ret;
-    const vfs_path_element_t *path_element;
+    const char *path;
 
-    path_element = vfs_path_get_by_index (vpath, -1);
-#ifdef HAVE_UTIMENSAT
-    ret = utimensat (AT_FDCWD, path_element->path, *times, AT_SYMLINK_NOFOLLOW);
-#else
-    ret = utime (path_element->path, times);
-#endif
-    return ret;
+    path = vfs_path_get_last_path_str (vpath);
+    return fsetflags (path, flags);
+}
+
+#endif /* ENABLE_EXT2FS_ATTR */
+
+/* --------------------------------------------------------------------------------------------- */
+
+static int
+local_utime (const vfs_path_t *vpath, mc_timesbuf_t *times)
+{
+    return vfs_utime (vfs_path_get_last_path_str (vpath), times);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-local_readlink (const vfs_path_t * vpath, char *buf, size_t size)
+local_readlink (const vfs_path_t *vpath, char *buf, size_t size)
 {
-    const vfs_path_element_t *path_element;
+    const char *path;
 
-    path_element = vfs_path_get_by_index (vpath, -1);
-    return readlink (path_element->path, buf, size);
+    path = vfs_path_get_last_path_str (vpath);
+    return readlink (path, buf, size);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-local_unlink (const vfs_path_t * vpath)
+local_unlink (const vfs_path_t *vpath)
 {
-    const vfs_path_element_t *path_element;
+    const char *path;
 
-    path_element = vfs_path_get_by_index (vpath, -1);
-    return unlink (path_element->path);
+    path = vfs_path_get_last_path_str (vpath);
+    return unlink (path);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-local_symlink (const vfs_path_t * vpath1, const vfs_path_t * vpath2)
+local_symlink (const vfs_path_t *vpath1, const vfs_path_t *vpath2)
 {
-    const vfs_path_element_t *path_element1, *path_element2;
+    const char *path1, *path2;
 
-    path_element1 = vfs_path_get_by_index (vpath1, -1);
-    path_element2 = vfs_path_get_by_index (vpath2, -1);
-    return symlink (path_element1->path, path_element2->path);
+    path1 = vfs_path_get_last_path_str (vpath1);
+    path2 = vfs_path_get_last_path_str (vpath2);
+    return symlink (path1, path2);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -273,75 +287,75 @@ local_write (void *data, const char *buf, size_t nbyte)
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-local_rename (const vfs_path_t * vpath1, const vfs_path_t * vpath2)
+local_rename (const vfs_path_t *vpath1, const vfs_path_t *vpath2)
 {
-    const vfs_path_element_t *path_element1, *path_element2;
+    const char *path1, *path2;
 
-    path_element1 = vfs_path_get_by_index (vpath1, -1);
-    path_element2 = vfs_path_get_by_index (vpath2, -1);
-    return rename (path_element1->path, path_element2->path);
+    path1 = vfs_path_get_last_path_str (vpath1);
+    path2 = vfs_path_get_last_path_str (vpath2);
+    return rename (path1, path2);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-local_chdir (const vfs_path_t * vpath)
+local_chdir (const vfs_path_t *vpath)
 {
-    const vfs_path_element_t *path_element;
+    const char *path;
 
-    path_element = vfs_path_get_by_index (vpath, -1);
-    return chdir (path_element->path);
+    path = vfs_path_get_last_path_str (vpath);
+    return chdir (path);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-local_mknod (const vfs_path_t * vpath, mode_t mode, dev_t dev)
+local_mknod (const vfs_path_t *vpath, mode_t mode, dev_t dev)
 {
-    const vfs_path_element_t *path_element;
+    const char *path;
 
-    path_element = vfs_path_get_by_index (vpath, -1);
-    return mknod (path_element->path, mode, dev);
+    path = vfs_path_get_last_path_str (vpath);
+    return mknod (path, mode, dev);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-local_link (const vfs_path_t * vpath1, const vfs_path_t * vpath2)
+local_link (const vfs_path_t *vpath1, const vfs_path_t *vpath2)
 {
-    const vfs_path_element_t *path_element1, *path_element2;
+    const char *path1, *path2;
 
-    path_element1 = vfs_path_get_by_index (vpath1, -1);
-    path_element2 = vfs_path_get_by_index (vpath2, -1);
-    return link (path_element1->path, path_element2->path);
+    path1 = vfs_path_get_last_path_str (vpath1);
+    path2 = vfs_path_get_last_path_str (vpath2);
+    return link (path1, path2);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-local_mkdir (const vfs_path_t * vpath, mode_t mode)
+local_mkdir (const vfs_path_t *vpath, mode_t mode)
 {
-    const vfs_path_element_t *path_element;
+    const char *path;
 
-    path_element = vfs_path_get_by_index (vpath, -1);
-    return mkdir (path_element->path, mode);
+    path = vfs_path_get_last_path_str (vpath);
+    return mkdir (path, mode);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-local_rmdir (const vfs_path_t * vpath)
+local_rmdir (const vfs_path_t *vpath)
 {
-    const vfs_path_element_t *path_element;
+    const char *path;
 
-    path_element = vfs_path_get_by_index (vpath, -1);
-    return rmdir (path_element->path);
+    path = vfs_path_get_last_path_str (vpath);
+    return rmdir (path);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static vfs_path_t *
-local_getlocalcopy (const vfs_path_t * vpath)
+local_getlocalcopy (const vfs_path_t *vpath)
 {
     return vfs_path_clone (vpath);
 }
@@ -349,7 +363,7 @@ local_getlocalcopy (const vfs_path_t * vpath)
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-local_ungetlocalcopy (const vfs_path_t * vpath, const vfs_path_t * local, gboolean has_changed)
+local_ungetlocalcopy (const vfs_path_t *vpath, const vfs_path_t *local, gboolean has_changed)
 {
     (void) vpath;
     (void) local;
@@ -476,6 +490,10 @@ vfs_init_localfs (void)
     vfs_local_ops->fstat = local_fstat;
     vfs_local_ops->chmod = local_chmod;
     vfs_local_ops->chown = local_chown;
+#ifdef ENABLE_EXT2FS_ATTR
+    vfs_local_ops->fgetflags = local_fgetflags;
+    vfs_local_ops->fsetflags = local_fsetflags;
+#endif
     vfs_local_ops->utime = local_utime;
     vfs_local_ops->readlink = local_readlink;
     vfs_local_ops->symlink = local_symlink;

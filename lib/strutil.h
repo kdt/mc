@@ -29,7 +29,7 @@
  * displaynig: all handled as zero with characters, expect combing character 
  * at the begin of string, this character has with one (space add before), 
  * so str_term_width is not good for computing width of singles characters 
- * (never return zero, expect emtpy string)
+ * (never return zero, expect empty string)
  * for compatibility are strings composed before displaynig
  * comparing: comparing decompose all string before comparing, n-compare 
  * functions do not work as is usual, because same strings do not have to be 
@@ -54,7 +54,7 @@
  */
 typedef enum
 {
-    /* success means, that convertion has been finished successully
+    /* success means, that conversion has been finished successfully
      */
     ESTR_SUCCESS = 0,
     /* problem means, that not every characters was successfully converted (They are
@@ -156,7 +156,7 @@ struct str_class
 
 /*** global variables defined in .c file *********************************************************/
 
-/* standard convertors */
+/* standard converters */
 extern GIConv str_cnv_to_term;
 extern GIConv str_cnv_from_term;
 /* from terminal encoding to terminal encoding */
@@ -168,17 +168,17 @@ struct str_class str_utf8_init (void);
 struct str_class str_8bit_init (void);
 struct str_class str_ascii_init (void);
 
-/* create convertor from "from_enc" to terminal encoding
+/* create converter from "from_enc" to terminal encoding
  * if "from_enc" is not supported return INVALID_CONV 
  */
 GIConv str_crt_conv_from (const char *from_enc);
 
-/* create convertor from terminal encoding to "to_enc"
+/* create converter from terminal encoding to "to_enc"
  * if "to_enc" is not supported return INVALID_CONV 
  */
 GIConv str_crt_conv_to (const char *to_enc);
 
-/* close convertor, do not close str_cnv_to_term, str_cnv_from_term, 
+/* close converter, do not close str_cnv_to_term, str_cnv_from_term, 
  * str_cnv_not_convert 
  */
 void str_close_conv (GIConv conv);
@@ -352,17 +352,17 @@ gboolean str_isprint (const char *ch);
  */
 gboolean str_iscombiningmark (const char *ch);
 
-/* write lower from of fisrt characters in ch into out
+/* write lower from of first characters in ch into out
  * decrase remain by size of returned characters
  * if out is not big enough, do nothing
  */
-gboolean str_toupper (const char *ch, char **out, size_t * remain);
+gboolean str_toupper (const char *ch, char **out, size_t *remain);
 
-/* write upper from of fisrt characters in ch into out
+/* write upper from of first characters in ch into out
  * decrase remain by size of returned characters
  * if out is not big enough, do nothing
  */
-gboolean str_tolower (const char *ch, char **out, size_t * remain);
+gboolean str_tolower (const char *ch, char **out, size_t *remain);
 
 /* return length of text in characters
  * I
@@ -524,7 +524,7 @@ char *str_create_key_for_filename (const char *text, gboolean case_sen);
  */
 int str_key_collate (const char *t1, const char *t2, gboolean case_sen);
 
-/* release_key created by str_create_key, only rigth way to release key
+/* release_key created by str_create_key, only right way to release key
  * I
  */
 void str_release_key (char *key, gboolean case_sen);
@@ -540,24 +540,53 @@ int str_verscmp (const char *s1, const char *s2);
 
 /* Compare version strings:
 
-   This function compares strings s1 and s2:
-   1) By PREFIX in the same way as strcmp.
-   2) Then by VERSION (most similarly to version compare of Debian's dpkg).
-   Leading zeros in version numbers are ignored.
-   3) If both (PREFIX and  VERSION) are equal, strcmp function is used for
-   comparison. So this function can return 0 if (and only if) strings s1
-   and s2 are identical.
+   Compare strings a and b as file names containing version numbers, and return an integer
+   that is negative, zero, or positive depending on whether a compares less than, equal to,
+   or greater than b.
 
-   It returns number > 0 for s1 > s2, 0 for s1 == s2 and number < 0 for s1 < s2.
+   Use the following version sort algorithm:
 
-   This function compares strings, in a way that if VER1 and VER2 are version
-   numbers and PREFIX and SUFFIX (SUFFIX defined as (\.[A-Za-z~][A-Za-z0-9~]*)*)
-   are strings then VER1 < VER2 implies filevercmp (PREFIX VER1 SUFFIX,
-   PREFIX VER2 SUFFIX) < 0.
+   1. Compare the strings' maximal-length non-digit prefixes lexically.
+   If there is a difference return that difference.
+   Otherwise discard the prefixes and continue with the next step.
 
-   This function is intended to be a replacement for strverscmp.
+   2. Compare the strings' maximal-length digit prefixes, using numeric comparison
+   of the numbers represented by each prefix. (Treat an empty prefix as zero; this can
+   happen only at string end.)
+   If there is a difference, return that difference.
+   Otherwise discard the prefixes and continue with the next step.
+
+   3. If both strings are empty, return 0.  Otherwise continue with step 1.
+
+   In version sort, lexical comparison is left to right, byte by byte, using the byte's numeric
+   value (0-255), except that:
+
+   1. ASCII letters sort before other bytes.
+   2. A tilde sorts before anything, even an empty string.
+
+   In addition to the version sort rules, the following strings have special priority and sort
+   before all other strings (listed in order):
+
+   1. The empty string.
+   2. ".".
+   3. "..".
+   4. Strings starting with "." sort before other strings.
+
+   Before comparing two strings where both begin with non-".", or where both begin with "."
+   but neither is "." or "..", suffixes matching the C-locale extended regular expression
+   (\.[A-Za-z~][A-Za-z0-9~]*)*$ are removed and the strings compared without them, using version sort
+   without special priority; if they do not compare equal, this comparison result is used and
+   the suffixes are effectively ignored. Otherwise, the entire strings are compared using version sort.
+   When removing a suffix from a nonempty string, remove the maximal-length suffix such that
+   the remaining string is nonempty.
  */
-int filevercmp (const char *s1, const char *s2);
+int filevercmp (const char *a, const char *b);
+
+/* Like filevercmp, except compare the byte arrays a (of length alen) and b (of length blen)
+   so that a and b can contain '\0', which sorts just before '\1'. But if alen is -1 treat
+   a as a string terminated by '\0', and similarly for blen.
+ */
+int filenvercmp (char const *a, ssize_t alen, char const *b, ssize_t blen);
 
 
 /* return how many lines and columns will text occupy on terminal
@@ -578,9 +607,26 @@ char *strrstr_skip_count (const char *haystack, const char *needle, size_t skip_
 
 char *str_replace_all (const char *haystack, const char *needle, const char *replacement);
 
+GPtrArray *str_tokenize (const char *string);
+
 strtol_error_t xstrtoumax (const char *s, char **ptr, int base, uintmax_t * val,
                            const char *valid_suffixes);
 uintmax_t parse_integer (const char *str, gboolean * invalid);
+
+char *str_escape (const char *src, gsize src_len, const char *escaped_chars,
+                  gboolean escape_non_printable);
+char *str_unescape (const char *src, gsize src_len, const char *unescaped_chars,
+                    gboolean unescape_non_printable);
+char *str_shell_unescape (const char *text);
+char *str_shell_escape (const char *text);
+
+char *str_glob_escape (const char *text);
+char *str_glob_unescape (const char *text);
+
+char *str_regex_escape (const char *text);
+char *str_regex_unescape (const char *text);
+
+gboolean str_is_char_escaped (const char *start, const char *current);
 
 /* --------------------------------------------------------------------------------------------- */
 /*** inline functions ****************************************************************************/

@@ -1,12 +1,12 @@
 /*
    Directory routines
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Written by:
    Slava Zanko <slavazanko@gmail.com>, 2013
-   Andrew Borodin <aborodin@vmail.ru>, 2013
+   Andrew Borodin <aborodin@vmail.ru>, 2013-2022
 
    This file is part of the Midnight Commander.
 
@@ -60,6 +60,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* Reverse flag */
@@ -73,21 +75,9 @@ static gboolean exec_first = TRUE;
 
 static dir_list dir_copy = { NULL, 0, 0, NULL };
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
-
-/*
-   sort_orders_t sort_orders [SORT_TYPES_TOTAL] = {
-   { N_("&Unsorted"),    unsorted },
-   { N_("&Name"),        sort_name },
-   { N_("&Extension"),   sort_ext },
-   { N_("&Modify time"), sort_time },
-   { N_("&Access time"), sort_atime },
-   { N_("C&Hange time"), sort_ctime },
-   { N_("&Size"),        sort_size },
-   { N_("&Inode"),       sort_inode },
-   };
- */
 
 static inline int
 key_collate (const char *t1, const char *t2)
@@ -117,12 +107,26 @@ key_collate (const char *t1, const char *t2)
 }
 
 /* --------------------------------------------------------------------------------------------- */
+
+static inline int
+compare_by_names (file_entry_t *a, file_entry_t *b)
+{
+    /* create key if does not exist, key will be freed after sorting */
+    if (a->name_sort_key == NULL)
+        a->name_sort_key = str_create_key_for_filename (a->fname->str, case_sensitive);
+    if (b->name_sort_key == NULL)
+        b->name_sort_key = str_create_key_for_filename (b->fname->str, case_sensitive);
+
+    return key_collate (a->name_sort_key, b->name_sort_key);
+}
+
+/* --------------------------------------------------------------------------------------------- */
 /**
  * clear keys, should be call after sorting is finished.
  */
 
 static void
-clean_sort_keys (dir_list * list, int start, int count)
+clean_sort_keys (dir_list *list, int start, int count)
 {
     int i;
 
@@ -131,10 +135,10 @@ clean_sort_keys (dir_list * list, int start, int count)
         file_entry_t *fentry;
 
         fentry = &list->list[i + start];
-        str_release_key (fentry->sort_key, case_sensitive);
-        fentry->sort_key = NULL;
-        str_release_key (fentry->second_sort_key, case_sensitive);
-        fentry->second_sort_key = NULL;
+        str_release_key (fentry->name_sort_key, case_sensitive);
+        fentry->name_sort_key = NULL;
+        str_release_key (fentry->extension_sort_key, case_sensitive);
+        fentry->extension_sort_key = NULL;
     }
 }
 
@@ -145,16 +149,17 @@ clean_sort_keys (dir_list * list, int start, int count)
  */
 
 static gboolean
-handle_dirent (struct vfs_dirent *dp, const char *fltr, struct stat *buf1, gboolean * link_to_dir,
-               gboolean * stale_link)
+handle_dirent (struct vfs_dirent *dp, const file_filter_t *filter, struct stat *buf1,
+               gboolean *link_to_dir, gboolean *stale_link)
 {
     vfs_path_t *vpath;
+    gboolean ok = TRUE;
 
     if (DIR_IS_DOT (dp->d_name) || DIR_IS_DOTDOT (dp->d_name))
         return FALSE;
     if (!panels_options.show_dot_files && (dp->d_name[0] == '.'))
         return FALSE;
-    if (!panels_options.show_backups && dp->d_name[strlen (dp->d_name) - 1] == '~')
+    if (!panels_options.show_backups && dp->d_name[dp->d_len - 1] == '~')
         return FALSE;
 
     vpath = vfs_path_from_str (dp->d_name);
@@ -176,15 +181,22 @@ handle_dirent (struct vfs_dirent *dp, const char *fltr, struct stat *buf1, gbool
 
     vfs_path_free (vpath, TRUE);
 
-    return (S_ISDIR (buf1->st_mode) || *link_to_dir || fltr == NULL
-            || mc_search (fltr, NULL, dp->d_name, MC_SEARCH_T_GLOB));
+    if (filter != NULL && filter->handler != NULL)
+    {
+        gboolean files_only = (filter->flags & SELECT_FILES_ONLY) != 0;
+
+        ok = ((S_ISDIR (buf1->st_mode) || *link_to_dir) && files_only)
+            || mc_search_run (filter->handler, dp->d_name, 0, dp->d_len, NULL);
+    }
+
+    return ok;
 }
 
 /* --------------------------------------------------------------------------------------------- */
 /** get info about ".." */
 
 static gboolean
-dir_get_dotdot_stat (const vfs_path_t * vpath, struct stat *st)
+dir_get_dotdot_stat (const vfs_path_t *vpath, struct stat *st)
 {
     gboolean ret = FALSE;
 
@@ -235,7 +247,7 @@ alloc_dir_copy (int size)
  */
 
 gboolean
-dir_list_grow (dir_list * list, int delta)
+dir_list_grow (dir_list *list, int delta)
 {
     int size;
     gboolean clear_flag = FALSE;
@@ -284,7 +296,7 @@ dir_list_grow (dir_list * list, int delta)
  */
 
 gboolean
-dir_list_append (dir_list * list, const char *fname, const struct stat * st,
+dir_list_append (dir_list *list, const char *fname, const struct stat *st,
                  gboolean link_to_dir, gboolean stale_link)
 {
     file_entry_t *fentry;
@@ -300,8 +312,8 @@ dir_list_append (dir_list * list, const char *fname, const struct stat * st,
     fentry->f.stale_link = stale_link ? 1 : 0;
     fentry->f.dir_size_computed = 0;
     fentry->st = *st;
-    fentry->sort_key = NULL;
-    fentry->second_sort_key = NULL;
+    fentry->name_sort_key = NULL;
+    fentry->extension_sort_key = NULL;
 
     list->len++;
 
@@ -311,7 +323,7 @@ dir_list_append (dir_list * list, const char *fname, const struct stat * st,
 /* --------------------------------------------------------------------------------------------- */
 
 int
-unsorted (file_entry_t * a, file_entry_t * b)
+unsorted (file_entry_t *a, file_entry_t *b)
 {
     (void) a;
     (void) b;
@@ -322,20 +334,34 @@ unsorted (file_entry_t * a, file_entry_t * b)
 /* --------------------------------------------------------------------------------------------- */
 
 int
-sort_name (file_entry_t * a, file_entry_t * b)
+sort_name (file_entry_t *a, file_entry_t *b)
+{
+    int ad = MY_ISDIR (a);
+    int bd = MY_ISDIR (b);
+
+    if (ad == bd || panels_options.mix_all_files)
+        return compare_by_names (a, b);
+
+    return bd - ad;
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+int
+sort_vers (file_entry_t *a, file_entry_t *b)
 {
     int ad = MY_ISDIR (a);
     int bd = MY_ISDIR (b);
 
     if (ad == bd || panels_options.mix_all_files)
     {
-        /* create key if does not exist, key will be freed after sorting */
-        if (a->sort_key == NULL)
-            a->sort_key = str_create_key_for_filename (a->fname->str, case_sensitive);
-        if (b->sort_key == NULL)
-            b->sort_key = str_create_key_for_filename (b->fname->str, case_sensitive);
+        int result;
 
-        return key_collate (a->sort_key, b->sort_key);
+        result = filevercmp (a->fname->str, b->fname->str);
+        if (result != 0)
+            return result * reverse;
+
+        return compare_by_names (a, b);
     }
 
     return bd - ad;
@@ -344,21 +370,7 @@ sort_name (file_entry_t * a, file_entry_t * b)
 /* --------------------------------------------------------------------------------------------- */
 
 int
-sort_vers (file_entry_t * a, file_entry_t * b)
-{
-    int ad = MY_ISDIR (a);
-    int bd = MY_ISDIR (b);
-
-    if (ad == bd || panels_options.mix_all_files)
-        return filevercmp (a->fname->str, b->fname->str) * reverse;
-
-    return bd - ad;
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-int
-sort_ext (file_entry_t * a, file_entry_t * b)
+sort_ext (file_entry_t *a, file_entry_t *b)
 {
     int ad = MY_ISDIR (a);
     int bd = MY_ISDIR (b);
@@ -367,16 +379,16 @@ sort_ext (file_entry_t * a, file_entry_t * b)
     {
         int r;
 
-        if (a->second_sort_key == NULL)
-            a->second_sort_key = str_create_key (extension (a->fname->str), case_sensitive);
-        if (b->second_sort_key == NULL)
-            b->second_sort_key = str_create_key (extension (b->fname->str), case_sensitive);
+        if (a->extension_sort_key == NULL)
+            a->extension_sort_key = str_create_key (extension (a->fname->str), case_sensitive);
+        if (b->extension_sort_key == NULL)
+            b->extension_sort_key = str_create_key (extension (b->fname->str), case_sensitive);
 
-        r = str_key_collate (a->second_sort_key, b->second_sort_key, case_sensitive);
+        r = str_key_collate (a->extension_sort_key, b->extension_sort_key, case_sensitive);
         if (r != 0)
             return r * reverse;
 
-        return sort_name (a, b);
+        return compare_by_names (a, b);
     }
 
     return bd - ad;
@@ -385,7 +397,7 @@ sort_ext (file_entry_t * a, file_entry_t * b)
 /* --------------------------------------------------------------------------------------------- */
 
 int
-sort_time (file_entry_t * a, file_entry_t * b)
+sort_time (file_entry_t *a, file_entry_t *b)
 {
     int ad = MY_ISDIR (a);
     int bd = MY_ISDIR (b);
@@ -397,7 +409,7 @@ sort_time (file_entry_t * a, file_entry_t * b)
         if (result != 0)
             return result * reverse;
 
-        return sort_name (a, b);
+        return compare_by_names (a, b);
     }
 
     return bd - ad;
@@ -406,7 +418,7 @@ sort_time (file_entry_t * a, file_entry_t * b)
 /* --------------------------------------------------------------------------------------------- */
 
 int
-sort_ctime (file_entry_t * a, file_entry_t * b)
+sort_ctime (file_entry_t *a, file_entry_t *b)
 {
     int ad = MY_ISDIR (a);
     int bd = MY_ISDIR (b);
@@ -418,7 +430,7 @@ sort_ctime (file_entry_t * a, file_entry_t * b)
         if (result != 0)
             return result * reverse;
 
-        return sort_name (a, b);
+        return compare_by_names (a, b);
     }
 
     return bd - ad;
@@ -427,7 +439,7 @@ sort_ctime (file_entry_t * a, file_entry_t * b)
 /* --------------------------------------------------------------------------------------------- */
 
 int
-sort_atime (file_entry_t * a, file_entry_t * b)
+sort_atime (file_entry_t *a, file_entry_t *b)
 {
     int ad = MY_ISDIR (a);
     int bd = MY_ISDIR (b);
@@ -439,7 +451,7 @@ sort_atime (file_entry_t * a, file_entry_t * b)
         if (result != 0)
             return result * reverse;
 
-        return sort_name (a, b);
+        return compare_by_names (a, b);
     }
 
     return bd - ad;
@@ -448,7 +460,7 @@ sort_atime (file_entry_t * a, file_entry_t * b)
 /* --------------------------------------------------------------------------------------------- */
 
 int
-sort_inode (file_entry_t * a, file_entry_t * b)
+sort_inode (file_entry_t *a, file_entry_t *b)
 {
     int ad = MY_ISDIR (a);
     int bd = MY_ISDIR (b);
@@ -462,7 +474,7 @@ sort_inode (file_entry_t * a, file_entry_t * b)
 /* --------------------------------------------------------------------------------------------- */
 
 int
-sort_size (file_entry_t * a, file_entry_t * b)
+sort_size (file_entry_t *a, file_entry_t *b)
 {
     int ad = MY_ISDIR (a);
     int bd = MY_ISDIR (b);
@@ -474,7 +486,7 @@ sort_size (file_entry_t * a, file_entry_t * b)
         if (result != 0)
             return result * reverse;
 
-        return sort_name (a, b);
+        return compare_by_names (a, b);
     }
 
     return bd - ad;
@@ -483,7 +495,7 @@ sort_size (file_entry_t * a, file_entry_t * b)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-dir_list_sort (dir_list * list, GCompareFunc sort, const dir_sort_options_t * sort_op)
+dir_list_sort (dir_list *list, GCompareFunc sort, const dir_sort_options_t *sort_op)
 {
     if (list->len > 1 && sort != (GCompareFunc) unsorted)
     {
@@ -506,7 +518,7 @@ dir_list_sort (dir_list * list, GCompareFunc sort, const dir_sort_options_t * so
 /* --------------------------------------------------------------------------------------------- */
 
 void
-dir_list_clean (dir_list * list)
+dir_list_clean (dir_list *list)
 {
     int i;
 
@@ -527,7 +539,7 @@ dir_list_clean (dir_list * list)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-dir_list_free_list (dir_list * list)
+dir_list_free_list (dir_list *list)
 {
     int i;
 
@@ -548,7 +560,7 @@ dir_list_free_list (dir_list * list)
 /** Used to set up a directory list when there is no access to a directory */
 
 gboolean
-dir_list_init (dir_list * list)
+dir_list_init (dir_list *list)
 {
     file_entry_t *fentry;
 
@@ -581,7 +593,7 @@ dir_list_init (dir_list * list)
 /* Return values: FALSE = don't add, TRUE = add to the list */
 
 gboolean
-handle_path (const char *path, struct stat * buf1, gboolean * link_to_dir, gboolean * stale_link)
+handle_path (const char *path, struct stat *buf1, gboolean *link_to_dir, gboolean *stale_link)
 {
     vfs_path_t *vpath;
 
@@ -619,8 +631,8 @@ handle_path (const char *path, struct stat * buf1, gboolean * link_to_dir, gbool
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-dir_list_load (dir_list * list, const vfs_path_t * vpath, GCompareFunc sort,
-               const dir_sort_options_t * sort_op, const char *fltr)
+dir_list_load (dir_list *list, const vfs_path_t *vpath, GCompareFunc sort,
+               const dir_sort_options_t *sort_op, const file_filter_t *filter)
 {
     DIR *dirp;
     struct vfs_dirent *dp;
@@ -657,7 +669,7 @@ dir_list_load (dir_list * list, const vfs_path_t * vpath, GCompareFunc sort,
         if (list->callback != NULL)
             list->callback (DIR_READ, dp);
 
-        if (!handle_dirent (dp, fltr, &st, &link_to_dir, &stale_link))
+        if (!handle_dirent (dp, filter, &st, &link_to_dir, &stale_link))
             continue;
 
         if (!dir_list_append (list, dp->d_name, &st, link_to_dir, stale_link))
@@ -678,7 +690,7 @@ dir_list_load (dir_list * list, const vfs_path_t * vpath, GCompareFunc sort,
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-if_link_is_exe (const vfs_path_t * full_name_vpath, const file_entry_t * file)
+if_link_is_exe (const vfs_path_t *full_name_vpath, const file_entry_t *file)
 {
     struct stat b;
 
@@ -689,11 +701,11 @@ if_link_is_exe (const vfs_path_t * full_name_vpath, const file_entry_t * file)
 }
 
 /* --------------------------------------------------------------------------------------------- */
-/** If fltr is null, then it is a match */
+/** If filter is null, then it is a match */
 
 gboolean
-dir_list_reload (dir_list * list, const vfs_path_t * vpath, GCompareFunc sort,
-                 const dir_sort_options_t * sort_op, const char *fltr)
+dir_list_reload (dir_list *list, const vfs_path_t *vpath, GCompareFunc sort,
+                 const dir_sort_options_t *sort_op, const file_filter_t *filter)
 {
     DIR *dirp;
     struct vfs_dirent *dp;
@@ -730,9 +742,9 @@ dir_list_reload (dir_list * list, const vfs_path_t * vpath, GCompareFunc sort,
         dfentry->f.dir_size_computed = fentry->f.dir_size_computed;
         dfentry->f.link_to_dir = fentry->f.link_to_dir;
         dfentry->f.stale_link = fentry->f.stale_link;
-        dfentry->sort_key = NULL;
-        dfentry->second_sort_key = NULL;
-        if (fentry->f.marked)
+        dfentry->name_sort_key = NULL;
+        dfentry->extension_sort_key = NULL;
+        if (fentry->f.marked != 0)
         {
             g_hash_table_insert (marked_files, dfentry->fname->str, dfentry);
             marked_cnt++;
@@ -776,7 +788,7 @@ dir_list_reload (dir_list * list, const vfs_path_t * vpath, GCompareFunc sort,
         if (list->callback != NULL)
             list->callback (DIR_READ, dp);
 
-        if (!handle_dirent (dp, fltr, &st, &link_to_dir, &stale_link))
+        if (!handle_dirent (dp, filter, &st, &link_to_dir, &stale_link))
             continue;
 
         if (!dir_list_append (list, dp->d_name, &st, link_to_dir, stale_link))
@@ -793,8 +805,8 @@ dir_list_reload (dir_list * list, const vfs_path_t * vpath, GCompareFunc sort,
              * we copied one.
              */
             fentry->f.marked = (marked_cnt > 0
-                                && g_hash_table_lookup (marked_files, dp->d_name) != NULL);
-            if (fentry->f.marked)
+                                && g_hash_table_lookup (marked_files, dp->d_name) != NULL) ? 1 : 0;
+            if (fentry->f.marked != 0)
                 marked_cnt--;
         }
     }
@@ -811,6 +823,17 @@ dir_list_reload (dir_list * list, const vfs_path_t * vpath, GCompareFunc sort,
     dir_list_free_list (&dir_copy);
 
     return ret;
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+void
+file_filter_clear (file_filter_t *filter)
+{
+    MC_PTR_FREE (filter->value);
+    mc_search_free (filter->handler);
+    filter->handler = NULL;
+    /* keep filter->flags */
 }
 
 /* --------------------------------------------------------------------------------------------- */

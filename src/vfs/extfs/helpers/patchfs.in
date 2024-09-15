@@ -1,4 +1,4 @@
-#! @PERL@ -w
+#! @PERL@
 #
 # Written by Adam Byrtek <alpha@debian.org>, 2002
 # Rewritten by David Sterba <dave@jikos.cz>, 2009
@@ -9,6 +9,7 @@
 
 use bytes;
 use strict;
+use warnings;
 use POSIX;
 use File::Temp 'tempfile';
 
@@ -16,6 +17,7 @@ use File::Temp 'tempfile';
 my $lzip = 'lzip';
 my $lz4  = 'lz4';
 my $lzma = 'lzma';
+my $lzo  = 'lzop';
 my $xz   = 'xz';
 my $zstd = 'zstd';
 my $bzip = 'bzip2';
@@ -87,6 +89,8 @@ sub myin
 	return "$lzip -dc $qfname";
     } elsif (/^'*lzma/) {
 	return "$lzma -dc $qfname";
+    } elsif (/^'*lzo/) {
+	return "$lzo -dc $qfname";
     } elsif (/^'*xz/) {
 	return "$xz -dc $qfname";
     } elsif (/^'*zst/) {
@@ -113,6 +117,8 @@ sub myout
 	return "$lzip -c $sep $qfname";
     } elsif (/^'*lzma/) {
 	return "$lzma -c $sep $qfname";
+    } elsif (/^'*lzo/) {
+	return "$lzo -c $sep $qfname";
     } elsif (/^'*xz/) {
 	return "$xz -c $sep $qfname";
     } elsif (/^'*zst/) {
@@ -173,7 +179,7 @@ sub diff_filename
 #     false - ie. copyout mode, print just the file
 sub parse($$$$)
 {
-    my $archive=quotemeta shift;
+    my $archive=shift;
     my $fh=shift;
     my $file=shift;
     my $rmmod=shift;
@@ -294,7 +300,7 @@ sub parse($$$$)
 	    elsif(ord($first) == ord(' ')) { $h_ctx++; }
 	    elsif(ord($first) == ord('\\')) { 0; }
 	    elsif(ord($first) == ord('@')) { error "Malformed hunk, header came too early"; }
-	    else { error "Unrecognized character in hunk"; }
+	    else { error "$archive:$line: Unrecognized character '$first' in hunk"; }
 	}
     }
     if($file eq '' && $filetoprint) {
@@ -303,7 +309,8 @@ sub parse($$$$)
     }
 
     # use uid and gid from file
-    my ($uid,$gid)=(`ls -l $archive`=~/$ls_extract_id/o);
+    my $qarchive = quotemeta $archive;
+    my ($uid,$gid)=(`ls -l $qarchive`=~/$ls_extract_id/o);
 
     # flush all file names with cumulative file size
     while(my ($fn, $fs) = each %fmap_size) {

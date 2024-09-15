@@ -2,9 +2,9 @@
 
 ヒント：C-x p で、現在のパス名をコマンドラインにコピーできます。
 
-Hint: Completion: use M-Tab (or Esc+Tab).  Type it twice to get a list.
+Hint: Completion: use M-Tab (or Esc+Tab). Type it twice to get a list.
 
-Hint: Use M-p and M-n to access the command history.
+ヒント：M-pとM-nを使用すると、コマンド履歴にアクセスできます。
 
 Hint: Need to quote a character? Use Control-q and the character.
 
@@ -14,9 +14,9 @@ Hint: Selecting directories: add a slash to the end of the matching pattern.
 
 Hint: If your terminal lacks functions keys, use the ESC+number sequence.
 
-Hint: The homepage of GNU Midnight Commander: http://www.midnight-commander.org/
+Hint: The homepage of GNU Midnight Commander: https://www.midnight-commander.org
 
-Hint: Please send any bug reports to mc-devel@gnome.org
+Hint: Please send any bug reports to mc-devel@lists.midnight-commander.org
 
 Hint: Tab changes your current panel.
 
@@ -34,7 +34,7 @@ Hint: The file listing format can be customized; do "man mc" for details.
 
 Hint: %D/%T expands to the tagged files in the opposite directory.
 
-Hint: Want your plain shell? Press C-o, and get back to MC with C-o again.
+ヒント：プレーンなシェルが必要な場合はC-oを押してください。もう一度押すことでMCに戻ることが出来ます。
 
 Hint: Setting the CDPATH variable can save you keystrokes in cd commands.
 
@@ -52,7 +52,7 @@ Hint: Want to do complex searches? Use the External Panelize command.
 
 Hint: To change directory halfway through typing a command, use M-c (quick cd).
 
-Note: Shell commands will not work when you are on a non-local file system.
+Hint: Shell commands will not work when you are on a non-local file system.
 
 Hint: Bring text back from the dead with C-y.
 

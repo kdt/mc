@@ -7,7 +7,7 @@
    Parts of this program were taken from the lsdel.c and dump.c files
    written by Ted Ts'o (tytso@mit.edu) for the ext2fs package.
 
-   Copyright (C) 1995-2021
+   Copyright (C) 1995-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -45,7 +45,6 @@
 
 #include <config.h>
 
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>             /* memset() */
@@ -111,6 +110,8 @@ typedef struct
     size_t count;               /* bytes to read */
 } undelfs_file;
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* We only allow one opened ext2fs */
@@ -145,19 +146,16 @@ undelfs_shutdown (void)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-undelfs_get_path (const vfs_path_t * vpath, char **fsname, char **file)
+undelfs_get_path (const vfs_path_t *vpath, char **fsname, char **file)
 {
     const char *p, *dirname;
-    const vfs_path_element_t *path_element;
 
-    path_element = vfs_path_get_by_index (vpath, -1);
+    dirname = vfs_path_get_last_path_str (vpath);
 
     /* To look like filesystem, we have virtual directories
        undel://XXX, which have no subdirectories. XXX is replaced with
        hda5, sdb8 etc, which is assumed to live under /dev. 
        -- pavel@ucw.cz */
-
-    dirname = path_element->path;
 
     *fsname = NULL;
 
@@ -168,7 +166,7 @@ undelfs_get_path (const vfs_path_t * vpath, char **fsname, char **file)
 
     /* Since we don't allow subdirectories, it's easy to get a filename,
      * just scan backwards for a slash */
-    if (*dirname == 0)
+    if (*dirname == '\0')
         return;
 
     p = dirname + strlen (dirname);
@@ -200,7 +198,7 @@ undelfs_get_path (const vfs_path_t * vpath, char **fsname, char **file)
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-undelfs_lsdel_proc (ext2_filsys _fs, blk_t * block_nr, int blockcnt, void *private)
+undelfs_lsdel_proc (ext2_filsys _fs, blk_t *block_nr, int blockcnt, void *private)
 {
     struct lsdel_struct *_lsd = (struct lsdel_struct *) private;
     (void) blockcnt;
@@ -332,12 +330,12 @@ undelfs_loaddel (void)
 /* --------------------------------------------------------------------------------------------- */
 
 static void *
-undelfs_opendir (const vfs_path_t * vpath)
+undelfs_opendir (const vfs_path_t *vpath)
 {
     char *file, *f = NULL;
-    const vfs_path_element_t *path_element;
+    const char *class_name;
 
-    path_element = vfs_path_get_by_index (vpath, -1);
+    class_name = vfs_path_get_last_path_vfs (vpath)->name;
     undelfs_get_path (vpath, &file, &f);
     if (file == NULL)
     {
@@ -381,10 +379,10 @@ undelfs_opendir (const vfs_path_t * vpath)
     /* Now load the deleted information */
     if (!undelfs_loaddel ())
         goto quit_opendir;
-    vfs_print_message (_("%s: done."), path_element->class->name);
+    vfs_print_message (_("%s: done."), class_name);
     return fs;
   quit_opendir:
-    vfs_print_message (_("%s: failure"), path_element->class->name);
+    vfs_print_message (_("%s: failure"), class_name);
     ext2fs_close (fs);
     fs = NULL;
     return 0;
@@ -432,7 +430,7 @@ undelfs_closedir (void *vfs_info)
 /* We do not support lseek */
 
 static void *
-undelfs_open (const vfs_path_t * vpath, int flags, mode_t mode)
+undelfs_open (const vfs_path_t *vpath, int flags, mode_t mode)
 {
     char *file, *f = NULL;
     ext2_ino_t inode, i;
@@ -507,7 +505,7 @@ undelfs_close (void *vfs_info)
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-undelfs_dump_read (ext2_filsys param_fs, blk_t * blocknr, int blockcnt, void *private)
+undelfs_dump_read (ext2_filsys param_fs, blk_t *blocknr, int blockcnt, void *private)
 {
     int copy_count;
     undelfs_file *p = (undelfs_file *) private;
@@ -633,19 +631,19 @@ undelfs_stat_int (int inode_index, struct stat *buf)
     buf->st_uid = delarray[inode_index].uid;
     buf->st_gid = delarray[inode_index].gid;
     buf->st_size = delarray[inode_index].size;
+
+    vfs_zero_stat_times (buf);
     buf->st_atime = delarray[inode_index].dtime;
     buf->st_ctime = delarray[inode_index].dtime;
     buf->st_mtime = delarray[inode_index].dtime;
-#ifdef HAVE_STRUCT_STAT_ST_MTIM
-    buf->st_atim.tv_nsec = buf->st_mtim.tv_nsec = buf->st_ctim.tv_nsec = 0;
-#endif
+
     return 0;
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-undelfs_lstat (const vfs_path_t * vpath, struct stat *buf)
+undelfs_lstat (const vfs_path_t *vpath, struct stat *buf)
 {
     int inode_index;
     char *file, *f = NULL;
@@ -700,7 +698,7 @@ undelfs_fstat (void *vfs_info, struct stat *buf)
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-undelfs_chdir (const vfs_path_t * vpath)
+undelfs_chdir (const vfs_path_t *vpath)
 {
     char *file, *f = NULL;
     int fd;
@@ -745,7 +743,7 @@ undelfs_lseek (void *vfs_info, off_t offset, int whence)
 /* --------------------------------------------------------------------------------------------- */
 
 static vfsid
-undelfs_getid (const vfs_path_t * vpath)
+undelfs_getid (const vfs_path_t *vpath)
 {
     char *fname = NULL, *fsname;
     gboolean ok;

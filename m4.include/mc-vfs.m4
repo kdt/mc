@@ -13,7 +13,7 @@ m4_include([m4.include/vfs/mc-vfs-extfs.m4])
 m4_include([m4.include/vfs/mc-vfs-sfs.m4])
 m4_include([m4.include/vfs/mc-vfs-ftp.m4])
 m4_include([m4.include/vfs/mc-vfs-sftp.m4])
-m4_include([m4.include/vfs/mc-vfs-fish.m4])
+m4_include([m4.include/vfs/mc-vfs-shell.m4])
 m4_include([m4.include/vfs/mc-vfs-undelfs.m4])
 m4_include([m4.include/vfs/mc-vfs-tarfs.m4])
 m4_include([m4.include/vfs/mc-vfs-cpiofs.m4])
@@ -44,6 +44,7 @@ AC_DEFUN([mc_ENABLE_VFS_NET],
 	AC_CHECK_RPC
 
 	enable_vfs_net=yes
+	AC_DEFINE(ENABLE_VFS_NET, [1], [Define to enable network VFSes support])
     fi
 ])
 
@@ -70,7 +71,7 @@ AC_DEFUN([mc_VFS_CHECKS],
 
     mc_VFS_CPIOFS
     mc_VFS_EXTFS
-    mc_VFS_FISH
+    mc_VFS_SHELL
     mc_VFS_FTP
     mc_VFS_SFS
     mc_VFS_SFTP
@@ -79,7 +80,7 @@ AC_DEFUN([mc_VFS_CHECKS],
 
     AM_CONDITIONAL(ENABLE_VFS, [test x"$enable_vfs" = x"yes"])
 
-    if test x"$enable_vfs_ftp" = x"yes" -o x"$enable_vfs_fish" = x"yes"; then
+    if test x"$enable_vfs_ftp" = x"yes" -o x"$enable_vfs_shell" = x"yes" -o x"$enable_vfs_sftp" = x"yes"; then
 	mc_ENABLE_VFS_NET
     fi
 

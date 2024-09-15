@@ -36,7 +36,11 @@ dnl ############################################################################
 dnl Check for compiler
 dnl ############################################################################
 
-AC_PROG_CC_STDC
+dnl This should be checked before toolchain macros, otherwise they will remember
+dnl that ar cannot be found and linking via libtool will fail at a later stage
+AC_CHECK_TOOLS([AR], [ar gar])
+
+AC_PROG_CC
 AM_PROG_CC_C_O
 
 mc_CHECK_CFLAGS
@@ -53,7 +57,7 @@ fi
 AC_ARG_ENABLE([werror],
     AS_HELP_STRING([--enable-werror], [Handle all compiler warnings as errors]))
 if test "x$enable_werror" = xyes; then
-    mc_CHECK_ONE_CFLAG([-Werror])
+    AX_APPEND_COMPILE_FLAGS([-Werror], [mc_configured_cflags])
 fi
 
 dnl Compiler can generate warnings for unrecognized flags added to CFLAGS
@@ -71,6 +75,7 @@ dnl ############################################################################
 dnl Check for programs
 dnl ############################################################################
 
+AC_PROG_SED
 PKG_PROG_PKG_CONFIG
 AC_PROG_INSTALL
 AC_PROG_LN_S
@@ -126,7 +131,7 @@ fi
 AC_SUBST(MANDOC)
 AC_SUBST(MAN_FLAGS)
 
-dnl Check for -z, -L, and -S options to file
+dnl Check for -z, -b, -L, and -S options to file
 AC_CHECK_PROG(HAVE_FILECMD, file, true, false)
 if $HAVE_FILECMD; then
     dnl Don't use the file command if it doesn't accept the -z option
@@ -148,7 +153,22 @@ if $HAVE_FILECMD; then
     fi
 
     if test x$mc_cv_file_z = xyes; then
-        dnl file is used; check -L and -S options
+        dnl file is used; check -b, -L and -S options
+
+        AC_MSG_CHECKING([for -b option to file command])
+        AC_CACHE_VAL(mc_cv_file_b, [
+            file -b . > /dev/null 2>&1
+            if test $? = 0; then
+                mc_cv_file_b=yes
+            else
+                mc_cv_file_b=no
+            fi
+        ])
+        AC_MSG_RESULT([$mc_cv_file_b])
+
+        if test x$mc_cv_file_b = xyes; then
+            AC_DEFINE(FILE_B, "-b ", [Define if the file command accepts the -b option])
+        fi
 
         AC_MSG_CHECKING([for -L option to file command])
         AC_CACHE_VAL(mc_cv_file_L, [
@@ -195,12 +215,12 @@ dnl ############################################################################
 dnl Check for other tools
 dnl ############################################################################
 
-AC_CHECK_TOOL(AR, ar, ar)
+AC_CHECK_TOOLS([INDENT], [gindent indent])
 mc_UNIT_TESTS
 
 
 dnl ############################################################################
-dnl Check for main libraies
+dnl Check for main libraries
 dnl ############################################################################
 
 mc_CHECK_GLIB
@@ -240,9 +260,11 @@ AC_TYPE_MODE_T
 gl_PROMOTED_TYPE_MODE_T
 AC_TYPE_PID_T
 AC_TYPE_UID_T
+AC_CHECK_TYPE([major_t], [], [AC_DEFINE([major_t], [int], [Type of major device numbers.])])
+AC_CHECK_TYPE([minor_t], [], [AC_DEFINE([minor_t], [int], [Type of minor device numbers.])])
 
 AC_STRUCT_ST_BLOCKS
-AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_rdev, struct stat.st_mtim])
+AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_rdev, struct stat.st_mtim, struct stat.st_mtimespec, struct stat.st_mtimensec])
 gl_STAT_SIZE
 
 AH_TEMPLATE([sig_atomic_t],
@@ -298,26 +320,6 @@ dnl replacing lstat with statlstat on sco makes it more portable between
 dnl sco clones
 AC_CHECK_FUNCS(statlstat)
 
-dnl Ovverriding mmap support.  This has to be before AC_FUNC_MMAP is used.
-dnl We use only part of the functionality of mmap, so on AIX,
-dnl it's possible to use mmap, even if it doesn't pass the autoconf test.
-AC_ARG_WITH([mmap],
-	AS_HELP_STRING([--with-mmap], [Use the mmap call @<:@yes if found@:>@]))
-if test x$with_mmap != xno; then
-    if test x$with_mmap = x; then
-	AC_FUNC_MMAP
-    else
-	AC_DEFINE(HAVE_MMAP, 1)
-    fi
-fi
-
-dnl Sequent wants getprocessstats
-AC_CHECK_LIB(seq, get_process_stats, [
-	LIBS="$LIBS -lseq"
-	AC_DEFINE(HAVE_GET_PROCESS_STATS, 1,
-		  [Define if you have function `get_process_stats' and
-have to use that instead of gettimeofday])])
-
 mc_GET_FS_INFO
 
 
@@ -339,11 +341,13 @@ dnl ############################################################################
 case $host_os in
 *os400)
     AC_PATH_PROG([PERL], [perl], [/QOpenSys/pkgs/bin/perl])
+    AC_PATH_PROG([PERL_FOR_BUILD], [perl], [/QOpenSys/pkgs/bin/perl])
     AC_PATH_PROG([PYTHON], [python], [/QOpenSys/pkgs/bin/python2])
     AC_PATH_PROG([RUBY], [ruby], [/QOpenSys/pkgs/bin/ruby])
     ;;
 *)
     AC_PATH_PROG([PERL], [perl], [/usr/bin/perl])
+    AC_PATH_PROG([PERL_FOR_BUILD], [perl], [/usr/bin/perl])
     AC_PATH_PROG([PYTHON], [python], [/usr/bin/python])
     AC_PATH_PROG([RUBY], [ruby], [/usr/bin/ruby])
 esac
@@ -373,14 +377,7 @@ AC_EGREP_CPP([yes],
     ])
 
 dnl utimensat is supported since glibc 2.6 and specified in POSIX.1-2008
-dnl utimensat() causes different timespec structures to cause failures on IBM i and AIX
-case $host_os in
-*os400 | aix*)
-    ;;
-*)
-    AC_CHECK_FUNCS([utimensat])
-    ;;
-esac
+AC_CHECK_FUNCS([utimensat])
 
 case $host_os in
 *os400)
@@ -564,7 +561,7 @@ AM_CONDITIONAL([HAVE_GMODULE], [test -n "$g_module_supported" && \
                                 test x"$textmode_x11_support" = x"yes" -o x"$enable_aspell" = x"yes"])
 
 AC_ARG_ENABLE([configure-args],
-    AS_HELP_STRING([--enable-configure-args], [Handle all compiler warnings as errors]))
+    AS_HELP_STRING([--enable-configure-args], [Embed ./configure arguments into binaries]))
 if test "x$enable_configure_args" != xno; then
     AC_DEFINE([ENABLE_CONFIGURE_ARGS], 1, [Define to enable showing configure arguments in help])
     AC_DEFINE_UNQUOTED([MC_CONFIGURE_ARGS], ["$ac_configure_args"], [MC configure arguments])
@@ -595,7 +592,7 @@ misc/ext.d/misc.sh
 misc/ext.d/text.sh
 misc/ext.d/web.sh
 misc/macros.d/Makefile
-misc/mc.ext
+misc/mc.ext.ini
 
 src/Makefile
 src/consaver/Makefile
@@ -641,8 +638,8 @@ src/vfs/extfs/helpers/uwim
 src/vfs/extfs/helpers/uzip
 src/vfs/extfs/helpers/uzoo
 
-src/vfs/fish/Makefile
-src/vfs/fish/helpers/Makefile
+src/vfs/shell/Makefile
+src/vfs/shell/helpers/Makefile
 
 src/vfs/ftpfs/Makefile
 
@@ -670,7 +667,6 @@ lib/vfs/Makefile
 lib/widget/Makefile
 
 misc/syntax/Makefile
-misc/syntax/Syntax
 
 doc/Makefile
 
@@ -695,6 +691,12 @@ doc/hlp/sr/Makefile
 
 po/Makefile.in
 ])
+
+dnl https://stackoverflow.com/questions/30897170/ac-subst-does-not-expand-variable/30932102#30932102
+AC_CONFIG_FILES(
+[misc/syntax/Syntax], [${SED-sed} -e "s%\${prefix}%$PREFIX%" misc/syntax/Syntax > misc/syntax/Syntax.tmp && \
+  mv -f misc/syntax/Syntax.tmp misc/syntax/Syntax], [export PREFIX=$prefix]
+)
 
 AC_CONFIG_FILES([
 tests/Makefile

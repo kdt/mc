@@ -1,7 +1,7 @@
 /*
    Widget based utility functions.
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Authors:
@@ -9,7 +9,7 @@
    Radek Doulik, 1994, 1995
    Jakub Jelinek, 1995
    Andrej Borsenkow, 1995
-   Andrew Borodin <aborodin@vmail.ru>, 2009-2014
+   Andrew Borodin <aborodin@vmail.ru>, 2009-2022
 
    This file is part of the Midnight Commander.
 
@@ -50,6 +50,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 static WDialog *last_query_dlg;
@@ -63,7 +65,7 @@ static int sel_pos = 0;
 /** default query callback, used to reposition query */
 
 static cb_ret_t
-query_default_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+query_default_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     WDialog *h = DIALOG (w);
 
@@ -95,14 +97,18 @@ query_default_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm,
 
             /* if previous dialog is not fullscreen'd -- overlap it */
             if (prev_dlg == NULL || (WIDGET (prev_dlg)->pos_flags & WPOS_FULLSCREEN) != 0)
-                ypos = LINES / 3 - (w->lines - 3) / 2;
+                ypos = LINES / 3 - (w->rect.lines - 3) / 2;
             else
-                ypos = WIDGET (prev_dlg)->y + 2;
+                ypos = WIDGET (prev_dlg)->rect.y + 2;
 
-            xpos = COLS / 2 - w->cols / 2;
+            /* if dialog is too high, place it centered */
+            if (ypos + w->rect.lines < LINES / 2)
+                w->pos_flags |= WPOS_CENTER;
+
+            xpos = COLS / 2 - w->rect.cols / 2;
 
             /* set position */
-            rect_init (&r, ypos, xpos, w->lines, w->cols);
+            rect_init (&r, ypos, xpos, w->rect.lines, w->rect.cols);
 
             return dlg_default_callback (w, NULL, MSG_RESIZE, 0, &r);
         }
@@ -217,9 +223,11 @@ fg_input_dialog_help (const char *header, const char *text, const char *help,
             /* *INDENT-ON* */
         };
 
+        WRect r = { -1, -1, 0, COLS / 2 };
+
         quick_dialog_t qdlg = {
-            -1, -1, COLS / 2, header,
-            help, quick_widgets, NULL, NULL
+            r, header, help,
+            quick_widgets, NULL, NULL
         };
 
         ret = quick_dialog (&qdlg);
@@ -439,7 +447,7 @@ message (int flags, const char *title, const char *text, ...)
 /** Show error message box */
 
 gboolean
-mc_error_message (GError ** mcerror, int *code)
+mc_error_message (GError **mcerror, int *code)
 {
     if (mcerror == NULL || *mcerror == NULL)
         return FALSE;
@@ -560,7 +568,7 @@ status_msg_create (const char *title, double delay, status_msg_cb init_cb,
  */
 
 void
-status_msg_destroy (status_msg_t * sm)
+status_msg_destroy (status_msg_t *sm)
 {
     status_msg_deinit (sm);
     g_free (sm);
@@ -579,7 +587,7 @@ status_msg_destroy (status_msg_t * sm)
  */
 
 void
-status_msg_init (status_msg_t * sm, const char *title, double delay, status_msg_cb init_cb,
+status_msg_init (status_msg_t *sm, const char *title, double delay, status_msg_cb init_cb,
                  status_msg_update_cb update_cb, status_msg_cb deinit_cb)
 {
     gint64 start;
@@ -587,7 +595,7 @@ status_msg_init (status_msg_t * sm, const char *title, double delay, status_msg_
     /* repaint screen to remove previous finished dialog */
     mc_refresh ();
 
-    start = g_get_real_time ();
+    start = g_get_monotonic_time ();
 
     sm->dlg = dlg_create (TRUE, 0, 0, 7, MIN (MAX (40, COLS / 2), COLS), WPOS_CENTER, FALSE,
                           dialog_colors, NULL, NULL, NULL, title);
@@ -617,7 +625,7 @@ status_msg_init (status_msg_t * sm, const char *title, double delay, status_msg_
  */
 
 void
-status_msg_deinit (status_msg_t * sm)
+status_msg_deinit (status_msg_t *sm)
 {
     if (sm == NULL)
         return;
@@ -640,7 +648,7 @@ status_msg_deinit (status_msg_t * sm)
  */
 
 int
-status_msg_common_update (status_msg_t * sm)
+status_msg_common_update (status_msg_t *sm)
 {
     int c;
     Gpm_Event event;
@@ -686,11 +694,12 @@ status_msg_common_update (status_msg_t * sm)
  */
 
 void
-simple_status_msg_init_cb (status_msg_t * sm)
+simple_status_msg_init_cb (status_msg_t *sm)
 {
     simple_status_msg_t *ssm = SIMPLE_STATUS_MSG (sm);
     Widget *wd = WIDGET (sm->dlg);
     WGroup *wg = GROUP (sm->dlg);
+    WRect r;
 
     const char *b_name = N_("&Abort");
     int b_width;
@@ -702,16 +711,19 @@ simple_status_msg_init_cb (status_msg_t * sm)
 #endif
 
     b_width = str_term_width1 (b_name) + 4;
-    wd_width = MAX (wd->cols, b_width + 6);
+    wd_width = MAX (wd->rect.cols, b_width + 6);
 
     y = 2;
-    ssm->label = label_new (y++, 3, "");
+    ssm->label = label_new (y++, 3, NULL);
     group_add_widget_autopos (wg, ssm->label, WPOS_KEEP_TOP | WPOS_CENTER_HORZ, NULL);
     group_add_widget (wg, hline_new (y++, -1, -1));
     b = WIDGET (button_new (y++, 3, B_CANCEL, NORMAL_BUTTON, b_name, NULL));
     group_add_widget_autopos (wg, b, WPOS_KEEP_TOP | WPOS_CENTER_HORZ, NULL);
 
-    widget_set_size (wd, wd->y, wd->x, y + 2, wd_width);
+    r = wd->rect;
+    r.lines = y + 2;
+    r.cols = wd_width;
+    widget_set_size_rect (wd, &r);
 }
 
 /* --------------------------------------------------------------------------------------------- */

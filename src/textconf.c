@@ -1,7 +1,7 @@
 /*
    Print features specific for this build
 
-   Copyright (C) 2000-2021
+   Copyright (C) 2000-2024
    Free Software Foundation, Inc.
 
    This file is part of the Midnight Commander.
@@ -30,6 +30,10 @@
 #include <stdio.h>
 #include <sys/types.h>
 
+#if defined (ENABLE_VFS) && defined(ENABLE_VFS_SFTP)
+#include <libssh2.h>
+#endif /* ENABLE_VFS_SFTP && ENABLE_VFS */
+
 #include "lib/global.h"
 #include "lib/fileloc.h"
 #include "lib/mcconfig.h"
@@ -43,6 +47,8 @@
 /*** file scope macro definitions ****************************************************************/
 
 /*** file scope type declarations ****************************************************************/
+
+/*** forward declarations (file scope functions) *************************************************/
 
 /*** file scope variables ************************************************************************/
 
@@ -69,8 +75,8 @@ static const char *const vfs_supported[] = {
 #ifdef ENABLE_VFS_SFTP
     "sftpfs",
 #endif
-#ifdef ENABLE_VFS_FISH
-    "fish",
+#ifdef ENABLE_VFS_SHELL
+    "shell",
 #endif
     NULL
 };
@@ -80,9 +86,9 @@ static const char *const features[] = {
 
 #ifdef USE_INTERNAL_EDIT
 #ifdef HAVE_ASPELL
-    N_("With builtin Editor and Aspell support"),
+    N_("With builtin editor and aspell support"),
 #else
-    N_("With builtin Editor"),
+    N_("With builtin editor"),
 #endif /* HAVE_ASPELL */
 #endif /* USE_INTERNAL_EDIT */
 
@@ -158,6 +164,11 @@ show_version (void)
 #error "Cannot compile mc without S-Lang or ncurses"
 #endif /* !HAVE_SLANG && !USE_NCURSES */
 
+#if defined (ENABLE_VFS) && defined(ENABLE_VFS_SFTP)
+    printf (_("Built with libssh2 %d.%d.%d\n"),
+            LIBSSH2_VERSION_MAJOR, LIBSSH2_VERSION_MINOR, LIBSSH2_VERSION_PATCH);
+#endif /* ENABLE_VFS_SFTP && ENABLE_VFS */
+
     for (i = 0; features[i] != NULL; i++)
         puts (_(features[i]));
 
@@ -207,15 +218,15 @@ show_datadirs_extended (void)
 
     PRINTF_SECTION (_("File extension handlers:"), EXTHELPERSDIR);
 
-#if defined ENABLE_VFS_EXTFS || defined ENABLE_VFS_FISH
+#if defined ENABLE_VFS_EXTFS || defined ENABLE_VFS_SHELL
     PRINTF_SECTION (_("VFS plugins and scripts:"), LIBEXECDIR);
 #ifdef ENABLE_VFS_EXTFS
     PRINTF2 ("extfs.d:", LIBEXECDIR, MC_EXTFS_DIR PATH_SEP_STR);
 #endif
-#ifdef ENABLE_VFS_FISH
-    PRINTF2 ("fish:", LIBEXECDIR, FISH_PREFIX PATH_SEP_STR);
+#ifdef ENABLE_VFS_SHELL
+    PRINTF2 ("shell:", LIBEXECDIR, VFS_SHELL_PREFIX PATH_SEP_STR);
 #endif
-#endif /* ENABLE_VFS_EXTFS || defiined ENABLE_VFS_FISH */
+#endif /* ENABLE_VFS_EXTFS || defiined ENABLE_VFS_SHELL */
     (void) puts ("");
 
     PRINTF_GROUP (_("User data"));
@@ -226,8 +237,8 @@ show_datadirs_extended (void)
 #ifdef ENABLE_VFS_EXTFS
     PRINTF ("extfs.d:", mc_config_get_data_path (), MC_EXTFS_DIR PATH_SEP_STR);
 #endif
-#ifdef ENABLE_VFS_FISH
-    PRINTF ("fish:", mc_config_get_data_path (), FISH_PREFIX PATH_SEP_STR);
+#ifdef ENABLE_VFS_SHELL
+    PRINTF ("shell:", mc_config_get_data_path (), VFS_SHELL_PREFIX PATH_SEP_STR);
 #endif
 #ifdef USE_INTERNAL_EDIT
     PRINTF ("mcedit macros:", mc_config_get_data_path (), MC_MACRO_FILE);

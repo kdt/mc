@@ -1,7 +1,7 @@
 /*
    Widgets for the Midnight Commander
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Authors:
@@ -10,7 +10,7 @@
    Jakub Jelinek, 1995
    Andrej Borsenkow, 1996
    Norbert Warmuth, 1997
-   Andrew Borodin <aborodin@vmail.ru>, 2009, 2010, 2013, 2016
+   Andrew Borodin <aborodin@vmail.ru>, 2009-2022
 
    This file is part of the Midnight Commander.
 
@@ -59,7 +59,7 @@
 /* --------------------------------------------------------------------------------------------- */
 
 cb_ret_t
-button_default_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+button_default_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     WButton *b = BUTTON (w);
     WGroup *g = w->owner;
@@ -100,7 +100,7 @@ button_default_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm
 
         h->ret_value = b->action;
         if (b->callback == NULL || b->callback (b, b->action) != 0)
-            dlg_stop (h);
+            dlg_close (h);
 
         return MSG_HANDLED;
 
@@ -181,7 +181,7 @@ button_default_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm
 /* --------------------------------------------------------------------------------------------- */
 
 void
-button_mouse_default_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
+button_mouse_default_callback (Widget *w, mouse_msg_t msg, mouse_event_t *event)
 {
     (void) event;
 
@@ -206,6 +206,7 @@ button_mouse_default_callback (Widget * w, mouse_msg_t msg, mouse_event_t * even
 WButton *
 button_new (int y, int x, int action, button_flags_t flags, const char *text, bcback_fn callback)
 {
+    WRect r = { y, x, 1, 1 };
     WButton *b;
     Widget *w;
 
@@ -215,8 +216,8 @@ button_new (int y, int x, int action, button_flags_t flags, const char *text, bc
     b->action = action;
     b->flags = flags;
     b->text = hotkey_new (text);
-    widget_init (w, y, x, 1, button_get_len (b), button_default_callback,
-                 button_mouse_default_callback);
+    r.cols = button_get_len (b);
+    widget_init (w, &r, button_default_callback, button_mouse_default_callback);
     w->options |= WOP_SELECTABLE | WOP_WANT_CURSOR | WOP_WANT_HOTKEY;
     b->callback = callback;
     b->hotpos = (b->text.hotkey != NULL) ? str_term_width1 (b->text.start) : -1;
@@ -227,7 +228,7 @@ button_new (int y, int x, int action, button_flags_t flags, const char *text, bc
 /* --------------------------------------------------------------------------------------------- */
 
 char *
-button_get_text (const WButton * b)
+button_get_text (const WButton *b)
 {
     return hotkey_get_text (b->text);
 }
@@ -235,7 +236,7 @@ button_get_text (const WButton * b)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-button_set_text (WButton * b, const char *text)
+button_set_text (WButton *b, const char *text)
 {
     Widget *w = WIDGET (b);
     hotkey_t hk;
@@ -250,14 +251,14 @@ button_set_text (WButton * b, const char *text)
     hotkey_free (b->text);
     b->text = hk;
     b->hotpos = (b->text.hotkey != NULL) ? str_term_width1 (b->text.start) : -1;
-    w->cols = button_get_len (b);
+    w->rect.cols = button_get_len (b);
     widget_draw (w);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 int
-button_get_len (const WButton * b)
+button_get_len (const WButton *b)
 {
     int ret = hotkey_width (b->text);
 

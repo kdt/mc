@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Midnight Commander\n"
-"Report-Msgid-Bugs-To: http://www.midnight-commander.org/\n"
-"POT-Creation-Date: 2021-09-26 10:06+0300\n"
+"Report-Msgid-Bugs-To: https://www.midnight-commander.org/\n"
+"POT-Creation-Date: 2024-08-23 19:20+0200\n"
 "PO-Revision-Date: 2015-02-26 09:48+0000\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: French (Canada) (http://www.transifex.com/projects/p/mc/"
@@ -501,6 +501,9 @@ msgid ""
 "%s"
 msgstr ""
 
+msgid "Cannot close pipe descriptor (p == NULL)"
+msgstr ""
+
 #, c-format
 msgid ""
 "Unexpected error in waitpid():\n"
@@ -529,27 +532,9 @@ msgid "Changes to file lost"
 msgstr ""
 
 #, c-format
-msgid "%s is not a directory\n"
-msgstr ""
-
-#, c-format
-msgid "Directory %s is not owned by you\n"
-msgstr ""
-
-#, c-format
-msgid "Cannot set correct permissions for directory %s\n"
-msgstr ""
-
-#, c-format
-msgid "Cannot create temporary directory %s: %s\n"
-msgstr ""
-
-#, c-format
-msgid "Temporary files will be created in %s\n"
-msgstr ""
-
-#, c-format
-msgid "Temporary files will not be created\n"
+msgid ""
+"Cannot create temporary directory %s: %s.\n"
+"Temporary files will not be created\n"
 msgstr ""
 
 msgid "Press any key to continue..."
@@ -701,7 +686,8 @@ msgid ""
 "                 errdhotfocus\n"
 "   Menus:        menunormal, menuhot, menusel, menuhotsel, menuinactive\n"
 "   Popup menus:  pmenunormal, pmenusel, pmenutitle\n"
-"   Editor:       editnormal, editbold, editmarked, editwhitespace,\n"
+"   Editor:       editnormal, editbold, editmarked, editwhitespace, "
+"editnonprintable,\n"
 "                 editlinestate, editbg, editframe, editframeactive\n"
 "                 editframedrag\n"
 "   Viewer:       viewnormal,viewbold, viewunderline, viewselected\n"
@@ -756,10 +742,13 @@ msgstr ""
 msgid "Arguments parse error!"
 msgstr ""
 
+msgid "MC is built without builtin editor."
+msgstr ""
+
 msgid "No arguments given to the viewer."
 msgstr ""
 
-msgid "Two files are required to envoke the diffviewer."
+msgid "Two files are required to invoke the diffviewer."
 msgstr ""
 
 msgid "Background protocol error"
@@ -1124,7 +1113,7 @@ msgstr ""
 msgid "Run sort"
 msgstr ""
 
-msgid "Enter sort options (see manpage) separated by whitespace:"
+msgid "Enter sort options (see sort(1) manpage) separated by whitespace:"
 msgstr ""
 
 msgid "Sort"
@@ -1537,7 +1526,7 @@ msgid ""
 "written for the Midnight Commander."
 msgstr ""
 
-msgid "Copyright (C) 1996-2021 the Free Software Foundation"
+msgid "Copyright (C) 1996-2024 the Free Software Foundation"
 msgstr ""
 
 msgid "About"
@@ -2057,7 +2046,8 @@ msgstr ""
 
 #, c-format
 msgid ""
-"Cannot chdir to \"%s\"\n"
+"Cannot change directory to\n"
+"%s\n"
 "%s"
 msgstr ""
 
@@ -2152,9 +2142,6 @@ msgstr ""
 msgid ""
 "Cannot chattr \"%s\"\n"
 "%s"
-msgstr ""
-
-msgid "Cannot change attributes on non-local filesystems"
 msgstr ""
 
 #, c-format
@@ -2256,15 +2243,6 @@ msgstr ""
 msgid "Files tagged, want to cd?"
 msgstr ""
 
-msgid "Cannot change directory"
-msgstr ""
-
-msgid "Filter"
-msgstr ""
-
-msgid "Set expression for filtering filenames"
-msgstr ""
-
 #, c-format
 msgid "Link %s to:"
 msgstr ""
@@ -2278,10 +2256,6 @@ msgstr ""
 
 #, c-format
 msgid "symlink: %s"
-msgstr ""
-
-#, c-format
-msgid "Cannot chdir to \"%s\""
 msgstr ""
 
 msgid "View file"
@@ -2406,24 +2380,29 @@ msgid "Pipe failed"
 msgstr ""
 
 #, c-format
-msgid " %s%s file error"
+msgid ""
+"You have an outdated %s file.\n"
+"Midnight Commander now uses %s file.\n"
+"Please copy your modifications of the old file to the new one."
 msgstr ""
 
 #, c-format
 msgid ""
-"The format of the %smc.ext file has changed with version 3.0. It seems that "
-"the installation failed. Please fetch a fresh copy from the Midnight "
-"Commander package."
-msgstr ""
-
-#, c-format
-msgid "%s file error"
+"The format of the\n"
+"%s%s\n"
+"file has changed with version 4.0.\n"
+"It seems that the installation has failed.\n"
+"Please fetch a fresh copy from the Midnight Commander package."
 msgstr ""
 
 #, c-format
 msgid ""
-"The format of the %s file has changed with version 3.0. You may either want "
-"to copy it from %smc.ext or use that file as an example of how to write it."
+"The format of the\n"
+"%s\n"
+"file has changed with version 4.0.\n"
+"You may either want to copy it from\n"
+"%s%s\n"
+"or use that file as an example of how to write it."
 msgstr ""
 
 msgid "DialogTitle|Copy"
@@ -2594,6 +2573,18 @@ msgstr ""
 
 #, c-format
 msgid ""
+"Cannot get attributes of source file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot set attributes of target file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
 "Cannot create special file \"%s\"\n"
 "%s"
 msgstr ""
@@ -2658,6 +2649,15 @@ msgstr ""
 msgid "(stalled)"
 msgstr ""
 
+msgid "Incomplete file was retrieved"
+msgstr ""
+
+msgid "&Keep"
+msgstr ""
+
+msgid "&Continue copy"
+msgstr ""
+
 #, c-format
 msgid ""
 "Cannot close source file \"%s\"\n"
@@ -2670,15 +2670,21 @@ msgid ""
 "%s"
 msgstr ""
 
-msgid "Incomplete file was retrieved. Keep it?"
-msgstr ""
-
-msgid "&Keep"
+#, c-format
+msgid ""
+"Cannot set attributes for target file \"%s\"\n"
+"%s"
 msgstr ""
 
 #, c-format
 msgid ""
 "Cannot stat source directory \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot get attributes of source directory \"%s\"\n"
 "%s"
 msgstr ""
 
@@ -2726,7 +2732,7 @@ msgid "Con&tinue"
 msgstr ""
 
 #, c-format
-msgid "%d:%02d.%02d"
+msgid "%d:%02d:%02d"
 msgstr ""
 
 #, c-format
@@ -2782,7 +2788,7 @@ msgid "Background process: File exists"
 msgstr ""
 
 #, c-format
-msgid "Files processed: %zu/%zu"
+msgid "Files processed: %zu / %zu"
 msgstr ""
 
 #, c-format
@@ -2810,7 +2816,7 @@ msgid " Total: %s "
 msgstr ""
 
 #, c-format
-msgid " Total: %s/%s "
+msgid " Total: %s / %s "
 msgstr ""
 
 msgid "Source"
@@ -2877,7 +2883,7 @@ msgstr ""
 msgid "S&hell link..."
 msgstr ""
 
-msgid "S&FTP link..."
+msgid "SFTP li&nk..."
 msgstr ""
 
 msgid "Paneli&ze"
@@ -3256,7 +3262,7 @@ msgid "No space information"
 msgstr ""
 
 #, c-format
-msgid "Free space: %s/%s (%d%%)"
+msgid "Free space: %s / %s (%d%%)"
 msgstr ""
 
 #, c-format
@@ -3307,9 +3313,6 @@ msgstr ""
 
 #, c-format
 msgid "Links:      %d"
-msgstr ""
-
-msgid "Attributes: not supported"
 msgstr ""
 
 #, c-format
@@ -3499,6 +3502,9 @@ msgid "Select"
 msgstr ""
 
 msgid "Unselect"
+msgstr ""
+
+msgid "Filter"
 msgstr ""
 
 msgid "Do you really want to execute?"
@@ -3719,10 +3725,10 @@ msgstr ""
 msgid "Warning: Cannot change to %s.\n"
 msgstr ""
 
-msgid "With builtin Editor and Aspell support"
+msgid "With builtin editor and aspell support"
 msgstr ""
 
-msgid "With builtin Editor"
+msgid "With builtin editor"
 msgstr ""
 
 msgid "With optional subshell support"
@@ -3772,6 +3778,10 @@ msgid "Built with ncursesw %s\n"
 msgstr ""
 
 msgid "Built with ncursesw (unknown version)"
+msgstr ""
+
+#, c-format
+msgid "Built with libssh2 %d.%d.%d\n"
 msgstr ""
 
 msgid "Virtual File Systems:"
@@ -3885,6 +3895,15 @@ msgid ""
 "%s"
 msgstr ""
 
+msgid "Inconsistent archive"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot open %s archive\n"
+"%s"
+msgstr ""
+
 #, c-format
 msgid ""
 "Cannot open %s archive\n"
@@ -3898,65 +3917,23 @@ msgid ""
 "%s"
 msgstr ""
 
+msgid ""
+"EXTFS virtual file system:\n"
+"wrong file name"
+msgstr ""
+
+msgid ""
+"EXTFS virtual file system:\n"
+"wrong archive name"
+msgstr ""
+
+msgid ""
+"EXTFS virtual file system:\n"
+"cannot build command"
+msgstr ""
+
 #, c-format
 msgid "Warning: cannot open %s directory\n"
-msgstr ""
-
-#, c-format
-msgid "fish: Disconnecting from %s"
-msgstr ""
-
-msgid "fish: Waiting for initial line..."
-msgstr ""
-
-msgid "Sorry, we cannot do password authenticated connections for now."
-msgstr ""
-
-#, c-format
-msgid "fish: Password is required for %s"
-msgstr ""
-
-msgid "fish: Sending password..."
-msgstr ""
-
-msgid "fish: Sending initial line..."
-msgstr ""
-
-msgid "fish: Handshaking version..."
-msgstr ""
-
-msgid "fish: Getting host info..."
-msgstr ""
-
-#, c-format
-msgid "fish: Reading directory %s..."
-msgstr ""
-
-#, c-format
-msgid "%s: done."
-msgstr ""
-
-#, c-format
-msgid "%s: failure"
-msgstr ""
-
-#, c-format
-msgid "fish: store %s: sending command..."
-msgstr ""
-
-msgid "fish: Local read failed, sending zeros"
-msgstr ""
-
-msgid "fish: storing file"
-msgstr ""
-
-msgid "Aborting transfer..."
-msgstr ""
-
-msgid "Error reported after abort."
-msgstr ""
-
-msgid "Aborted transfer would be successful."
 msgstr ""
 
 #, c-format
@@ -4012,6 +3989,21 @@ msgstr ""
 msgid "Waiting to retry... %d (Control-G to cancel)"
 msgstr ""
 
+#, c-format
+msgid "ftpfs: could not make address-to-name translation: %s"
+msgstr ""
+
+#, c-format
+msgid "ftpfs: try reconnect to server, attempt %u"
+msgstr ""
+
+#, c-format
+msgid "ftpfs: could not get socket name: %s"
+msgstr ""
+
+msgid "ftpfs: could not reconnect to server"
+msgstr ""
+
 msgid "ftpfs: invalid address family"
 msgstr ""
 
@@ -4052,6 +4044,14 @@ msgid "(chdir first)"
 msgstr ""
 
 msgid "ftpfs: failed; nowhere to fallback to"
+msgstr ""
+
+#, c-format
+msgid "%s: failure"
+msgstr ""
+
+#, c-format
+msgid "%s: done."
 msgstr ""
 
 msgid "ftpfs: storing file"
@@ -4188,9 +4188,49 @@ msgid "sftp: Listing done."
 msgstr ""
 
 #, c-format
-msgid ""
-"Cannot open tar archive\n"
-"%s"
+msgid "shell: Disconnecting from %s"
+msgstr ""
+
+msgid "shell: Waiting for initial line..."
+msgstr ""
+
+msgid "Sorry, we cannot do password authenticated connections for now."
+msgstr ""
+
+#, c-format
+msgid "shell: Password is required for %s"
+msgstr ""
+
+msgid "shell: Sending password..."
+msgstr ""
+
+msgid "shell: Sending initial line..."
+msgstr ""
+
+msgid "shell: Getting host info..."
+msgstr ""
+
+#, c-format
+msgid "shell: Reading directory %s..."
+msgstr ""
+
+#, c-format
+msgid "shell: store %s: sending command..."
+msgstr ""
+
+msgid "shell: Local read failed, sending zeros"
+msgstr ""
+
+msgid "shell: storing file"
+msgstr ""
+
+msgid "Aborting transfer..."
+msgstr ""
+
+msgid "Error reported after abort."
+msgstr ""
+
+msgid "Aborted transfer would be successful."
 msgstr ""
 
 msgid "Inconsistent tar archive"
@@ -4201,8 +4241,17 @@ msgstr ""
 
 #, c-format
 msgid ""
+"Cannot open tar archive\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
 "%s\n"
-"doesn't look like a tar archive."
+"doesn't look like a tar archive"
+msgstr ""
+
+msgid "tar: mc_lseek not stopped at a record boundary"
 msgstr ""
 
 msgid "undelfs: error"

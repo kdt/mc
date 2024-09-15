@@ -13,14 +13,13 @@
 #include "lib/strutil.h"
 #include "lib/widget.h"         /* Widget */
 #include "lib/filehighlight.h"
+#include "lib/file-entry.h"
 
 #include "dir.h"                /* dir_list */
 
 /*** typedefs(not structures) and defined constants **********************************************/
 
 #define PANEL(x) ((WPanel *)(x))
-#define selection(p) (&(p->dir.list[p->selected]))
-#define DEFAULT_USER_FORMAT "half type name | size | perm"
 
 #define LIST_FORMATS 4
 
@@ -49,16 +48,7 @@ typedef enum
     UP_ONLY_CURRENT = 2
 } panel_update_flags_t;
 
-/* selection flags */
-typedef enum
-{
-    SELECT_FILES_ONLY = 1 << 0,
-    SELECT_MATCH_CASE = 1 << 1,
-    SELECT_SHELL_PATTERNS = 1 << 2
-} panel_select_flags_t;
-
 /* run mode and params */
-
 enum cd_enum
 {
     cd_parse_command,
@@ -77,7 +67,7 @@ typedef struct panel_field_struct
     const char *title_hotkey;
     gboolean is_user_choice;
     gboolean use_in_user_format;
-    const char *(*string_fn) (file_entry_t *, int);
+    const char *(*string_fn) (const file_entry_t * fe, int len);
     GCompareFunc sort_routine;  /* used by mouse_sort_col() */
 } panel_field_t;
 
@@ -85,7 +75,7 @@ typedef struct
 {
     dir_list list;
     vfs_path_t *root_vpath;
-} panelized_panel_t;
+} panelized_descr_t;
 
 typedef struct
 {
@@ -97,7 +87,9 @@ typedef struct
 
     gboolean active;            /* If panel is currently selected */
     gboolean dirty;             /* Should we redisplay the panel? */
-    gboolean is_panelized;      /* Flag: special filelisting, can't reload */
+
+    gboolean is_panelized;      /* Panelization: special mode, can't reload the file list */
+    panelized_descr_t *panelized_descr; /* Panelization descriptor */
 
 #ifdef HAVE_CHARSET
     int codepage;               /* Panel codepage */
@@ -122,14 +114,14 @@ typedef struct
     int dirs_marked;            /* Count of marked directories */
     uintmax_t total;            /* Bytes in marked files */
 
-    int top_file;               /* The file showed on the top of the panel */
-    int selected;               /* Index to the selected file */
+    int top;                    /* The file shown on the top of the panel */
+    int current;                /* Index to the currently selected file */
 
     GSList *status_format;      /* Mini status format */
     gboolean user_mini_status;  /* Is user_status_format used */
     char *user_status_format[LIST_FORMATS];     /* User format for status line */
 
-    char *filter;               /* File name filter */
+    file_filter_t filter;       /* File name filter */
 
     struct
     {
@@ -153,16 +145,14 @@ typedef struct
 
 /*** global variables defined in .c file *********************************************************/
 
-extern panelized_panel_t panelized_panel;
-
 extern hook_t *select_file_hook;
 
 extern mc_fhl_t *mc_filehighlight;
 
 /*** declarations of public functions ************************************************************/
 
-WPanel *panel_sized_empty_new (const char *panel_name, int y, int x, int lines, int cols);
-WPanel *panel_sized_with_dir_new (const char *panel_name, int y, int x, int lines, int cols,
+WPanel *panel_sized_empty_new (const char *panel_name, const WRect * r);
+WPanel *panel_sized_with_dir_new (const char *panel_name, const WRect * r,
                                   const vfs_path_t * vpath);
 
 void panel_clean_dir (WPanel * panel);
@@ -179,7 +169,9 @@ vfs_path_t *remove_encoding_from_path (const vfs_path_t * vpath);
 void update_panels (panel_update_flags_t flags, const char *current_file);
 int set_panel_formats (WPanel * p);
 
-void try_to_select (WPanel * panel, const char *name);
+void panel_set_filter (WPanel * panel, const file_filter_t * filter);
+
+void panel_set_current_by_name (WPanel * panel, const char *name);
 
 void unmark_files (WPanel * panel);
 void select_item (WPanel * panel);
@@ -201,6 +193,11 @@ char **panel_get_user_possible_fields (gsize * array_size);
 void panel_set_cwd (WPanel * panel, const vfs_path_t * vpath);
 void panel_set_lwd (WPanel * panel, const vfs_path_t * vpath);
 
+void panel_panelize_cd (void);
+void panel_panelize_change_root (WPanel * panel, const vfs_path_t * new_root);
+void panel_panelize_absolutize_if_needed (WPanel * panel);
+void panel_panelize_save (WPanel * panel);
+
 void panel_init (void);
 void panel_deinit (void);
 
@@ -210,7 +207,7 @@ void panel_deinit (void);
 /**
  * Empty panel creation.
  *
- * @param panel_name name of panel for setup retieving
+ * @param panel_name name of panel for setup retrieving
  *
  * @return new instance of WPanel
  */
@@ -219,24 +216,28 @@ static inline WPanel *
 panel_empty_new (const char *panel_name)
 {
     /* Unknown sizes of the panel at startup */
-    return panel_sized_empty_new (panel_name, 0, 0, 1, 1);
+    WRect r = { 0, 0, 1, 1 };
+
+    return panel_sized_empty_new (panel_name, &r);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 /**
  * Panel creation for specified directory.
  *
- * @param panel_name name of panel for setup retieving
+ * @param panel_name name of panel for setup retrieving
  * @param vpath working panel directory. If NULL then current directory is used
  *
  * @return new instance of WPanel
  */
 
 static inline WPanel *
-panel_with_dir_new (const char *panel_name, const vfs_path_t * vpath)
+panel_with_dir_new (const char *panel_name, const vfs_path_t *vpath)
 {
     /* Unknown sizes of the panel at startup */
-    return panel_sized_with_dir_new (panel_name, 0, 0, 1, 1, vpath);
+    WRect r = { 0, 0, 1, 1 };
+
+    return panel_sized_with_dir_new (panel_name, &r, vpath);
 }
 
 
@@ -244,7 +245,7 @@ panel_with_dir_new (const char *panel_name, const vfs_path_t * vpath)
 /**
  * Panel creation.
  *
- * @param panel_name name of panel for setup retieving
+ * @param panel_name name of panel for setup retrieving
  *
  * @return new instance of WPanel
  */
@@ -259,19 +260,24 @@ panel_new (const char *panel_name)
 /**
  * Panel creation with specified size.
  *
- * @param panel_name name of panel for setup retieving
- * @param y y coordinate of top-left corner
- * @param x x coordinate of top-left corner
- * @param lines vertical size
- * @param cols horizontal size
+ * @param panel_name name of panel for setup retrieving
+ * @param r panel area
  *
  * @return new instance of WPanel
  */
 
 static inline WPanel *
-panel_sized_new (const char *panel_name, int y, int x, int lines, int cols)
+panel_sized_new (const char *panel_name, const WRect *r)
 {
-    return panel_sized_with_dir_new (panel_name, y, x, lines, cols, NULL);
+    return panel_sized_with_dir_new (panel_name, r, NULL);
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+static inline file_entry_t *
+panel_current_entry (const WPanel *panel)
+{
+    return &(panel->dir.list[panel->current]);
 }
 
 /* --------------------------------------------------------------------------------------------- */

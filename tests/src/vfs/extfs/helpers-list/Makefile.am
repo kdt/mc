@@ -32,6 +32,10 @@ data_files_to_distribute = \
 	data/hp48+.args \
 	data/hp48+.input \
 	data/hp48+.output \
+	data/iso9660.xorriso.env_vars \
+	data/iso9660.xorriso.input \
+	data/iso9660.xorriso.output \
+	data/iso9660.xorriso.README \
 	data/lslR.1.spaces.args \
 	data/lslR.1.spaces.input \
 	data/lslR.1.spaces.output \
@@ -125,7 +129,7 @@ doc: README.html
 
 # (Thanks to VPATH we don't need to write "$(srcdir)/README". doc/hlp/Makefile.am needlessly does this.)
 README.html: README
-	pandoc --include-in-header=$(srcdir)/README.css.inc -N --old-dashes --toc --toc-depth=4 --standalone -o $@ $<
+	pandoc --include-in-header=$(srcdir)/README.css.inc -N --old-dashes --toc --toc-depth=4 --standalone -o '$@' '$(srcdir)/README'
 
 EXTRA_DIST += README.css.inc
 CLEANFILES += README.html

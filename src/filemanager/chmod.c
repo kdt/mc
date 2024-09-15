@@ -1,7 +1,7 @@
 /*
    Chmod command -- for the Midnight Commander
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    This file is part of the Midnight Commander.
@@ -60,6 +60,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 static struct
@@ -68,8 +70,7 @@ static struct
     const char *text;
     gboolean selected;
     WCheck *check;
-} check_perm[BUTTONS_PERM] =
-{
+} check_perm[BUTTONS_PERM] = {
     /* *INDENT-OFF* */
     { S_ISUID, N_("set &user ID on execution"),  FALSE, NULL },
     { S_ISGID, N_("set &group ID on execution"), FALSE, NULL },
@@ -104,8 +105,7 @@ static struct
     int y;                      /* vertical position relatively to dialog bottom boundary */
     int len;
     const char *text;
-} chmod_but[BUTTONS] =
-{
+} chmod_but[BUTTONS] = {
     /* *INDENT-OFF* */
     { B_SETALL, NORMAL_BUTTON, 6, 0, N_("Set &all")      },
     { B_MARKED, NORMAL_BUTTON, 6, 0, N_("&Marked all")   },
@@ -179,7 +179,7 @@ chmod_init (void)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-chmod_draw_select (const WDialog * h, int Id)
+chmod_draw_select (const WDialog *h, int Id)
 {
     widget_gotoyx (h, PY + Id + 1, PX + 1);
     tty_print_char (check_perm[Id].selected ? '*' : ' ');
@@ -189,7 +189,7 @@ chmod_draw_select (const WDialog * h, int Id)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-chmod_toggle_select (const WDialog * h, int Id)
+chmod_toggle_select (const WDialog *h, int Id)
 {
     check_perm[Id].selected = !check_perm[Id].selected;
     tty_setcolor (COLOR_NORMAL);
@@ -199,7 +199,7 @@ chmod_toggle_select (const WDialog * h, int Id)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-chmod_refresh (const WDialog * h)
+chmod_refresh (const WDialog *h)
 {
     int i;
     int y, x;
@@ -209,8 +209,8 @@ chmod_refresh (const WDialog * h)
     for (i = 0; i < BUTTONS_PERM; i++)
         chmod_draw_select (h, i);
 
-    y = WIDGET (file_gb)->y + 1;
-    x = WIDGET (file_gb)->x + 2;
+    y = WIDGET (file_gb)->rect.y + 1;
+    x = WIDGET (file_gb)->rect.x + 2;
 
     tty_gotoyx (y, x);
     tty_print_string (file_info_labels[0]);
@@ -225,7 +225,7 @@ chmod_refresh (const WDialog * h)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-chmod_bg_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+chmod_bg_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     switch (msg)
     {
@@ -242,7 +242,7 @@ chmod_bg_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-chmod_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+chmod_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     WGroup *g = GROUP (w);
     WDialog *h = DIALOG (w);
@@ -300,7 +300,7 @@ chmod_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *d
 /* --------------------------------------------------------------------------------------------- */
 
 static WDialog *
-chmod_dlg_create (WPanel * panel, const char *fname, const struct stat *sf_stat)
+chmod_dlg_create (WPanel *panel, const char *fname, const struct stat *sf_stat)
 {
     gboolean single_set;
     WDialog *ch_dlg;
@@ -372,11 +372,11 @@ chmod_dlg_create (WPanel * panel, const char *fname, const struct stat *sf_stat)
         for (; i < BUTTONS - 2; i++)
         {
             y = lines - chmod_but[i].y;
-            group_add_widget (g, button_new (y, WIDGET (ch_dlg)->cols / 2 - chmod_but[i].len,
+            group_add_widget (g, button_new (y, WIDGET (ch_dlg)->rect.cols / 2 - chmod_but[i].len,
                                              chmod_but[i].ret_cmd, chmod_but[i].flags,
                                              chmod_but[i].text, NULL));
             i++;
-            group_add_widget (g, button_new (y, WIDGET (ch_dlg)->cols / 2 + 1,
+            group_add_widget (g, button_new (y, WIDGET (ch_dlg)->rect.cols / 2 + 1,
                                              chmod_but[i].ret_cmd, chmod_but[i].flags,
                                              chmod_but[i].text, NULL));
         }
@@ -385,11 +385,11 @@ chmod_dlg_create (WPanel * panel, const char *fname, const struct stat *sf_stat)
     i = BUTTONS - 2;
     y = lines - chmod_but[i].y;
     group_add_widget (g, hline_new (y - 1, -1, -1));
-    group_add_widget (g, button_new (y, WIDGET (ch_dlg)->cols / 2 - chmod_but[i].len,
+    group_add_widget (g, button_new (y, WIDGET (ch_dlg)->rect.cols / 2 - chmod_but[i].len,
                                      chmod_but[i].ret_cmd, chmod_but[i].flags, chmod_but[i].text,
                                      NULL));
     i++;
-    group_add_widget (g, button_new (y, WIDGET (ch_dlg)->cols / 2 + 1, chmod_but[i].ret_cmd,
+    group_add_widget (g, button_new (y, WIDGET (ch_dlg)->rect.cols / 2 + 1, chmod_but[i].ret_cmd,
                                      chmod_but[i].flags, chmod_but[i].text, NULL));
 
     /* select first checkbox */
@@ -411,9 +411,9 @@ chmod_done (gboolean need_update)
 /* --------------------------------------------------------------------------------------------- */
 
 static const GString *
-next_file (const WPanel * panel)
+next_file (const WPanel *panel)
 {
-    while (!panel->dir.list[current_file].f.marked)
+    while (panel->dir.list[current_file].f.marked == 0)
         current_file++;
 
     return panel->dir.list[current_file].fname;
@@ -422,17 +422,19 @@ next_file (const WPanel * panel)
 /* --------------------------------------------------------------------------------------------- */
 
 static gboolean
-try_chmod (const vfs_path_t * p, mode_t m)
+try_chmod (const vfs_path_t *p, mode_t m)
 {
+    const char *fname = NULL;
+
     while (mc_chmod (p, m) == -1 && !ignore_all)
     {
         int my_errno = errno;
         int result;
         char *msg;
 
-        msg =
-            g_strdup_printf (_("Cannot chmod \"%s\"\n%s"), x_basename (vfs_path_as_str (p)),
-                             unix_error_string (my_errno));
+        if (fname == NULL)
+            fname = x_basename (vfs_path_as_str (p));
+        msg = g_strdup_printf (_("Cannot chmod \"%s\"\n%s"), fname, unix_error_string (my_errno));
         result =
             query_dialog (MSG_ERROR, msg, D_ERROR, 4, _("&Ignore"), _("Ignore &all"), _("&Retry"),
                           _("&Cancel"));
@@ -466,7 +468,7 @@ try_chmod (const vfs_path_t * p, mode_t m)
 /* --------------------------------------------------------------------------------------------- */
 
 static gboolean
-do_chmod (WPanel * panel, const vfs_path_t * p, struct stat *sf)
+do_chmod (WPanel *panel, const vfs_path_t *p, struct stat *sf)
 {
     gboolean ret;
 
@@ -483,7 +485,7 @@ do_chmod (WPanel * panel, const vfs_path_t * p, struct stat *sf)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-apply_mask (WPanel * panel, vfs_path_t * vpath, struct stat *sf)
+apply_mask (WPanel *panel, vfs_path_t *vpath, struct stat *sf)
 {
     gboolean ok;
 
@@ -524,7 +526,7 @@ apply_mask (WPanel * panel, vfs_path_t * vpath, struct stat *sf)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-chmod_cmd (WPanel * panel)
+chmod_cmd (WPanel *panel)
 {
     gboolean need_update;
     gboolean end_chmod;
@@ -550,7 +552,7 @@ chmod_cmd (WPanel * panel)
         if (panel->marked != 0)
             fname = next_file (panel);  /* next marked file */
         else
-            fname = selection (panel)->fname;   /* single file */
+            fname = panel_current_entry (panel)->fname; /* single file */
 
         vpath = vfs_path_from_str (fname->str);
 

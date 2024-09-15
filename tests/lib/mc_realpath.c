@@ -1,7 +1,7 @@
 /*
    lib - realpath
 
-   Copyright (C) 2017-2021
+   Copyright (C) 2017-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -69,14 +69,24 @@ static const struct data_source
 {
     /* absolute paths */
     { "/", "/"},
-    { "/" VFS_ENCODING_PREFIX "UTF-8/", "/" },
     { "/usr/bin", "/usr/bin" },
+#ifdef HAVE_CHARSET
+    { "/" VFS_ENCODING_PREFIX "UTF-8/", "/" },
     { "/" VFS_ENCODING_PREFIX "UTF-8/usr/bin", "/usr/bin" },
+#else
+    { "/" VFS_ENCODING_PREFIX "UTF-8/", "/" VFS_ENCODING_PREFIX "UTF-8/" },
+    { "/" VFS_ENCODING_PREFIX "UTF-8/usr/bin", "/" VFS_ENCODING_PREFIX "UTF-8/usr/bin" },
+#endif
 
     /* relative paths are relative to / */
-    { VFS_ENCODING_PREFIX "UTF-8/", "/" },
     { "usr/bin", "/usr/bin" },
+#ifdef HAVE_CHARSET
+    { VFS_ENCODING_PREFIX "UTF-8/", "/" },
     { VFS_ENCODING_PREFIX "UTF-8/usr/bin", "/usr/bin" }
+#else
+    { VFS_ENCODING_PREFIX "UTF-8/", VFS_ENCODING_PREFIX "UTF-8/" },
+    { VFS_ENCODING_PREFIX "UTF-8/usr/bin", VFS_ENCODING_PREFIX "UTF-8/usr/bin" }
+#endif
 };
 /* *INDENT-ON* */
 
@@ -87,7 +97,7 @@ START_PARAMETRIZED_TEST (realpath_test, data_source)
 {
     int ret;
 
-    /* realpath(3) produces a canonicalized absolute pathname using curent directory.
+    /* realpath(3) produces a canonicalized absolute pathname using current directory.
      * Change the current directory to produce correct pathname. */
     ret = chdir ("/");
 

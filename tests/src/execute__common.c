@@ -1,7 +1,7 @@
 /*
    Common code for testing functions in src/execute.c file.
 
-   Copyright (C) 2013-2021
+   Copyright (C) 2013-2024
 
    Free Software Foundation, Inc.
 
@@ -41,29 +41,27 @@ static gboolean vfs_file_is_local__return_value;
 
 /* @Mock */
 gboolean
-vfs_file_is_local (const vfs_path_t * vpath)
+vfs_file_is_local (const vfs_path_t *vpath)
 {
     g_ptr_array_add (vfs_file_is_local__vpath__captured, vfs_path_clone (vpath));
     return vfs_file_is_local__return_value;
 }
 
 static void
-vfs_file_is_local__init (void)
+vpath_captured_free (gpointer data)
 {
-    vfs_file_is_local__vpath__captured = g_ptr_array_new ();
+    vfs_path_free ((vfs_path_t *) data, TRUE);
 }
 
 static void
-vpath_captured_free (gpointer data, gpointer user_data)
+vfs_file_is_local__init (void)
 {
-    (void) user_data;
-    vfs_path_free ((vfs_path_t *) data, TRUE);
+    vfs_file_is_local__vpath__captured = g_ptr_array_new_with_free_func (vpath_captured_free);
 }
 
 static void
 vfs_file_is_local__deinit (void)
 {
-    g_ptr_array_foreach (vfs_file_is_local__vpath__captured, vpath_captured_free, NULL);
     g_ptr_array_free (vfs_file_is_local__vpath__captured, TRUE);
 }
 
@@ -110,7 +108,7 @@ static vfs_path_t *mc_getlocalcopy__return_value;
 
 /* @Mock */
 vfs_path_t *
-mc_getlocalcopy (const vfs_path_t * pathname_vpath)
+mc_getlocalcopy (const vfs_path_t *pathname_vpath)
 {
     mc_getlocalcopy__pathname_vpath__captured = vfs_path_clone (pathname_vpath);
     return mc_getlocalcopy__return_value;
@@ -181,7 +179,7 @@ static int mc_stat__return_value = 0;
 
 /* @Mock */
 int
-mc_stat (const vfs_path_t * vpath, struct stat *stat_ignored)
+mc_stat (const vfs_path_t *vpath, struct stat *stat_ignored)
 {
     (void) stat_ignored;
     if (mc_stat__vpath__captured != NULL)
@@ -193,13 +191,12 @@ mc_stat (const vfs_path_t * vpath, struct stat *stat_ignored)
 static void
 mc_stat__init (void)
 {
-    mc_stat__vpath__captured = g_ptr_array_new ();
+    mc_stat__vpath__captured = g_ptr_array_new_with_free_func (vpath_captured_free);
 }
 
 static void
 mc_stat__deinit (void)
 {
-    g_ptr_array_foreach (mc_stat__vpath__captured, vpath_captured_free, NULL);
     g_ptr_array_free (mc_stat__vpath__captured, TRUE);
     mc_stat__vpath__captured = NULL;
 }
@@ -215,7 +212,7 @@ static int mc_ungetlocalcopy__return_value = 0;
 
 /* @Mock */
 int
-mc_ungetlocalcopy (const vfs_path_t * pathname_vpath, const vfs_path_t * local_vpath,
+mc_ungetlocalcopy (const vfs_path_t *pathname_vpath, const vfs_path_t *local_vpath,
                    gboolean has_changed_ignored)
 {
     (void) has_changed_ignored;

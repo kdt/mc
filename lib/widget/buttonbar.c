@@ -1,7 +1,7 @@
 /*
    Widgets for the Midnight Commander
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Authors:
@@ -10,7 +10,7 @@
    Jakub Jelinek, 1995
    Andrej Borsenkow, 1996
    Norbert Warmuth, 1997
-   Andrew Borodin <aborodin@vmail.ru>, 2009, 2010, 2013, 2016
+   Andrew Borodin <aborodin@vmail.ru>, 2009-2022
 
    This file is part of the Midnight Commander.
 
@@ -52,14 +52,17 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
 /* calculate positions of buttons; width is never less than 7 */
 static void
-buttonbar_init_button_positions (WButtonBar * bb)
+buttonbar_init_button_positions (WButtonBar *bb)
 {
     int i;
     int pos = 0;
@@ -108,7 +111,7 @@ buttonbar_init_button_positions (WButtonBar * bb)
 
 /* return width of one button */
 static int
-buttonbar_get_button_width (const WButtonBar * bb, int i)
+buttonbar_get_button_width (const WButtonBar *bb, int i)
 {
     if (i == 0)
         return bb->labels[0].end_coord;
@@ -118,7 +121,7 @@ buttonbar_get_button_width (const WButtonBar * bb, int i)
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-buttonbar_get_button_by_x_coord (const WButtonBar * bb, int x)
+buttonbar_get_button_by_x_coord (const WButtonBar *bb, int x)
 {
     int i;
 
@@ -132,7 +135,7 @@ buttonbar_get_button_by_x_coord (const WButtonBar * bb, int x)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-set_label_text (WButtonBar * bb, int idx, const char *text)
+set_label_text (WButtonBar *bb, int idx, const char *text)
 {
     g_free (bb->labels[idx - 1].text);
     bb->labels[idx - 1].text = g_strdup (text);
@@ -142,7 +145,7 @@ set_label_text (WButtonBar * bb, int idx, const char *text)
 
 /* returns TRUE if a function has been called, FALSE otherwise. */
 static gboolean
-buttonbar_call (WButtonBar * bb, int i)
+buttonbar_call (WButtonBar *bb, int i)
 {
     cb_ret_t ret = MSG_NOT_HANDLED;
     Widget *w = WIDGET (bb);
@@ -159,7 +162,7 @@ buttonbar_call (WButtonBar * bb, int i)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-buttonbar_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+buttonbar_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     WButtonBar *bb = BUTTONBAR (w);
     int i;
@@ -178,7 +181,7 @@ buttonbar_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, voi
             buttonbar_init_button_positions (bb);
             widget_gotoyx (w, 0, 0);
             tty_setcolor (DEFAULT_COLOR);
-            tty_printf ("%-*s", w->cols, "");
+            tty_printf ("%-*s", w->rect.cols, "");
             widget_gotoyx (w, 0, 0);
 
             for (i = 0; i < BUTTONBAR_LABELS_NUM; i++)
@@ -213,7 +216,7 @@ buttonbar_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, voi
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-buttonbar_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
+buttonbar_mouse_callback (Widget *w, mouse_msg_t msg, mouse_event_t *event)
 {
     switch (msg)
     {
@@ -240,15 +243,16 @@ buttonbar_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
 WButtonBar *
 buttonbar_new (void)
 {
+    WRect r = { LINES - 1, 0, 1, COLS };
     WButtonBar *bb;
     Widget *w;
 
     bb = g_new0 (WButtonBar, 1);
     w = WIDGET (bb);
-    widget_init (w, LINES - 1, 0, 1, COLS, buttonbar_callback, buttonbar_mouse_callback);
+    widget_init (w, &r, buttonbar_callback, buttonbar_mouse_callback);
 
     w->pos_flags = WPOS_KEEP_HORZ | WPOS_KEEP_BOTTOM;
-    widget_want_hotkey (w, TRUE);
+    w->options |= WOP_WANT_HOTKEY;
 
     return bb;
 }
@@ -256,8 +260,8 @@ buttonbar_new (void)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-buttonbar_set_label (WButtonBar * bb, int idx, const char *text, const global_keymap_t * keymap,
-                     Widget * receiver)
+buttonbar_set_label (WButtonBar *bb, int idx, const char *text, const global_keymap_t *keymap,
+                     Widget *receiver)
 {
     if ((bb != NULL) && (idx >= 1) && (idx <= BUTTONBAR_LABELS_NUM))
     {
@@ -280,7 +284,7 @@ buttonbar_set_label (WButtonBar * bb, int idx, const char *text, const global_ke
 
 /* Find ButtonBar widget in the dialog */
 WButtonBar *
-find_buttonbar (const WDialog * h)
+buttonbar_find (const WDialog *h)
 {
     return BUTTONBAR (widget_find_by_type (CONST_WIDGET (h), buttonbar_callback));
 }

@@ -8,11 +8,11 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Midnight Commander\n"
-"Report-Msgid-Bugs-To: http://www.midnight-commander.org/\n"
-"POT-Creation-Date: 2021-09-26 10:06+0300\n"
-"PO-Revision-Date: 2021-07-26 20:16+0000\n"
-"Last-Translator: Transifex Bot <>\n"
-"Language-Team: Mongolian (http://www.transifex.com/mc/mc/language/mn/)\n"
+"Report-Msgid-Bugs-To: https://www.midnight-commander.org/\n"
+"POT-Creation-Date: 2024-08-23 19:20+0200\n"
+"PO-Revision-Date: 2010-12-29 10:19+0000\n"
+"Last-Translator: Shuree Nyam-Oidov <99shuree@gmail.com>, 2020\n"
+"Language-Team: Mongolian (http://app.transifex.com/mc/mc/language/mn/)\n"
 "Language: mn\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -504,6 +504,9 @@ msgid ""
 "%s"
 msgstr ""
 
+msgid "Cannot close pipe descriptor (p == NULL)"
+msgstr ""
+
 #, c-format
 msgid ""
 "Unexpected error in waitpid():\n"
@@ -532,28 +535,10 @@ msgid "Changes to file lost"
 msgstr "Файлын өөрчлөлт алга байна"
 
 #, c-format
-msgid "%s is not a directory\n"
-msgstr "%s нь лавлах биш байна\n"
-
-#, c-format
-msgid "Directory %s is not owned by you\n"
-msgstr " %s лавлах нь таны эзэмшил биш байна\n"
-
-#, c-format
-msgid "Cannot set correct permissions for directory %s\n"
-msgstr " %s лавлахын зөв зөвшөөрөлийг олгож чадсангүй\n"
-
-#, c-format
-msgid "Cannot create temporary directory %s: %s\n"
-msgstr " %s: %s түр зуурын лавлахыг үүсгэж чадсангүй\n"
-
-#, c-format
-msgid "Temporary files will be created in %s\n"
-msgstr " Түр зуурын файлууд нь %s д үүссэн\n"
-
-#, c-format
-msgid "Temporary files will not be created\n"
-msgstr "Түр зуурын файлууд үүссэнгүй\n"
+msgid ""
+"Cannot create temporary directory %s: %s.\n"
+"Temporary files will not be created\n"
+msgstr ""
 
 msgid "Press any key to continue..."
 msgstr "Дурын товчлуур дарж үргэлжлүүл..."
@@ -704,7 +689,8 @@ msgid ""
 "                 errdhotfocus\n"
 "   Menus:        menunormal, menuhot, menusel, menuhotsel, menuinactive\n"
 "   Popup menus:  pmenunormal, pmenusel, pmenutitle\n"
-"   Editor:       editnormal, editbold, editmarked, editwhitespace,\n"
+"   Editor:       editnormal, editbold, editmarked, editwhitespace, "
+"editnonprintable,\n"
 "                 editlinestate, editbg, editframe, editframeactive\n"
 "                 editframedrag\n"
 "   Viewer:       viewnormal,viewbold, viewunderline, viewselected\n"
@@ -759,10 +745,13 @@ msgstr ""
 msgid "Arguments parse error!"
 msgstr ""
 
+msgid "MC is built without builtin editor."
+msgstr ""
+
 msgid "No arguments given to the viewer."
 msgstr ""
 
-msgid "Two files are required to envoke the diffviewer."
+msgid "Two files are required to invoke the diffviewer."
 msgstr ""
 
 msgid "Background protocol error"
@@ -1127,7 +1116,7 @@ msgstr ""
 msgid "Run sort"
 msgstr ""
 
-msgid "Enter sort options (see manpage) separated by whitespace:"
+msgid "Enter sort options (see sort(1) manpage) separated by whitespace:"
 msgstr ""
 
 msgid "Sort"
@@ -1540,7 +1529,7 @@ msgid ""
 "written for the Midnight Commander."
 msgstr ""
 
-msgid "Copyright (C) 1996-2021 the Free Software Foundation"
+msgid "Copyright (C) 1996-2024 the Free Software Foundation"
 msgstr ""
 
 msgid "About"
@@ -2060,7 +2049,8 @@ msgstr ""
 
 #, c-format
 msgid ""
-"Cannot chdir to \"%s\"\n"
+"Cannot change directory to\n"
+"%s\n"
 "%s"
 msgstr ""
 
@@ -2155,9 +2145,6 @@ msgstr ""
 msgid ""
 "Cannot chattr \"%s\"\n"
 "%s"
-msgstr ""
-
-msgid "Cannot change attributes on non-local filesystems"
 msgstr ""
 
 #, c-format
@@ -2259,15 +2246,6 @@ msgstr ""
 msgid "Files tagged, want to cd?"
 msgstr "Файлууд тэмдэглэгдсэн байна, шилжих үү?"
 
-msgid "Cannot change directory"
-msgstr "Хавтас руу шилжиж чадсангүй"
-
-msgid "Filter"
-msgstr ""
-
-msgid "Set expression for filtering filenames"
-msgstr ""
-
 #, c-format
 msgid "Link %s to:"
 msgstr "%s руу холбох:"
@@ -2281,10 +2259,6 @@ msgstr ""
 
 #, c-format
 msgid "symlink: %s"
-msgstr ""
-
-#, c-format
-msgid "Cannot chdir to \"%s\""
 msgstr ""
 
 msgid "View file"
@@ -2409,24 +2383,29 @@ msgid "Pipe failed"
 msgstr ""
 
 #, c-format
-msgid " %s%s file error"
+msgid ""
+"You have an outdated %s file.\n"
+"Midnight Commander now uses %s file.\n"
+"Please copy your modifications of the old file to the new one."
 msgstr ""
 
 #, c-format
 msgid ""
-"The format of the %smc.ext file has changed with version 3.0. It seems that "
-"the installation failed. Please fetch a fresh copy from the Midnight "
-"Commander package."
-msgstr ""
-
-#, c-format
-msgid "%s file error"
+"The format of the\n"
+"%s%s\n"
+"file has changed with version 4.0.\n"
+"It seems that the installation has failed.\n"
+"Please fetch a fresh copy from the Midnight Commander package."
 msgstr ""
 
 #, c-format
 msgid ""
-"The format of the %s file has changed with version 3.0. You may either want "
-"to copy it from %smc.ext or use that file as an example of how to write it."
+"The format of the\n"
+"%s\n"
+"file has changed with version 4.0.\n"
+"You may either want to copy it from\n"
+"%s%s\n"
+"or use that file as an example of how to write it."
 msgstr ""
 
 msgid "DialogTitle|Copy"
@@ -2597,6 +2576,18 @@ msgstr ""
 
 #, c-format
 msgid ""
+"Cannot get attributes of source file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot set attributes of target file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
 "Cannot create special file \"%s\"\n"
 "%s"
 msgstr ""
@@ -2661,6 +2652,15 @@ msgstr ""
 msgid "(stalled)"
 msgstr "(гацсан)"
 
+msgid "Incomplete file was retrieved"
+msgstr ""
+
+msgid "&Keep"
+msgstr "&Хадгалах"
+
+msgid "&Continue copy"
+msgstr ""
+
 #, c-format
 msgid ""
 "Cannot close source file \"%s\"\n"
@@ -2673,15 +2673,21 @@ msgid ""
 "%s"
 msgstr ""
 
-msgid "Incomplete file was retrieved. Keep it?"
-msgstr "Дутуу файл орж ирсэн байна. Хадгалах уу?"
-
-msgid "&Keep"
-msgstr "&Хадгалах"
+#, c-format
+msgid ""
+"Cannot set attributes for target file \"%s\"\n"
+"%s"
+msgstr ""
 
 #, c-format
 msgid ""
 "Cannot stat source directory \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot get attributes of source directory \"%s\"\n"
 "%s"
 msgstr ""
 
@@ -2729,7 +2735,7 @@ msgid "Con&tinue"
 msgstr "&үргэлжлүүл"
 
 #, c-format
-msgid "%d:%02d.%02d"
+msgid "%d:%02d:%02d"
 msgstr ""
 
 #, c-format
@@ -2785,7 +2791,7 @@ msgid "Background process: File exists"
 msgstr ""
 
 #, c-format
-msgid "Files processed: %zu/%zu"
+msgid "Files processed: %zu / %zu"
 msgstr ""
 
 #, c-format
@@ -2813,7 +2819,7 @@ msgid " Total: %s "
 msgstr ""
 
 #, c-format
-msgid " Total: %s/%s "
+msgid " Total: %s / %s "
 msgstr ""
 
 msgid "Source"
@@ -2866,7 +2872,7 @@ msgid "&Listing format..."
 msgstr "&Жагшаалтын формат"
 
 msgid "&Sort order..."
-msgstr "Эрэмбэлэх &дараалал..."
+msgstr ""
 
 msgid "&Filter..."
 msgstr "&Шүүлт..."
@@ -2880,7 +2886,7 @@ msgstr "&FTP-холбоос..."
 msgid "S&hell link..."
 msgstr "S&hell-холбоос..."
 
-msgid "S&FTP link..."
+msgid "SFTP li&nk..."
 msgstr ""
 
 msgid "Paneli&ze"
@@ -3259,7 +3265,7 @@ msgid "No space information"
 msgstr "Мэдээлэлийн зай алга"
 
 #, c-format
-msgid "Free space: %s/%s (%d%%)"
+msgid "Free space: %s / %s (%d%%)"
 msgstr ""
 
 #, c-format
@@ -3310,9 +3316,6 @@ msgstr ""
 
 #, c-format
 msgid "Links:      %d"
-msgstr ""
-
-msgid "Attributes: not supported"
 msgstr ""
 
 #, c-format
@@ -3502,6 +3505,9 @@ msgid "Select"
 msgstr ""
 
 msgid "Unselect"
+msgstr ""
+
+msgid "Filter"
 msgstr ""
 
 msgid "Do you really want to execute?"
@@ -3738,10 +3744,10 @@ msgstr ""
 msgid "Warning: Cannot change to %s.\n"
 msgstr "Анхааруулга: %s руу өөрчилж чадсангүй. \n"
 
-msgid "With builtin Editor and Aspell support"
+msgid "With builtin editor and aspell support"
 msgstr ""
 
-msgid "With builtin Editor"
+msgid "With builtin editor"
 msgstr ""
 
 msgid "With optional subshell support"
@@ -3791,6 +3797,10 @@ msgid "Built with ncursesw %s\n"
 msgstr ""
 
 msgid "Built with ncursesw (unknown version)"
+msgstr ""
+
+#, c-format
+msgid "Built with libssh2 %d.%d.%d\n"
 msgstr ""
 
 msgid "Virtual File Systems:"
@@ -3918,6 +3928,15 @@ msgstr ""
 "Файлын төгсөлийн алдаа\n"
 "%s"
 
+msgid "Inconsistent archive"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot open %s archive\n"
+"%s"
+msgstr ""
+
 #, c-format
 msgid ""
 "Cannot open %s archive\n"
@@ -3931,66 +3950,24 @@ msgid ""
 "%s"
 msgstr ""
 
+msgid ""
+"EXTFS virtual file system:\n"
+"wrong file name"
+msgstr ""
+
+msgid ""
+"EXTFS virtual file system:\n"
+"wrong archive name"
+msgstr ""
+
+msgid ""
+"EXTFS virtual file system:\n"
+"cannot build command"
+msgstr ""
+
 #, c-format
 msgid "Warning: cannot open %s directory\n"
 msgstr ""
-
-#, c-format
-msgid "fish: Disconnecting from %s"
-msgstr "fish: %s аас салгагдаж байна"
-
-msgid "fish: Waiting for initial line..."
-msgstr "fish: Эхлэл мөрийг хүлээж байна..."
-
-msgid "Sorry, we cannot do password authenticated connections for now."
-msgstr "Уучлаарай, Бид энэ холболтод нууц үг ашиглаж чадахгүй байна."
-
-#, c-format
-msgid "fish: Password is required for %s"
-msgstr ""
-
-msgid "fish: Sending password..."
-msgstr "fish: Нууц үгийг илгээж байна..."
-
-msgid "fish: Sending initial line..."
-msgstr "fish: эхлэл мөрийг илгээж байна..."
-
-msgid "fish: Handshaking version..."
-msgstr "fish: Handshaking version..."
-
-msgid "fish: Getting host info..."
-msgstr ""
-
-#, c-format
-msgid "fish: Reading directory %s..."
-msgstr "fish: %s лавлахыг уншиж байна..."
-
-#, c-format
-msgid "%s: done."
-msgstr "%s: дууссан."
-
-#, c-format
-msgid "%s: failure"
-msgstr "%s: алдаа"
-
-#, c-format
-msgid "fish: store %s: sending command..."
-msgstr "fish: %s сэргээх: командыг илгээж байна..."
-
-msgid "fish: Local read failed, sending zeros"
-msgstr "fish: локал уншилт бүтсэнгүй, тэгийг илгээж байна"
-
-msgid "fish: storing file"
-msgstr ""
-
-msgid "Aborting transfer..."
-msgstr "Дамжуулалтыг таслаж байна..."
-
-msgid "Error reported after abort."
-msgstr "Таслалтын дараа алдаа илтгэгдлээ."
-
-msgid "Aborted transfer would be successful."
-msgstr "Таслагдсан дамжуулалт дууссан ч байж магадгүй."
 
 #, c-format
 msgid "ftpfs: Disconnecting from %s"
@@ -4045,6 +4022,21 @@ msgstr "ftpfs: сервер руу холбогдолт амжилтгүй бо�
 msgid "Waiting to retry... %d (Control-G to cancel)"
 msgstr ""
 
+#, c-format
+msgid "ftpfs: could not make address-to-name translation: %s"
+msgstr ""
+
+#, c-format
+msgid "ftpfs: try reconnect to server, attempt %u"
+msgstr ""
+
+#, c-format
+msgid "ftpfs: could not get socket name: %s"
+msgstr ""
+
+msgid "ftpfs: could not reconnect to server"
+msgstr ""
+
 msgid "ftpfs: invalid address family"
 msgstr ""
 
@@ -4086,6 +4078,14 @@ msgstr "(эхлэл chdir)"
 
 msgid "ftpfs: failed; nowhere to fallback to"
 msgstr "ftpfs: алдаа; ослын горимд хаашаа ч шилжих боломжгүй"
+
+#, c-format
+msgid "%s: failure"
+msgstr "%s: алдаа"
+
+#, c-format
+msgid "%s: done."
+msgstr "%s: дууссан."
 
 msgid "ftpfs: storing file"
 msgstr ""
@@ -4225,12 +4225,50 @@ msgid "sftp: Listing done."
 msgstr ""
 
 #, c-format
-msgid ""
-"Cannot open tar archive\n"
-"%s"
+msgid "shell: Disconnecting from %s"
 msgstr ""
-"tar-архивыг нээж чадсангүй\n"
-"%s"
+
+msgid "shell: Waiting for initial line..."
+msgstr ""
+
+msgid "Sorry, we cannot do password authenticated connections for now."
+msgstr "Уучлаарай, Бид энэ холболтод нууц үг ашиглаж чадахгүй байна."
+
+#, c-format
+msgid "shell: Password is required for %s"
+msgstr ""
+
+msgid "shell: Sending password..."
+msgstr ""
+
+msgid "shell: Sending initial line..."
+msgstr ""
+
+msgid "shell: Getting host info..."
+msgstr ""
+
+#, c-format
+msgid "shell: Reading directory %s..."
+msgstr ""
+
+#, c-format
+msgid "shell: store %s: sending command..."
+msgstr ""
+
+msgid "shell: Local read failed, sending zeros"
+msgstr ""
+
+msgid "shell: storing file"
+msgstr ""
+
+msgid "Aborting transfer..."
+msgstr "Дамжуулалтыг таслаж байна..."
+
+msgid "Error reported after abort."
+msgstr "Таслалтын дараа алдаа илтгэгдлээ."
+
+msgid "Aborted transfer would be successful."
+msgstr "Таслагдсан дамжуулалт дууссан ч байж магадгүй."
 
 msgid "Inconsistent tar archive"
 msgstr "Алдаатай архив tar"
@@ -4240,8 +4278,19 @@ msgstr "Архив файлын төгсгөл алдаатай"
 
 #, c-format
 msgid ""
+"Cannot open tar archive\n"
+"%s"
+msgstr ""
+"tar-архивыг нээж чадсангүй\n"
+"%s"
+
+#, c-format
+msgid ""
 "%s\n"
-"doesn't look like a tar archive."
+"doesn't look like a tar archive"
+msgstr ""
+
+msgid "tar: mc_lseek not stopped at a record boundary"
 msgstr ""
 
 msgid "undelfs: error"
@@ -4419,19 +4468,3 @@ msgstr ""
 
 msgid "Cannot fetch a local copy of /ftp://some.host/editme.txt"
 msgstr ""
-
-#~ msgid "Set debug level"
-#~ msgstr "Дебаг түвшинг тодорхойлох"
-
-#, c-format
-#~ msgid "Password for \\\\%s\\%s"
-#~ msgstr "\\\\%s\\%s ийн Нууц үг"
-
-#~ msgid "Domain:"
-#~ msgstr "Домен:"
-
-#~ msgid "Username:"
-#~ msgstr "Хэрэглэгчийн нэр:"
-
-#~ msgid "SM&B link..."
-#~ msgstr "SM&B-холбоос..."

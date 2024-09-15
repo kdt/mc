@@ -1,7 +1,7 @@
 /*
    Keyboard support routines.
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -89,11 +89,11 @@
 
 /*** global variables ****************************************************************************/
 
-int mou_auto_repeat = 100;
-int double_click_speed = 250;
+int mou_auto_repeat = 100;      /* ms */
+int double_click_speed = 250;   /* ms */
 gboolean old_esc_mode = TRUE;
 /* timeout for old_esc_mode in usec */
-int old_esc_mode_timeout = 1000000;     /* settable via env */
+int old_esc_mode_timeout = G_USEC_PER_SEC;      /* us, settable via env */
 gboolean use_8th_bit_as_meta = FALSE;
 
 gboolean bracketed_pasting_in_progress = FALSE;
@@ -220,8 +220,7 @@ const key_code_name_t key_name_conv_tab[] = {
 
 /*** file scope macro definitions ****************************************************************/
 
-#define GET_TIME(tv)     (gettimeofday(&tv, (struct timezone *) NULL))
-#define DIF_TIME(t1, t2) ((t2.tv_sec  - t1.tv_sec) * 1000 + (t2.tv_usec - t1.tv_usec)/1000)
+#define MC_USEC_PER_MSEC 1000
 
 /* The maximum sequence length (32 + null terminator) */
 #define SEQ_BUFFER_LEN 33
@@ -275,6 +274,8 @@ typedef int (*ph_dv_f) (void *, void *);
 typedef int (*ph_ov_f) (void *);
 typedef int (*ph_pqc_f) (unsigned short, PhCursorInfo_t *);
 #endif
+
+/*** forward declarations (file scope functions) *************************************************/
 
 /*** file scope variables ************************************************************************/
 
@@ -382,6 +383,11 @@ static key_define_t xterm_key_defines[] = {
     {KEY_M_CTRL | KEY_M_ALT | KEY_HOME, ESC_STR "OH", MCKEY_NOACTION},
     {KEY_M_CTRL | KEY_M_ALT | KEY_END, ESC_STR "OF", MCKEY_NOACTION},
 
+    {KEY_M_SHIFT | KEY_M_ALT | KEY_UP, ESC_STR "[1;4A", MCKEY_NOACTION},
+    {KEY_M_SHIFT | KEY_M_ALT | KEY_DOWN, ESC_STR "[1;4B", MCKEY_NOACTION},
+    {KEY_M_SHIFT | KEY_M_ALT | KEY_RIGHT, ESC_STR "[1;4C", MCKEY_NOACTION},
+    {KEY_M_SHIFT | KEY_M_ALT | KEY_LEFT, ESC_STR "[1;4D", MCKEY_NOACTION},
+
     /* rxvt keys with modifiers */
     {KEY_M_SHIFT | KEY_UP, ESC_STR "[a", MCKEY_NOACTION},
     {KEY_M_SHIFT | KEY_DOWN, ESC_STR "[b", MCKEY_NOACTION},
@@ -446,7 +452,7 @@ static key_define_t xterm_key_defines[] = {
     {0, NULL, MCKEY_NOACTION},
 };
 
-/* qansi-m terminals have a much more key combinatios,
+/* qansi-m terminals have a much more key combinations,
    which are undefined in termcap/terminfo */
 static key_define_t qansi_key_defines[] = {
     /* qansi-m terminal */
@@ -578,7 +584,7 @@ select_cmp_by_fd (gconstpointer a, gconstpointer b)
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-add_selects (fd_set * select_set)
+add_selects (fd_set *select_set)
 {
     int top_fd = 0;
 
@@ -602,7 +608,7 @@ add_selects (fd_set * select_set)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-check_selects (fd_set * select_set)
+check_selects (fd_set *select_set)
 {
     while (disabled_channels == 0)
     {
@@ -640,7 +646,7 @@ try_channels (gboolean set_timeout)
         if (set_timeout)
         {
             time_out.tv_sec = 0;
-            time_out.tv_usec = 100000;
+            time_out.tv_usec = 100 * MC_USEC_PER_MSEC;
             timeptr = &time_out;
         }
 
@@ -684,7 +690,7 @@ create_sequence (const char *seq, int code, int action)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-define_sequences (const key_define_t * kd)
+define_sequences (const key_define_t *kd)
 {
     int i;
 
@@ -739,10 +745,9 @@ getch_with_delay (void)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-xmouse_get_event (Gpm_Event * ev, gboolean extended)
+xmouse_get_event (Gpm_Event *ev, gboolean extended)
 {
-    static struct timeval tv1 = { 0, 0 };       /* Force first click as single */
-    static struct timeval tv2;
+    static gint64 tv1 = 0;      /* Force first click as single */
     static int clicks = 0;
     static int last_btn = 0;
     int btn;
@@ -811,13 +816,12 @@ xmouse_get_event (Gpm_Event * ev, gboolean extended)
                 /* don't generate GPM_UP after mouse wheel */
                 /* need for menu event handling */
                 ev->type = 0;
-                tv1.tv_sec = 0;
-                tv1.tv_usec = 0;
+                tv1 = 0;
             }
             else
             {
                 ev->type = GPM_UP | (GPM_SINGLE << clicks);
-                GET_TIME (tv1);
+                tv1 = g_get_monotonic_time ();
             }
             ev->buttons = 0;
             last_btn = 0;
@@ -831,6 +835,8 @@ xmouse_get_event (Gpm_Event * ev, gboolean extended)
     }
     else
     {
+        gint64 tv2;
+
         if (btn >= 32 && btn <= 34)
         {
             btn -= 32;
@@ -839,8 +845,8 @@ xmouse_get_event (Gpm_Event * ev, gboolean extended)
         else
             ev->type = GPM_DOWN;
 
-        GET_TIME (tv2);
-        if (tv1.tv_sec != 0 && DIF_TIME (tv1, tv2) < double_click_speed)
+        tv2 = g_get_monotonic_time ();
+        if (tv1 != 0 && tv2 - tv1 < (gint64) double_click_speed * MC_USEC_PER_MSEC)
         {
             clicks++;
             clicks %= 3;
@@ -1153,8 +1159,8 @@ getch_with_timeout (unsigned int delay_us)
     int c;
     struct timeval time_out;
 
-    time_out.tv_sec = delay_us / 1000000u;
-    time_out.tv_usec = delay_us % 1000000u;
+    time_out.tv_sec = delay_us / G_USEC_PER_SEC;
+    time_out.tv_usec = delay_us % G_USEC_PER_SEC;
     tty_nodelay (TRUE);
     FD_ZERO (&Read_FD_Set);
     FD_SET (input_fd, &Read_FD_Set);
@@ -1167,34 +1173,25 @@ getch_with_timeout (unsigned int delay_us)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-learn_store_key (char *buffer, char **p, int c)
+learn_store_key (GString *buffer, int c)
 {
-    if (*p - buffer > 253)
-        return;
-
     if (c == ESC_CHAR)
-    {
-        *(*p)++ = '\\';
-        *(*p)++ = 'e';
-    }
+        g_string_append (buffer, "\\e");
     else if (c < ' ')
     {
-        *(*p)++ = '^';
-        *(*p)++ = c + 'a' - 1;
+        g_string_append_c (buffer, '^');
+        g_string_append_c (buffer, c + 'a' - 1);
     }
     else if (c == '^')
-    {
-        *(*p)++ = '^';
-        *(*p)++ = '^';
-    }
+        g_string_append (buffer, "^^");
     else
-        *(*p)++ = (char) c;
+        g_string_append_c (buffer, (char) c);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-k_dispose (key_def * k)
+k_dispose (key_def *k)
 {
     if (k != NULL)
     {
@@ -1445,7 +1442,7 @@ channels_down (void)
  */
 
 long
-lookup_key (const char *name, char **label)
+tty_keyname_to_keycode (const char *name, char **label)
 {
     char **lc_keys, **p;
     char *cname;
@@ -1560,7 +1557,7 @@ lookup_key (const char *name, char **label)
 /* --------------------------------------------------------------------------------------------- */
 
 char *
-lookup_key_by_code (const int keycode)
+tty_keycode_to_keyname (const int keycode)
 {
     /* code without modifier */
     unsigned int k = keycode & ~KEY_M_MASK;
@@ -1731,7 +1728,7 @@ get_key_code (int no_delay)
 {
     int c;
     static key_def *this = NULL, *parent;
-    static struct timeval esctime = { -1, -1 };
+    static gint64 esc_time = -1;
     static int lastnodelay = -1;
 
     if (no_delay != lastnodelay)
@@ -1790,22 +1787,8 @@ get_key_code (int no_delay)
         tty_nodelay (FALSE);
         if (c == -1)
         {
-            struct timeval current, time_out;
-
             if (this == NULL || parent == NULL || parent->action != MCKEY_ESCAPE || !old_esc_mode ||
-                esctime.tv_sec == -1)
-                return -1;
-
-            GET_TIME (current);
-            time_out.tv_sec = old_esc_mode_timeout / 1000000 + esctime.tv_sec;
-            time_out.tv_usec = old_esc_mode_timeout % 1000000 + esctime.tv_usec;
-            if (time_out.tv_usec > 1000000)
-            {
-                time_out.tv_usec -= 1000000;
-                time_out.tv_sec++;
-            }
-            if (current.tv_sec < time_out.tv_sec ||
-                (current.tv_sec == time_out.tv_sec && current.tv_usec < time_out.tv_usec))
+                esc_time == -1 || g_get_monotonic_time () < esc_time + old_esc_mode_timeout)
                 return -1;
 
             this = NULL;
@@ -1869,11 +1852,11 @@ get_key_code (int no_delay)
             {
                 if (no_delay != 0)
                 {
-                    GET_TIME (esctime);
+                    esc_time = g_get_monotonic_time ();
                     goto nodelay_try_again;
                 }
 
-                esctime.tv_sec = -1;
+                esc_time = -1;
                 c = getch_with_timeout (old_esc_mode_timeout);
                 if (c != -1)
                     continue;
@@ -2000,7 +1983,7 @@ tty_get_event (struct Gpm_Event *event, gboolean redo_event, gboolean block)
 
         if (redo_event)
         {
-            time_out.tv_usec = mou_auto_repeat * 1000;
+            time_out.tv_usec = mou_auto_repeat * MC_USEC_PER_MSEC;
             time_out.tv_sec = 0;
 
             time_addr = &time_out;
@@ -2165,57 +2148,50 @@ tty_getch (void)
 char *
 learn_key (void)
 {
-    /* LEARN_TIMEOUT in usec */
-#define LEARN_TIMEOUT 200000
+    /* LEARN_TIMEOUT in ms */
+#define LEARN_TIMEOUT 200
 
     fd_set Read_FD_Set;
-    struct timeval endtime;
-    struct timeval time_out;
+    gint64 end_time;
     int c;
-    char buffer[256];
-    char *p = buffer;
+    GString *buffer;
 
-    tty_keypad (FALSE);         /* disable intepreting keys by ncurses */
+    buffer = g_string_sized_new (16);
+
+    tty_keypad (FALSE);         /* disable interpreting keys by ncurses */
     c = tty_lowlevel_getch ();
     while (c == -1)
         c = tty_lowlevel_getch ();      /* Sanity check, should be unnecessary */
-    learn_store_key (buffer, &p, c);
+    learn_store_key (buffer, c);
 
-    GET_TIME (endtime);
-    endtime.tv_usec += LEARN_TIMEOUT;
-    if (endtime.tv_usec > 1000000)
-    {
-        endtime.tv_usec -= 1000000;
-        endtime.tv_sec++;
-    }
+    end_time = g_get_monotonic_time () + LEARN_TIMEOUT * MC_USEC_PER_MSEC;
 
     tty_nodelay (TRUE);
     while (TRUE)
     {
         while ((c = tty_lowlevel_getch ()) == -1)
         {
-            GET_TIME (time_out);
-            time_out.tv_usec = endtime.tv_usec - time_out.tv_usec;
-            if (time_out.tv_usec < 0)
-                time_out.tv_sec++;
-            time_out.tv_sec = endtime.tv_sec - time_out.tv_sec;
-            if (time_out.tv_sec >= 0 && time_out.tv_usec > 0)
-            {
-                FD_ZERO (&Read_FD_Set);
-                FD_SET (input_fd, &Read_FD_Set);
-                select (input_fd + 1, &Read_FD_Set, NULL, NULL, &time_out);
-            }
-            else
+            gint64 time_out;
+            struct timeval tv;
+
+            time_out = end_time - g_get_monotonic_time ();
+            if (time_out <= 0)
                 break;
+
+            tv.tv_sec = time_out / G_USEC_PER_SEC;
+            tv.tv_usec = time_out % G_USEC_PER_SEC;
+            FD_ZERO (&Read_FD_Set);
+            FD_SET (input_fd, &Read_FD_Set);
+            select (input_fd + 1, &Read_FD_Set, NULL, NULL, &tv);
         }
         if (c == -1)
             break;
-        learn_store_key (buffer, &p, c);
+        learn_store_key (buffer, c);
     }
     tty_keypad (TRUE);
     tty_nodelay (FALSE);
-    *p = '\0';
-    return g_strdup (buffer);
+
+    return g_string_free (buffer, buffer->len == 0);
 #undef LEARN_TIMEOUT
 }
 

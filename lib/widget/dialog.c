@@ -1,7 +1,7 @@
 /*
    Dialog box features module for the Midnight Commander
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    This file is part of the Midnight Commander.
@@ -55,16 +55,8 @@ dlg_colors_t dialog_colors;
 dlg_colors_t alarm_colors;
 dlg_colors_t listbox_colors;
 
-/* Primitive way to check if the the current dialog is our dialog */
-/* This is needed by async routines like load_prompt */
-GList *top_dlg = NULL;
-
 /* A hook list for idle events */
 hook_t *idle_hook = NULL;
-
-/* If set then dialogs just clean the screen when refreshing, else */
-/* they do a complete refresh, refreshing all the parts of the program */
-gboolean fast_refresh = FALSE;
 
 /* left click outside of dialog closes it */
 gboolean mouse_close_dialog = FALSE;
@@ -75,6 +67,8 @@ const global_keymap_t *dialog_map = NULL;
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* --------------------------------------------------------------------------------------------- */
@@ -82,17 +76,17 @@ const global_keymap_t *dialog_map = NULL;
 /* --------------------------------------------------------------------------------------------- */
 
 static const int *
-dlg_default_get_colors (const Widget * w)
+dlg_default_get_colors (const Widget *w)
 {
     return CONST_DIALOG (w)->colors;
 }
 
 /* --------------------------------------------------------------------------------------------- */
 /**
-  * Read histories from the ${XDG_CACHE_HOME}/mc/history file
+  * Read histories from the ${XDG_DATA_HOME}/mc/history file
   */
 static void
-dlg_read_history (WDialog * h)
+dlg_read_history (WDialog *h)
 {
     char *profile;
     ev_history_load_save_t event_data;
@@ -128,8 +122,18 @@ refresh_cmd (void)
 
 /* --------------------------------------------------------------------------------------------- */
 
+static void
+dlg_help (const WDialog *h)
+{
+    ev_help_t event_data = { NULL, h->help_ctx };
+
+    mc_event_raise (MCEVENT_GROUP_CORE, "help", &event_data);
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
 static cb_ret_t
-dlg_execute_cmd (WDialog * h, long command)
+dlg_execute_cmd (WDialog *h, long command)
 {
     WGroup *g = GROUP (h);
     cb_ret_t ret = MSG_HANDLED;
@@ -141,11 +145,11 @@ dlg_execute_cmd (WDialog * h, long command)
     {
     case CK_Ok:
         h->ret_value = B_ENTER;
-        dlg_stop (h);
+        dlg_close (h);
         break;
     case CK_Cancel:
         h->ret_value = B_CANCEL;
-        dlg_stop (h);
+        dlg_close (h);
         break;
 
     case CK_Up:
@@ -158,10 +162,7 @@ dlg_execute_cmd (WDialog * h, long command)
         break;
 
     case CK_Help:
-        {
-            ev_help_t event_data = { NULL, h->help_ctx };
-            mc_event_raise (MCEVENT_GROUP_CORE, "help", &event_data);
-        }
+        dlg_help (h);
         break;
 
     case CK_Suspend:
@@ -201,7 +202,7 @@ dlg_execute_cmd (WDialog * h, long command)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-dlg_handle_key (WDialog * h, int d_key)
+dlg_handle_key (WDialog *h, int d_key)
 {
     long command;
 
@@ -217,7 +218,7 @@ dlg_handle_key (WDialog * h, int d_key)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-dlg_key_event (WDialog * h, int d_key)
+dlg_key_event (WDialog *h, int d_key)
 {
     Widget *w = WIDGET (h);
     WGroup *g = GROUP (h);
@@ -260,7 +261,7 @@ dlg_key_event (WDialog * h, int d_key)
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-dlg_handle_mouse_event (Widget * w, Gpm_Event * event)
+dlg_handle_mouse_event (Widget *w, Gpm_Event *event)
 {
     if (w->mouse_callback != NULL)
     {
@@ -277,7 +278,7 @@ dlg_handle_mouse_event (Widget * w, Gpm_Event * event)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-frontend_dlg_run (WDialog * h)
+frontend_dlg_run (WDialog *h)
 {
     Widget *wh = WIDGET (h);
     Gpm_Event event;
@@ -327,13 +328,14 @@ frontend_dlg_run (WDialog * h)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-dlg_default_destroy (Widget * w)
+dlg_default_destroy (Widget *w)
 {
     WDialog *h = DIALOG (w);
 
     /* if some widgets have history, save all histories at one moment here */
     dlg_save_history (h);
     group_default_callback (w, NULL, MSG_DESTROY, 0, NULL);
+    send_message (w, NULL, MSG_DESTROY, 0, NULL);
     mc_event_group_del (h->event_group);
     g_free (h->event_group);
     g_free (h);
@@ -347,7 +349,7 @@ dlg_default_destroy (Widget * w)
 /** Default dialog callback */
 
 cb_ret_t
-dlg_default_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+dlg_default_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     switch (msg)
     {
@@ -372,15 +374,15 @@ dlg_default_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, v
 /* --------------------------------------------------------------------------------------------- */
 
 void
-dlg_default_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
+dlg_default_mouse_callback (Widget *w, mouse_msg_t msg, mouse_event_t *event)
 {
     switch (msg)
     {
     case MSG_MOUSE_CLICK:
-        if (event->y < 0 || event->y >= w->lines || event->x < 0 || event->x >= w->cols)
+        if (event->y < 0 || event->y >= w->rect.lines || event->x < 0 || event->x >= w->rect.cols)
         {
             DIALOG (w)->ret_value = B_CANCEL;
-            dlg_stop (DIALOG (w));
+            dlg_close (DIALOG (w));
         }
         break;
 
@@ -398,6 +400,7 @@ dlg_create (gboolean modal, int y1, int x1, int lines, int cols, widget_pos_flag
             gboolean compact, const int *colors, widget_cb_fn callback,
             widget_mouse_cb_fn mouse_callback, const char *help_ctx, const char *title)
 {
+    WRect r = { y1, x1, lines, cols };
     WDialog *new_d;
     Widget *w;
     WGroup *g;
@@ -405,8 +408,8 @@ dlg_create (gboolean modal, int y1, int x1, int lines, int cols, widget_pos_flag
     new_d = g_new0 (WDialog, 1);
     w = WIDGET (new_d);
     g = GROUP (new_d);
-    widget_adjust_position (pos_flags, &y1, &x1, &lines, &cols);
-    group_init (g, y1, x1, lines, cols, callback != NULL ? callback : dlg_default_callback,
+    widget_adjust_position (pos_flags, &r);
+    group_init (g, &r, callback != NULL ? callback : dlg_default_callback,
                 mouse_callback != NULL ? mouse_callback : dlg_default_mouse_callback);
 
     w->pos_flags = pos_flags;
@@ -426,13 +429,14 @@ dlg_create (gboolean modal, int y1, int x1, int lines, int cols, widget_pos_flag
     new_d->colors = colors;
     new_d->help_ctx = help_ctx;
     new_d->compact = compact;
-    new_d->data = NULL;
+    new_d->data.p = NULL;
 
     if (modal)
     {
         w->state |= WST_MODAL;
 
-        new_d->bg = WIDGET (frame_new (0, 0, w->lines, w->cols, title, FALSE, new_d->compact));
+        new_d->bg =
+            WIDGET (frame_new (0, 0, w->rect.lines, w->rect.cols, title, FALSE, new_d->compact));
         group_add_widget (g, new_d->bg);
         frame_set_title (FRAME (new_d->bg), title);
     }
@@ -470,37 +474,7 @@ dlg_set_default_colors (void)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-do_refresh (void)
-{
-    GList *d = top_dlg;
-
-    if (fast_refresh)
-    {
-        if (d != NULL)
-            widget_draw (WIDGET (d->data));
-    }
-    else
-    {
-        /* Search first fullscreen dialog */
-        for (; d != NULL; d = g_list_next (d))
-            if ((WIDGET (d->data)->pos_flags & WPOS_FULLSCREEN) != 0)
-                break;
-
-        /* when small dialog (i.e. error message) is created first,
-           there is no fullscreen dialog in the stack */
-        if (d == NULL)
-            d = g_list_last (top_dlg);
-
-        /* back to top dialog */
-        for (; d != NULL; d = g_list_previous (d))
-            widget_draw (WIDGET (d->data));
-    }
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-void
-dlg_stop (WDialog * h)
+dlg_close (WDialog *h)
 {
     widget_set_state (WIDGET (h), WST_CLOSED, TRUE);
 }
@@ -509,7 +483,7 @@ dlg_stop (WDialog * h)
 /** Init the process */
 
 void
-dlg_init (WDialog * h)
+dlg_init (WDialog *h)
 {
     WGroup *g = GROUP (h);
     Widget *wh = WIDGET (h);
@@ -536,8 +510,7 @@ dlg_init (WDialog * h)
         group_set_current_widget_next (g);
 
     widget_set_state (wh, WST_ACTIVE, TRUE);
-    /* draw dialog and focus found widget */
-    widget_set_state (wh, WST_FOCUSED, TRUE);
+    widget_draw (wh);
 
     h->ret_value = 0;
 }
@@ -545,7 +518,7 @@ dlg_init (WDialog * h)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-dlg_process_event (WDialog * h, int key, Gpm_Event * event)
+dlg_process_event (WDialog *h, int key, Gpm_Event *event)
 {
     switch (key)
     {
@@ -572,7 +545,7 @@ dlg_process_event (WDialog * h, int key, Gpm_Event * event)
 /** Shutdown the dlg_run */
 
 void
-dlg_run_done (WDialog * h)
+dlg_run_done (WDialog *h)
 {
     top_dlg = g_list_remove (top_dlg, h);
 
@@ -594,7 +567,7 @@ dlg_run_done (WDialog * h)
  */
 
 int
-dlg_run (WDialog * h)
+dlg_run (WDialog *h)
 {
     dlg_init (h);
     frontend_dlg_run (h);
@@ -605,10 +578,10 @@ dlg_run (WDialog * h)
 /* --------------------------------------------------------------------------------------------- */
 
 /**
-  * Write history to the ${XDG_CACHE_HOME}/mc/history file
+  * Write history to the ${XDG_DATA_HOME}/mc/history file
   */
 void
-dlg_save_history (WDialog * h)
+dlg_save_history (WDialog *h)
 {
     char *profile;
     int i;
@@ -642,7 +615,7 @@ dlg_save_history (WDialog * h)
 /* --------------------------------------------------------------------------------------------- */
 
 char *
-dlg_get_title (const WDialog * h, size_t len)
+dlg_get_title (const WDialog *h, size_t len)
 {
     char *t;
 

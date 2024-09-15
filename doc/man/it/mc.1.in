@@ -81,9 +81,9 @@ Questa funzione non è fatta per un uso diretto, ma dovrebbe essere
 utilizzata da una speciale funzione shell che imposti automaticamente 
 l'ultima directory corrente della shell come l'ultima directory in cui
 stava il Midnight Commander. Prelevate i file
-.B %libexecdir%/mc/mc.sh
+.B %pkglibexecdir%/mc.sh
 (utenti bash e zsh) o rispettivamente
-.B %libexecdir%/mc/mc.csh
+.B %pkglibexecdir%/mc.csh
 (utenti tcsh) per definire
 .B mc
 come un alias allo script di shell appropriato.
@@ -1090,8 +1090,7 @@ pannelli directory uno con l'altro. E' poi possibile usare il comando
 Copia (F5) per rendere i pannelli identici. Ci sono tre metodi di
 confronto. Il metodo veloce confronta solo l'ampiezza e la data del
 file. Il metodo completo fa un confronto byte\-per\-byte. Il metodo
-completo non è disponibile se la macchina non supporta la chiamata di
-sistema mmap(2). Il metodo solo dimensione confronta solo l'ampiezza dei
+solo dimensione confronta solo l'ampiezza dei
 file e non controlla il contenuto né la data del file.
 .PP
 Il comando cronologia comandi mostra un'elenco dei comandi battuti. Il
@@ -1314,60 +1313,14 @@ comando cd interno\&.
 .\"NODE "    Edit Extension File"
 .SH "    Modifica file estensioni"
 Questo comando invocherà l'editor sul file 
-.IR ~/.config/mc/mc.ext .
-Il fomato di questo file è il seguente (il formato è cambiato dalla 
-versione 3.0):
-.PP
-Tutte le righe che iniziano per # vengono ignorate.
-.PP
-Le righe che cominciano dalla prima colonna devono avere il seguente formato:
-.PP
-.IR parolachiave/descrizione ,
-i.e. qualsiasi cosa dopo
-.I parolachiave/
-fino al fine riga è 
-.I descrizione
-.PP
-parolachiave può essere: 
-.TP
-.I shell
-(allora descrizione è qualsiasi estensione (no caratteri jolly), 
-cioè corrisponde a tutti i file *descrizione. Esempio: .tar corrisponde a *.tar)
-.TP
-.I regex
-(descrizione è un'espressione regolare)
-.TP
-.I type
-(file corrisponde se `file %f` corrisponde all'espressione regolare descrizione
-(nome del file: a partire da `file %f` viene rimosso))
-.TP
-.I default
-(corrisponde a qualsiasi file indipendentemente dalla descrizione)
-.PP
-Le altre linee devono cominciare con uno spazio o una tabulazione e devono essere nel formato:
-.I parolachiave=comando
-(senza spazi intorno a =), dove
-.I parolachiave
-deve essere: 
-.I Open
-(se l'utente preme Invio o fa doppio clic), 
-.I View
-(F3),
-.I Edit
-(F4).
-.I command
-è qualsiasi comando shell di una riga, con la semplice
-.\"LINK2"
-sostituzione macro\&.
-.\"Macro Substitution"
-.PP
-Gli obiettivi sono valutati dalla cima al fondo, perciò l'ordine è 
-importante. Se alcune azioni mancano, la ricerca continua come se 
-la regola non corrispondesse, cioè se un file corrisponde alla prima e
-alla seconda voce e manca la voce View in cima, allora premendo F3 verrà
-usata l'azione View della seconda voce.
-.I Normalmente 
-dovrebbero corrispondere tutte le azioni.
+.IR ~/.config/mc/mc.ext.ini .
+If this file does not exist and you are not root, it will be copied from
+.IR %sysconfdir%/mc/mc.ext.ini .
+If you are root, you can choose the file to edit: user's
+.I ~/.config/mc/mc.ext.ini
+or system\-wide
+.IR %sysconfdir%/mc/mc.ext.ini .
+The format of this file is described in detail in it.
 .\"NODE "    Background jobs"
 .SH "    Processi in background"
 Questo comando permette di controllare lo stato di ogni processo
@@ -1382,7 +1335,7 @@ utilizzato, se esiste, il file .mc.menu dalla directory corrente,
 ma solo se è di proprietà dell'utente o di root e se non è scrivibile
 a tutti. Se tale file non viene trovato, mc alla stessa maniera 
 prova con ~/.config/mc/menu altrimenti usa il menu di sistema
-%prefix%/share/mc/mc.menu.
+%pkgdatadir%/mc.menu.
 .PP
 Il formato del file menu è molto semplice. Le righe che cominciano
 con qualsiasi cosa che non sia uno spazio o una tabulazione sono
@@ -1894,7 +1847,7 @@ file system FTP
 per gli esempi.
 .PP
 Se quest'opzione è impostata, il programma farà due cose: consulterà 
-il file %prefix%/lib/mc/mc.no_proxy per le righe contenenti nomi host
+il file %sysconfdir%/mc/mc.no_proxy per le righe contenenti nomi host
 locali (se il nome host comincia con un punto, è considerato un 
 dominio) e assumendo che ogni nome host senza punti nel nome sia
 direttamente accessibile. Tutti gli altri host verranno contattati
@@ -1916,7 +1869,7 @@ funzionare con alcuni firewall.
 Alla partenza il Midnight Commander prova a caricare le informazioni di
 inizializzazione dal file ~/.config/mc/ini. Se questo file non esiste, 
 caricherà le informazioni dal file di configurazione di sistema 
-posizionato in %prefix%/share/mc/mc.ini. Se il file di configurazione di 
+posizionato in %pkgdatadir%/mc.ini. Se il file di configurazione di 
 sistema non esiste, MC userà le impostazioni predefinite.
 .PP
 Il comando
@@ -2382,14 +2335,6 @@ mescolare testo protetto con costanti come nell'esempio:
 .PP
 Notare che 012 è un numero ottale. \-1 viene convertito in 0xFF.
 .PP
-Alcuni dettagli interni circa il visualizzatore: su sistemi che
-forniscono la chiamata di sistema mmap(2), il programma mappa il
-file invece di caricarlo; se il sistema non fornisce la chiamata di
-sistema mmap(2) o il file corrisponde ad un'azione che richiede
-un filtro, allora il visualizzatore userà i buffer di accrescimanto
-(growing), caricando perciò solo le parti del file su cui vi si accede
-(inclusi i file compressi).
-.PP
 Ecco un'elenco di azioni associate ad ogni tasto che il Midnight Commander
 gestisce nel visualizzatore di file interno.
 .PP
@@ -2425,7 +2370,7 @@ un'espressione di ricerca, altrimenti trova la prossima occorrenza.
 .PP
 .B F8
 Cambia tra modalità Normale/Filtrata: questo mostrerà il file come si
-trova su disco o se è stato specificato un filtro nel file mc.ext, come
+trova su disco o se è stato specificato un filtro nel file mc.ext.ini, come
 esce dal filtro. La modalità corrente è sempre quella diversa da quella
 mostrata dall'etichetta del tasto, dato che il bottone rappresenta la
 modalità nella quale si entra premendolo.
@@ -2537,7 +2482,7 @@ formatterà il blocco evidenziato correntemente (testo, codice
 o
 .B C++
 o altro). Questo comportamento viene controllato dal file 
-.B %prefix%/share/mc/edit.indent.rc
+.B %pkgdatadir%/edit.indent.rc
 che viene copiato nel 
 .B ~/.local/share/mc/mcedit/edit.indent.rc
 nella propria directory home la prima volta che lo si usa.
@@ -2672,7 +2617,7 @@ al file tar usare la seguente sintassi:
 .PP
 .I /nomefile.tar/utar://[dir\-dentro\-tar]
 .PP
-Il file mc.ext già fornisce un collegamento per il file tar; ciò
+Il file mc.ext.ini già fornisce un collegamento per il file tar; ciò
 significa che normalmente basta selezionare un file tar e premere invio
 per entrare nel file tar, vedere la sezione
 .\"LINK2"
@@ -2927,7 +2872,7 @@ Il colore del visualizzatore è: viewunderline.
 Colori speciali di evidenziazione: executable, directory, link, device, 
 special, core.
 I colori dell'viewer sono: viewnormal, viewbold, viewunderline, viewselected.
-I colori dell'editor sono: editnormal, editbold, editmarked.
+I colori dell'editor sono: editnormal, editbold, editmarked, editnonprintable.
 .PP
 .I input 
 determina il colore delle righe di input usate delle finestre di dialogo.
@@ -3082,7 +3027,7 @@ pannello.
 Se questa variabile è abilitata (valore predefinito) userà il comando
 file per trovare delle corrispondenze sui tipi di file elencati nel
 .\"LINK2"
-file mc.ext\&.
+file mc.ext.ini\&.
 .\"Edit Extension File"
 .TP
 .I xtree_mode
@@ -3140,28 +3085,28 @@ simpatici tasti dappertutto).
 Il programma recupera tutte le informazioni relative al proprio funzionamento
 dalla variabile ambiente
 .BR MC_DATADIR ,
-e se la variabile non è impostata, passerà alla directory %prefix%/share/mc .
+e se la variabile non è impostata, passerà alla directory %pkgdatadir% .
 .PP
-.I %prefix%/share/mc/help/mc.hlp
+.I %pkgdatadir%/help/mc.hlp
 .IP
 Il file di aiuto per il programma.
 .PP
-.I %prefix%/share/mc/mc.ext
+.I %pkgdatadir%/mc.ext.ini
 .IP
 Il file delle estensioni di sistema predefinito.
 .PP
-.I ~/.config/mc/mc.ext
+.I ~/.config/mc/mc.ext.ini
 .IP
 Le estensioni dell'utente, la configurazione del visualizzatore e
 dell'editor di file. Se presenti, questi file si sovrappongono ai file di 
 sistema.
 .PP
-.I %prefix%/share/mc/mc.ini
+.I %pkgdatadir%/mc.ini
 .IP
 La configurazione di sistema predefinita per il Midnight Commander, usata solo
 se l'utente non possiede il proprio file ~/.config/mc/ini.
 .PP
-.I %prefix%/share/mc/mc.lib
+.I %pkgdatadir%/mc.lib
 .IP
 Le impostazioni globali per il Midnight Commander. La modifica di questo
 file influisce su tutti gli utenti, che abbiano o no il file ~/.config/mc/ini .
@@ -3176,11 +3121,11 @@ da mc.lib.
 La configurazione dell'utente. Se questo file è presente, la configurazione
 viene caricata da qui invece che dal file di sistema.
 .PP
-.I %prefix%/share/mc/hints/mc.hint
+.I %pkgdatadir%/hints/mc.hint
 .IP
 Questo file contiene i suggerimenti (dritte) mostrate dal programma.
 .PP
-.I %prefix%/share/mc/mc.menu
+.I %pkgdatadir%/mc.menu
 .IP
 Questo file contiene il menu di sistema per le applicazioni.
 .PP
@@ -3219,7 +3164,7 @@ tcsh(1), zsh(1).
 .PP
 .nf
 La pagina Web del Midnight Commander:
-	http://www.midnight\-commander.org/
+	https://www.midnight\-commander.org/
 .fi
 .\"NODE "AUTHORS"
 .SH "AUTORI"
@@ -3260,7 +3205,8 @@ Vedere il file TODO nella distribuzione per informazioni su
 quello che rimane ancora da fare.
 .PP
 Se si vuole fare un rapporto di un problema nel programma, si prega di
-spedire un messaggio di posta a questo indirizzo: mc\-devel@gnome.org.
+spedire un messaggio di posta a questo indirizzo:
+mc\-devel@lists.midnight-commander.org.
 .PP
 Nel rapporto è necessario fornire una descrizione dettagliata del baco, 
 la versione del programma (mc \-v mostra quest'informazione), il sistema 

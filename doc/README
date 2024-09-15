@@ -1,12 +1,12 @@
 Contents
 --------
 
-Introduction
-Dependencies
-Features
-Mini-documentation
-Where to get more information
-Reporting problems
+* Introduction
+* Dependencies
+* Features
+* Mini-documentation
+* Where to get more information
+* Reporting problems
 
 
 Introduction
@@ -16,8 +16,8 @@ GNU Midnight Commander (also referred to as MC) is a user shell with
 text-mode full-screen interface.  It can be run on the OS console,
 in xterm and other terminal emulators.
 
-GNU Midnight Commander allows you to manage files while making most of
-you screen and giving you a clear representation of the filesystem, yet
+GNU Midnight Commander allows you to manage files while making the most of
+your screen and giving you a clear representation of the filesystem, yet
 it's simple enough to be run over a telnet or ssh session.
 
 GNU Midnight Commander is released under the GNU General Public
@@ -128,7 +128,7 @@ These are hints for the text mode edition:
 
 * The Virtual File System is a cute addition to the project, you may
   browse in tar and compressed tar files as well as browsing remote
-  machines with the fish file system.
+  machines with the shell file system.
 
 * Please read the manual page.
 
@@ -141,15 +141,19 @@ Where to get more information
 
 There is a webpage for GNU Midnight Commander at
 
-https://www.midnight-commander.org/
+* https://www.midnight-commander.org
 
 This page also has current information about mailing lists and some
 useful advices how to report bugs.
 
 You can download the latest version of GNU Midnight Commander from
 
-https://www.midnight-commander.org/downloads/
+* https://www.midnight-commander.org/downloads/
 
+The Midnight Commander distribution is placed at:
+
+* http://ftp.osuosl.org/pub/midnightcommander/
+* ftp://ftp.osuosl.org/pub/midnightcommander/
 
 Reporting problems
 ------------------
@@ -160,11 +164,13 @@ https://www.midnight-commander.org/wiki/doc/reportDefects
 
 Also you can use mc mailing lists to discuss problems.
 
-There are two mailing lists, mc@gnome.org and mc-devel@gnome.org.  Use
-mc-devel@gnome.org if you are prepared for a more technical discussion
-with the developers of the package, otherwise use mc@gnome.org.
+There are two mailing lists:
 
-Please don't sent HTML e-mail to either of those mailing lists.
+  - mc@lists.midnight-commander.org
+  - mc-devel@lists.midnight-commander.org
+
+Use mc-devel@ if you are prepared for a more technical discussion
+with the developers of the package, otherwise use mc@.
 
 Include the output of "mc --version", the operating system and the
 distribution (if applicable) you are using, the compiler and the

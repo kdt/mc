@@ -2,7 +2,7 @@
    Internal file viewer for the Midnight Commander
    Function for paint dialogs
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -14,7 +14,7 @@
    Pavel Machek, 1998
    Roland Illig <roland.illig@gmx.de>, 2004, 2005
    Slava Zanko <slavazanko@google.com>, 2009
-   Andrew Borodin <aborodin@vmail.ru>, 2009, 2012
+   Andrew Borodin <aborodin@vmail.ru>, 2009-2022
    Ilia Maslakov <il.smind@gmail.com>, 2009
 
    This file is part of the Midnight Commander.
@@ -66,7 +66,7 @@
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mcview_dialog_search (WView * view)
+mcview_dialog_search (WView *view)
 {
     char *exp = NULL;
     int qd_result;
@@ -98,9 +98,10 @@ mcview_dialog_search (WView * view)
             /* *INDENT-ON* */
         };
 
+        WRect r = { -1, -1, 0, 58 };
+
         quick_dialog_t qdlg = {
-            -1, -1, 58,
-            N_("Search"), "[Input Line Keys]",
+            r, N_("Search"), "[Input Line Keys]",
             quick_widgets, NULL, NULL
         };
 
@@ -109,7 +110,7 @@ mcview_dialog_search (WView * view)
 
     g_strfreev (list_of_types);
 
-    if ((qd_result == B_CANCEL) || (exp == NULL) || (exp[0] == '\0'))
+    if (qd_result == B_CANCEL || exp[0] == '\0')
     {
         g_free (exp);
         return FALSE;
@@ -121,7 +122,10 @@ mcview_dialog_search (WView * view)
 
         tmp = str_convert_to_input (exp);
         g_free (exp);
-        exp = g_string_free (tmp, FALSE);
+        if (tmp != NULL)
+            exp = g_string_free (tmp, FALSE);
+        else
+            exp = g_strdup ("");
     }
 #endif
 
@@ -134,7 +138,7 @@ mcview_dialog_search (WView * view)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mcview_dialog_goto (WView * view, off_t * offset)
+mcview_dialog_goto (WView *view, off_t *offset)
 {
     typedef enum
     {
@@ -181,9 +185,10 @@ mcview_dialog_goto (WView * view, off_t * offset)
             /* *INDENT-ON* */
         };
 
+        WRect r = { -1, -1, 0, 40 };
+
         quick_dialog_t qdlg = {
-            -1, -1, 40,
-            N_("Goto"), "[Input Line Keys]",
+            r, N_("Goto"), "[Input Line Keys]",
             quick_widgets, NULL, NULL
         };
 
@@ -194,7 +199,7 @@ mcview_dialog_goto (WView * view, off_t * offset)
     *offset = -1;
 
     /* check input line value */
-    res = (qd_result != B_CANCEL && exp != NULL && exp[0] != '\0');
+    res = (qd_result != B_CANCEL && exp[0] != '\0');
     if (res)
     {
         int base = (current_goto_type == MC_VIEW_GOTO_OFFSET_HEX) ? 16 : 10;

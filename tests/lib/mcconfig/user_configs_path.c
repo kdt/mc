@@ -1,7 +1,7 @@
 /*
    libmc - check mcconfig submodule. Get full paths to user's config files.
 
-   Copyright (C) 2011-2021
+   Copyright (C) 2011-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -28,7 +28,6 @@
 #include "tests/mctest.h"
 
 #include "lib/strutil.h"
-#include "lib/strescape.h"
 #include "lib/vfs/vfs.h"
 #include "lib/fileloc.h"
 
@@ -97,8 +96,8 @@ static const struct test_user_config_paths_ds
         MC_USERMENU_FILE
     },
     { /* 5. */
-        CONF_MAIN,
-        EDIT_HOME_SYNTAX_FILE
+        CONF_DATA,
+        EDIT_SYNTAX_FILE
     },
     { /* 6. */
         CONF_MAIN,
@@ -110,7 +109,7 @@ static const struct test_user_config_paths_ds
     },
     { /* 8. */
         CONF_MAIN,
-        MC_FILEBIND_FILE
+        MC_EXT_FILE
     },
     { /* 9. */
         CONF_DATA,
@@ -118,7 +117,7 @@ static const struct test_user_config_paths_ds
     },
     { /* 10. */
         CONF_DATA,
-        FISH_PREFIX
+        VFS_SHELL_PREFIX
     },
     { /* 11. */
         CONF_DATA,

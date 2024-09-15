@@ -1,7 +1,7 @@
 /*
    Concurrent shell support for the Midnight Commander
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -149,7 +149,7 @@ gboolean should_read_new_subshell_prompt;
 #define FORK_FAILURE 69         /* Arbitrary */
 
 /* Length of the buffer for all I/O with the subshell */
-#define PTY_BUFFER_SIZE BUF_SMALL       /* Arbitrary; but keep it >= 80 */
+#define PTY_BUFFER_SIZE BUF_MEDIUM      /* Arbitrary; but keep it >= 80 */
 
 /*** file scope type declarations ****************************************************************/
 
@@ -167,6 +167,8 @@ enum
 /* This is the keybinding that is sent to the shell, to make the shell send us the location of
  * the cursor. */
 #define SHELL_CURSOR_KEYBINDING "+"
+
+/*** forward declarations (file scope functions) *************************************************/
 
 /*** file scope variables ************************************************************************/
 
@@ -416,13 +418,13 @@ init_subshell_child (const char *pty_name)
     switch (mc_global.shell->type)
     {
     case SHELL_BASH:
-        execl (mc_global.shell->path, "bash", "-rcfile", init_file, (char *) NULL);
+        execl (mc_global.shell->path, mc_global.shell->path, "-rcfile", init_file, (char *) NULL);
         break;
 
     case SHELL_ZSH:
         /* Use -g to exclude cmds beginning with space from history
          * and -Z to use the line editor on non-interactive term */
-        execl (mc_global.shell->path, "zsh", "-Z", "-g", (char *) NULL);
+        execl (mc_global.shell->path, mc_global.shell->path, "-Z", "-g", (char *) NULL);
         break;
 
     case SHELL_ASH_BUSYBOX:
@@ -728,7 +730,7 @@ set_prompt_string (void)
         return;
 
     if (subshell_prompt_temp_buffer->len != 0)
-        g_string_assign (subshell_prompt, subshell_prompt_temp_buffer->str);
+        mc_g_string_copy (subshell_prompt, subshell_prompt_temp_buffer);
 
     setup_cmdline ();
 }
@@ -748,8 +750,9 @@ feed_subshell (int how, gboolean fail_on_error)
 
     should_read_new_subshell_prompt = FALSE;
 
-    /* we wait up to 1 second if fail_on_error, forever otherwise */
-    wtime.tv_sec = 1;
+    /* have more than enough time to run subshell:
+       wait up to 10 second if fail_on_error, forever otherwise */
+    wtime.tv_sec = 10;
     wtime.tv_usec = 0;
     wptr = fail_on_error ? &wtime : NULL;
 
@@ -871,7 +874,7 @@ feed_subshell (int how, gboolean fail_on_error)
                         set_prompt_string ();
                         if (subshell_ready && !read_command_line_buffer (FALSE))
                         {
-                            /* If we got here, some unforseen error must have occurred. */
+                            /* If we got here, some unforeseen error must have occurred. */
                             if (mc_global.shell->type != SHELL_FISH)
                             {
                                 write_all (mc_global.tty.subshell_pty, "\003", 1);
@@ -1173,7 +1176,7 @@ init_subshell_precmd (char *precmd, size_t buff_size)
                     "functions -e fish_right_prompt;"
                     "functions -c fish_prompt fish_prompt_mc; end;"
                     "function fish_prompt;"
-                    "echo \"$PWD\">&%d; fish_prompt_mc; kill -STOP %%self; end\n",
+                    "echo \"$PWD\">&%d; fish_prompt_mc; kill -STOP $fish_pid; end\n",
                     command_buffer_pipe[WRITE], command_buffer_pipe[WRITE], subshell_pipe[WRITE]);
         break;
 
@@ -1259,6 +1262,37 @@ subshell_name_quote (const char *s)
     g_string_append (ret, quote_cmd_end);
 
     return ret;
+}
+
+/* --------------------------------------------------------------------------------------------- */
+/**
+ * This function checks the pipe from which we receive data about the current working directory.
+ * If there is any data waiting, we clear it.
+ */
+
+static void
+clear_cwd_pipe (void)
+{
+    fd_set read_set;
+    struct timeval wtime = { 0, 0 };
+    int maxfdp;
+
+    FD_ZERO (&read_set);
+    FD_SET (subshell_pipe[READ], &read_set);
+    maxfdp = subshell_pipe[READ];
+
+    if (select (maxfdp + 1, &read_set, NULL, NULL, &wtime) > 0
+        && FD_ISSET (subshell_pipe[READ], &read_set))
+    {
+        if (read (subshell_pipe[READ], subshell_cwd, sizeof (subshell_cwd)) <= 0)
+        {
+            tcsetattr (STDOUT_FILENO, TCSANOW, &shell_mode);
+            fprintf (stderr, "read (subshell_pipe[READ]...): %s\r\n", unix_error_string (errno));
+            exit (EXIT_FAILURE);
+        }
+
+        synchronize ();
+    }
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -1410,7 +1444,7 @@ init_subshell (void)
 /* --------------------------------------------------------------------------------------------- */
 
 int
-invoke_subshell (const char *command, int how, vfs_path_t ** new_dir_vpath)
+invoke_subshell (const char *command, int how, vfs_path_t **new_dir_vpath)
 {
     /* Make the MC terminal transparent */
     tcsetattr (STDOUT_FILENO, TCSANOW, &raw_mode);
@@ -1431,21 +1465,23 @@ invoke_subshell (const char *command, int how, vfs_path_t ** new_dir_vpath)
 
             if (use_persistent_buffer)
             {
+                const char *s;
                 size_t i;
                 int pos;
 
+                s = input_get_ctext (cmdline);
+
                 /* Check to make sure there are no non text characters in the command buffer,
                  * such as tab, or newline, as this could cause problems. */
-                for (i = 0; cmdline->buffer[i] != '\0'; i++)
-                    if ((unsigned char) cmdline->buffer[i] < 32
-                        || (unsigned char) cmdline->buffer[i] == 127)
-                        cmdline->buffer[i] = ' ';
+                for (i = 0; i < cmdline->buffer->len; i++)
+                    if ((unsigned char) s[i] < 32 || (unsigned char) s[i] == 127)
+                        g_string_overwrite_len (cmdline->buffer, i, " ", 1);
 
                 /* Write the command buffer to the subshell. */
-                write_all (mc_global.tty.subshell_pty, cmdline->buffer, strlen (cmdline->buffer));
+                write_all (mc_global.tty.subshell_pty, s, cmdline->buffer->len);
 
                 /* Put the cursor in the correct place in the subshell. */
-                pos = str_length (cmdline->buffer) - cmdline->point;
+                pos = str_length (s) - cmdline->point;
                 for (i = 0; i < (size_t) pos; i++)
                     write_all (mc_global.tty.subshell_pty, ESC_STR "[D", 3);
             }
@@ -1457,7 +1493,9 @@ invoke_subshell (const char *command, int how, vfs_path_t ** new_dir_vpath)
         /* data is there, but only if we are using one of the shells that */
         /* doesn't support keeping command buffer contents, OR if there was */
         /* some sort of error. */
-        if (!use_persistent_buffer)
+        if (use_persistent_buffer)
+            clear_cwd_pipe ();
+        else
         {
             /* We don't need to call feed_subshell here if we are using fish, because of a
              * quirk in the behavior of that particular shell. */
@@ -1549,7 +1587,6 @@ read_subshell_prompt (void)
     int rc = 0;
     ssize_t bytes = 0;
     struct timeval timeleft = { 0, 0 };
-    gboolean should_reset_prompt = TRUE;
     gboolean got_new_prompt = FALSE;
 
     fd_set tmp;
@@ -1575,11 +1612,6 @@ read_subshell_prompt (void)
         }
 
         bytes = read (mc_global.tty.subshell_pty, pty_buffer, sizeof (pty_buffer));
-        if (should_reset_prompt)
-        {
-            should_reset_prompt = FALSE;
-            clear_subshell_prompt_string ();
-        }
 
         parse_subshell_prompt_string (pty_buffer, bytes);
         got_new_prompt = TRUE;
@@ -1651,7 +1683,7 @@ exit_subshell (void)
 
 /** If it actually changed the directory it returns true */
 void
-do_subshell_chdir (const vfs_path_t * vpath, gboolean update_prompt)
+do_subshell_chdir (const vfs_path_t *vpath, gboolean update_prompt)
 {
     char *pcwd;
 
@@ -1682,16 +1714,32 @@ do_subshell_chdir (const vfs_path_t * vpath, gboolean update_prompt)
                 return;
             }
     }
+
+    /* A quick and dirty fix for fish shell. For some reason, fish does not
+     * execute all the commands sent to it from Midnight Commander :(
+     * An example of such buggy behavior is presented in ticket #4521.
+     * TODO: Find the real cause and fix it "the right way" */
+    if (mc_global.shell->type == SHELL_FISH)
+    {
+        write_all (mc_global.tty.subshell_pty, "\n", 1);
+        subshell_state = RUNNING_COMMAND;
+        feed_subshell (QUIETLY, TRUE);
+    }
+
     /* The initial space keeps this out of the command history (in bash
        because we set "HISTCONTROL=ignorespace") */
     write_all (mc_global.tty.subshell_pty, " cd ", 4);
 
-    if (vpath != NULL)
+    if (vpath == NULL)
+        write_all (mc_global.tty.subshell_pty, "/", 1);
+    else
     {
         const char *translate;
 
         translate = vfs_translate_path (vfs_path_as_str (vpath));
-        if (translate != NULL)
+        if (translate == NULL)
+            write_all (mc_global.tty.subshell_pty, ".", 1);
+        else
         {
             GString *temp;
 
@@ -1699,15 +1747,8 @@ do_subshell_chdir (const vfs_path_t * vpath, gboolean update_prompt)
             write_all (mc_global.tty.subshell_pty, temp->str, temp->len);
             g_string_free (temp, TRUE);
         }
-        else
-        {
-            write_all (mc_global.tty.subshell_pty, ".", 1);
-        }
     }
-    else
-    {
-        write_all (mc_global.tty.subshell_pty, "/", 1);
-    }
+
     write_all (mc_global.tty.subshell_pty, "\n", 1);
 
     subshell_state = RUNNING_COMMAND;
@@ -1749,12 +1790,16 @@ do_subshell_chdir (const vfs_path_t * vpath, gboolean update_prompt)
         }
     }
 
-    /* Really escape Zsh history */
-    if (mc_global.shell->type == SHELL_ZSH)
+    /* Really escape Zsh/Fish history */
+    if (mc_global.shell->type == SHELL_ZSH || mc_global.shell->type == SHELL_FISH)
     {
         /* Per Zsh documentation last command prefixed with space lingers in the internal history
          * until the next command is entered before it vanishes. To make it vanish right away,
-         * type a space and press return. */
+         * type a space and press return.
+         *
+         * Fish shell now also provides the same behavior:
+         * https://github.com/fish-shell/fish-shell/commit/9fdc4f903b8b421b18389a0f290d72cc88c128bb
+         * */
         write_all (mc_global.tty.subshell_pty, " \n", 2);
         subshell_state = RUNNING_COMMAND;
         feed_subshell (QUIETLY, TRUE);

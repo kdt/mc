@@ -1,7 +1,7 @@
 /*
    Widgets for the Midnight Commander
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Authors:
@@ -10,7 +10,7 @@
    Jakub Jelinek, 1995
    Andrej Borsenkow, 1996
    Norbert Warmuth, 1997
-   Andrew Borodin <aborodin@vmail.ru>, 2009-2019
+   Andrew Borodin <aborodin@vmail.ru>, 2009-2022
 
    This file is part of the Midnight Commander.
 
@@ -61,22 +61,26 @@ typedef struct
     size_t max_width;
 } history_dlg_data;
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
+/* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-history_dlg_reposition (WDialog * dlg_head)
+history_dlg_reposition (WDialog *dlg_head)
 {
     history_dlg_data *data;
     int x = 0, y, he, wi;
     WRect r;
 
     /* guard checks */
-    if ((dlg_head == NULL) || (dlg_head->data == NULL))
+    if (dlg_head == NULL || dlg_head->data.p == NULL)
         return MSG_NOT_HANDLED;
 
-    data = (history_dlg_data *) dlg_head->data;
+    data = (history_dlg_data *) dlg_head->data.p;
 
     y = data->y;
     he = data->count + 2;
@@ -111,7 +115,7 @@ history_dlg_reposition (WDialog * dlg_head)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-history_dlg_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+history_dlg_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     switch (msg)
     {
@@ -138,7 +142,7 @@ history_dlg_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, v
                 return MSG_NOT_HANDLED;
             }
 
-            dlg_stop (d);
+            dlg_close (d);
             return MSG_HANDLED;
         }
 
@@ -150,7 +154,7 @@ history_dlg_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, v
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-history_create_item (history_descriptor_t * hd, void *data)
+history_create_item (history_descriptor_t *hd, void *data)
 {
     char *text = (char *) data;
     size_t width;
@@ -164,7 +168,7 @@ history_create_item (history_descriptor_t * hd, void *data)
 /* --------------------------------------------------------------------------------------------- */
 
 static void *
-history_release_item (history_descriptor_t * hd, WLEntry * le)
+history_release_item (history_descriptor_t *hd, WLEntry *le)
 {
     void *text;
 
@@ -181,7 +185,7 @@ history_release_item (history_descriptor_t * hd, WLEntry * le)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-history_descriptor_init (history_descriptor_t * hd, int y, int x, GList * history, int current)
+history_descriptor_init (history_descriptor_t *hd, int y, int x, GList *history, int current)
 {
     hd->list = history;
     hd->y = y;
@@ -200,7 +204,7 @@ history_descriptor_init (history_descriptor_t * hd, int y, int x, GList * histor
 /* --------------------------------------------------------------------------------------------- */
 
 void
-history_show (history_descriptor_t * hd)
+history_show (history_descriptor_t *hd)
 {
     GList *z, *hi;
     size_t count;
@@ -227,7 +231,7 @@ history_show (history_descriptor_t * hd)
     query_dlg =
         dlg_create (TRUE, 0, 0, 4, 4, WPOS_KEEP_DEFAULT, TRUE, dialog_colors, history_dlg_callback,
                     NULL, "[History-query]", _("History"));
-    query_dlg->data = &hist_data;
+    query_dlg->data.p = &hist_data;
 
     /* this call makes list stick to all sides of dialog, effectively make
        it be resized with dialog */
@@ -240,7 +244,7 @@ history_show (history_descriptor_t * hd)
        center of it, and let dialog function resize it to needed size. */
     send_message (query_dlg, NULL, MSG_RESIZE, 0, NULL);
 
-    if (WIDGET (query_dlg)->y < hd->y)
+    if (WIDGET (query_dlg)->rect.y < hd->y)
     {
         /* history is above base widget -- revert order to place recent item at bottom */
         /* revert history direction */
@@ -248,13 +252,13 @@ history_show (history_descriptor_t * hd)
         if (hd->current < 0 || (size_t) hd->current >= count)
             listbox_select_last (hd->listbox);
         else
-            listbox_select_entry (hd->listbox, count - 1 - (size_t) hd->current);
+            listbox_set_current (hd->listbox, count - 1 - (size_t) hd->current);
     }
     else
     {
         /* history is below base widget -- keep order to place recent item on top  */
         if (hd->current > 0)
-            listbox_select_entry (hd->listbox, hd->current);
+            listbox_set_current (hd->listbox, hd->current);
     }
 
     dlg_ret = dlg_run (query_dlg);
@@ -285,7 +289,7 @@ history_show (history_descriptor_t * hd)
         z = g_list_prepend (z, hd->release (hd, LENTRY (hi->data)));
 
     /* restore history direction */
-    if (WIDGET (query_dlg)->y < hd->y)
+    if (WIDGET (query_dlg)->rect.y < hd->y)
         z = g_list_reverse (z);
 
     widget_destroy (WIDGET (query_dlg));

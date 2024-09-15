@@ -1,6 +1,6 @@
 /* lib/vfs - test vfs_path_t manipulation functions
 
-   Copyright (C) 2011-2021
+   Copyright (C) 2011-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -49,7 +49,7 @@ static int test_chdir__return_value;
 
 /* @Mock */
 static int
-test_chdir (const vfs_path_t * vpath)
+test_chdir (const vfs_path_t *vpath)
 {
     test_chdir__vpath__captured = vfs_path_clone (vpath);
     return test_chdir__return_value;
@@ -144,11 +144,11 @@ START_PARAMETRIZED_TEST (test_relative_cd, test_relative_cd_ds)
 
     /* then */
     {
-        const vfs_path_element_t *element;
+        const char *element_path;
 
-        mctest_assert_int_eq (actual_result, 0);
-        element = vfs_path_get_by_index (vpath, -1);
-        mctest_assert_str_eq (element->path, data->expected_element_path);
+        ck_assert_int_eq (actual_result, 0);
+        element_path = vfs_path_get_last_path_str (vpath);
+        mctest_assert_str_eq (element_path, data->expected_element_path);
         vfs_path_free (vpath, TRUE);
     }
 }
@@ -175,8 +175,7 @@ START_TEST (test_vpath_to_str_filter)
     path_element = vfs_path_element_clone (vfs_path_get_by_index (vpath, -1));
     vfs_path_free (vpath, TRUE);
 
-    last_vpath = vfs_path_new ();
-    last_vpath->relative = TRUE;
+    last_vpath = vfs_path_new (TRUE);
 
     vfs_path_add_element (last_vpath, path_element);
 

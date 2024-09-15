@@ -1,7 +1,7 @@
 /*
    Main program for the Midnight Commander
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -62,6 +62,11 @@
 #include "filemanager/ext.h"    /* flush_extension_file() */
 #include "filemanager/command.h"        /* cmdline */
 #include "filemanager/panel.h"  /* panalized_panel */
+#include "filemanager/filenot.h"        /* my_rmdir() */
+
+#ifdef USE_INTERNAL_EDIT
+#include "editor/edit.h"        /* edit_arg_free() */
+#endif
 
 #include "vfs/plugins_init.h"
 
@@ -86,8 +91,11 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
@@ -130,7 +138,7 @@ OS_Setup (void)
     mc_shell_init ();
 
     /* This is the directory, where MC was installed, on Unix this is DATADIR */
-    /* and can be overriden by the MC_DATADIR environment variable */
+    /* and can be overridden by the MC_DATADIR environment variable */
     datadir_env = g_getenv ("MC_DATADIR");
     if (datadir_env != NULL)
         mc_global.sysconfig_dir = g_strdup (datadir_env);
@@ -250,6 +258,7 @@ main (int argc, char *argv[])
 {
     GError *mcerror = NULL;
     int exit_code = EXIT_FAILURE;
+    const char *tmpdir = NULL;
 
     mc_global.run_from_parent_mc = !check_sid ();
 
@@ -275,6 +284,13 @@ main (int argc, char *argv[])
         str_uninit_strings ();
         return exit_code;
     }
+
+    /* check terminal type
+     * $TERM must be set and not empty
+     * mc_global.tty.xterm_flag is used in init_key() and tty_init()
+     * Do this after mc_args_parse() where mc_args__force_xterm is set up.
+     */
+    mc_global.tty.xterm_flag = tty_check_term (mc_args__force_xterm);
 
     /* do this before mc_args_show_info () to view paths in the --datadir-info output */
     OS_Setup ();
@@ -312,12 +328,17 @@ main (int argc, char *argv[])
     vfs_setup_work_dir ();
 
     /* Set up temporary directory after VFS initialization */
-    mc_tmpdir ();
+    tmpdir = mc_tmpdir ();
 
     /* do this after vfs initialization and vfs working directory setup
        due to mc_setctl() and mcedit_arg_vpath_new() calls in mc_setup_by_args() */
     if (!mc_setup_by_args (argc, argv, &mcerror))
     {
+        /* At exit, do this before vfs_shut():
+           normally, temporary directory should be empty */
+        vfs_expire (TRUE);
+        (void) my_rmdir (tmpdir);
+
         vfs_shut ();
         done_setup ();
         g_free (saved_other_dir);
@@ -342,13 +363,6 @@ main (int argc, char *argv[])
             g_free (buffer);
         vfs_path_free (vpath, TRUE);
     }
-
-    /* check terminal type
-     * $TERM must be set and not empty
-     * mc_global.tty.xterm_flag is used in init_key() and tty_init()
-     * Do this after mc_args_handle() where mc_args__force_xterm is set up.
-     */
-    mc_global.tty.xterm_flag = tty_check_term (mc_args__force_xterm);
 
     /* NOTE: This has to be called before tty_init or whatever routine
        calls any define_sequence */
@@ -463,6 +477,11 @@ main (int argc, char *argv[])
 
     keymap_free ();
 
+    /* At exit, do this before vfs_shut():
+       normally, temporary directory should be empty */
+    vfs_expire (TRUE);
+    (void) my_rmdir (tmpdir);
+
     /* Virtual File System shutdown */
     vfs_shut ();
 
@@ -490,8 +509,7 @@ main (int argc, char *argv[])
     {
         int last_wd_fd;
 
-        last_wd_fd = open (mc_args__last_wd_file, O_WRONLY | O_CREAT | O_TRUNC | O_EXCL,
-                           S_IRUSR | S_IWUSR);
+        last_wd_fd = open (mc_args__last_wd_file, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
         if (last_wd_fd != -1)
         {
             ssize_t ret1;
@@ -529,8 +547,10 @@ main (int argc, char *argv[])
 
     if (mc_global.mc_run_mode != MC_RUN_EDITOR)
         g_free (mc_run_param0);
+#ifdef USE_INTERNAL_EDIT
     else
-        g_list_free_full ((GList *) mc_run_param0, (GDestroyNotify) mcedit_arg_free);
+        g_list_free_full ((GList *) mc_run_param0, (GDestroyNotify) edit_arg_free);
+#endif /* USE_INTERNAL_EDIT */
 
     g_free (mc_run_param1);
     g_free (saved_other_dir);

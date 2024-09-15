@@ -1,7 +1,7 @@
 /*
    Virtual File System: FTP file system
 
-   Copyright (C) 2015-2021
+   Copyright (C) 2015-2024
    The Free Software Foundation, Inc.
 
    Written by: Andrew Borodin <aborodin@vmail.ru>, 2013
@@ -56,14 +56,8 @@
 
 #define number_of_parsers 7
 
-#define MINUTE (60)
-#define HOUR   (60 * MINUTE)
-#define DAY    (24 * HOUR)
-
 #define NO_SIZE     ((off_t) (-1L))
-#define NO_SIZE_YET ((off_t) (-2L))
 #define NO_DATE     ((time_t) (-1L))
-#define NO_DATE_YET ((time_t) (-2L))
 
 #define FIRST_TOKEN strtok (line, " \t")
 #define NEXT_TOKEN  strtok (NULL, " \t")
@@ -85,7 +79,8 @@ typedef enum
 typedef gboolean (*ftpfs_line_parser) (char *line, struct stat * s, char **filename,
                                        char **linkname, int *err);
 
-/* formard declarations */
+/*** forward declarations (file scope functions) *************************************************/
+
 static gboolean ftpfs_parse_long_list_UNIX (char *line, struct stat *s, char **filename,
                                             char **linkname, int *err);
 static gboolean ftpfs_parse_long_list_NT (char *line, struct stat *s, char **filename,
@@ -214,7 +209,7 @@ mktime_from_utc (const struct tm *t)
     memcpy (&tc, t, sizeof (struct tm));
 
     /* UTC times are never DST; if we say -1, we'll introduce odd localtime-
-     * dependant errors. */
+     * dependent errors. */
 
     tc.tm_isdst = 0;
 
@@ -329,7 +324,7 @@ parse_ls_line (char *line, struct stat *s, char **filename, char **linkname)
         long long size;
         int n;
 
-        s->st_gid = ftpfs_get_gid (t);
+        s->st_gid = ftpfs_get_gid (group_or_size);
 
         if (sscanf (t, "%lld%n", &size, &n) == 1 && t[n] == '\0')
             s->st_size = (off_t) size;
@@ -431,8 +426,6 @@ ftpfs_parse_long_list_UNIX (char *line, struct stat *s, char **filename, char **
 
     if (strncasecmp (line, "Status of ", 10) == 0)
         return FALSE;           /* STAT output. */
-    if (strchr ("bcpsD", line[0]) != NULL)      /* block, char, pipe, socket, Door. */
-        return FALSE;
 
     ret = parse_ls_line (line, s, filename, linkname);
     if (!ret)
@@ -807,7 +800,7 @@ ftpfs_parse_long_list_MLSD (char *line, struct stat *s, char **filename, char **
     if (owner != NULL)
         s->st_uid = ftpfs_get_uid (owner);
     if (group != NULL)
-        s->st_uid = ftpfs_get_gid (group);
+        s->st_gid = ftpfs_get_gid (group);
 
     return TRUE;
 }
@@ -1112,7 +1105,7 @@ ftpfs_parse_long_list_MacWebStar (char *line, struct stat *s, char **filename,
 /* --------------------------------------------------------------------------------------------- */
 
 GSList *
-ftpfs_parse_long_list (struct vfs_class * me, struct vfs_s_inode * dir, GSList * buf, int *err_ret)
+ftpfs_parse_long_list (struct vfs_class *me, struct vfs_s_inode *dir, GSList *buf, int *err_ret)
 {
     int err[number_of_parsers];
     GSList *set[number_of_parsers];     /* arrays of struct vfs_s_entry */

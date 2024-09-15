@@ -3,6 +3,7 @@
 # This file is distributed under the same license as the mc package.
 #
 # Translators:
+# Gurbuzguven <6mehmet6@gmail.com>, 2021
 # Jacques Yip <cong-ye@163.com>, 2017
 # Jake Li <gnozil@gmail.com>, 2012
 # Kenneth Cheung <zjhken01@163.com>, 2018
@@ -16,11 +17,11 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Midnight Commander\n"
-"Report-Msgid-Bugs-To: http://www.midnight-commander.org/\n"
-"POT-Creation-Date: 2021-09-26 10:06+0300\n"
-"PO-Revision-Date: 2021-07-26 20:16+0000\n"
-"Last-Translator: Transifex Bot <>\n"
-"Language-Team: Chinese (China) (http://www.transifex.com/mc/mc/language/"
+"Report-Msgid-Bugs-To: https://www.midnight-commander.org/\n"
+"POT-Creation-Date: 2024-08-23 19:20+0200\n"
+"PO-Revision-Date: 2010-12-29 10:19+0000\n"
+"Last-Translator: Gurbuzguven <6mehmet6@gmail.com>, 2021\n"
+"Language-Team: Chinese (China) (http://app.transifex.com/mc/mc/language/"
 "zh_CN/)\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
@@ -530,6 +531,9 @@ msgstr ""
 "使用 select() 从子进程读取数据时发生未知错误：\n"
 "%s"
 
+msgid "Cannot close pipe descriptor (p == NULL)"
+msgstr ""
+
 #, c-format
 msgid ""
 "Unexpected error in waitpid():\n"
@@ -560,28 +564,10 @@ msgid "Changes to file lost"
 msgstr "对文件的修改被丢失"
 
 #, c-format
-msgid "%s is not a directory\n"
-msgstr "%s 不是目录\n"
-
-#, c-format
-msgid "Directory %s is not owned by you\n"
-msgstr "目录 %s 的所有者不是您\n"
-
-#, c-format
-msgid "Cannot set correct permissions for directory %s\n"
-msgstr "无法正确设置目录 %s 的权限\n"
-
-#, c-format
-msgid "Cannot create temporary directory %s: %s\n"
-msgstr "无法创建临时目录 %s: %s\n"
-
-#, c-format
-msgid "Temporary files will be created in %s\n"
-msgstr "在 %s 中创建临时文件\n"
-
-#, c-format
-msgid "Temporary files will not be created\n"
-msgstr "无法创建临时文件\n"
+msgid ""
+"Cannot create temporary directory %s: %s.\n"
+"Temporary files will not be created\n"
+msgstr ""
 
 msgid "Press any key to continue..."
 msgstr "按任意键继续..."
@@ -732,30 +718,13 @@ msgid ""
 "                 errdhotfocus\n"
 "   Menus:        menunormal, menuhot, menusel, menuhotsel, menuinactive\n"
 "   Popup menus:  pmenunormal, pmenusel, pmenutitle\n"
-"   Editor:       editnormal, editbold, editmarked, editwhitespace,\n"
+"   Editor:       editnormal, editbold, editmarked, editwhitespace, "
+"editnonprintable,\n"
 "                 editlinestate, editbg, editframe, editframeactive\n"
 "                 editframedrag\n"
 "   Viewer:       viewnormal,viewbold, viewunderline, viewselected\n"
 "   Help:         helpnormal, helpitalic, helpbold, helplink, helpslink\n"
 msgstr ""
-"--colors KEYWORD={FORE},{BACK},{ATTR}:KEYWORD2=...\n"
-"\n"
-"{FORE}, {BACK} 及 {ATTR} 可以省略，省略时使用默认值\n"
-"\n"
-"关键词: \n"
-"全局: errors, disabled, reverse, gauge, header\n"
-"          input, inputmark, inputunchanged, commandlinemark\n"
-"          bbarhotkey, bbarbutton, statusbar\n"
-"文件显示: normal, selected, marked, markselect\n"
-"对话框窗口:dnormal, dfocus, dhotnormal, dhotfocus, errdhotnormal, "
-"errdhotfocus\n"
-"菜单: menunormal, menuhot, menusel, menuhotsel, menuinactive\n"
-"弹出菜单:pmenunormal, pmenusel, pmenutitle\n"
-"编辑器:editnormal, editbold, editmarked, editwhitespace,\n"
-"            editlinestate, editbg, editframe, editframeactive\n"
-"            editframedrag\n"
-"查看器:viewbold, viewunderline, viewselected\n"
-"帮助:helpnormal, helpi talic, helpbold, helplink, helpslink\n"
 
 #. TRANSLATORS: don't translate color names and attributes
 msgid ""
@@ -817,11 +786,14 @@ msgstr "终端选项"
 msgid "Arguments parse error!"
 msgstr "参数解析错误!"
 
+msgid "MC is built without builtin editor."
+msgstr ""
+
 msgid "No arguments given to the viewer."
 msgstr "查看器没有指定参数。"
 
-msgid "Two files are required to envoke the diffviewer."
-msgstr "需要两个文件才能调用差异查看器。"
+msgid "Two files are required to invoke the diffviewer."
+msgstr ""
 
 msgid "Background protocol error"
 msgstr "后台协议错误"
@@ -1204,8 +1176,8 @@ msgstr "您必需先突出显示一个文字块"
 msgid "Run sort"
 msgstr "运行 sort"
 
-msgid "Enter sort options (see manpage) separated by whitespace:"
-msgstr "输入排序选项(查看 manpage)用空格分隔: "
+msgid "Enter sort options (see sort(1) manpage) separated by whitespace:"
+msgstr ""
 
 msgid "Sort"
 msgstr "排序"
@@ -1297,7 +1269,7 @@ msgid "&Close"
 msgstr "关闭(&C)"
 
 msgid "&History..."
-msgstr ""
+msgstr "＆历史记录..."
 
 msgid "Save &as..."
 msgstr "另存为(&A)..."
@@ -1621,7 +1593,7 @@ msgstr ""
 "为 Midnight Commander 编写的\n"
 "一个界面友好的文本编辑器。"
 
-msgid "Copyright (C) 1996-2021 the Free Software Foundation"
+msgid "Copyright (C) 1996-2024 the Free Software Foundation"
 msgstr ""
 
 msgid "About"
@@ -1786,6 +1758,8 @@ msgid ""
 "Not an xterm or Linux console;\n"
 "the subshell cannot be toggled."
 msgstr ""
+"不是一个 xterm 或 Linux 控制台；\n"
+"无法切换subshell窗口。"
 
 msgid "Type 'exit' to return to the Midnight Commander"
 msgstr "输入 'exit' 返回 Midnight Commander"
@@ -2153,11 +2127,10 @@ msgstr "后台任务"
 
 #, c-format
 msgid ""
-"Cannot chdir to \"%s\"\n"
+"Cannot change directory to\n"
+"%s\n"
 "%s"
 msgstr ""
-"无法进入目录“%s”\n"
-"%s"
 
 msgid "Secure deletion"
 msgstr ""
@@ -2250,9 +2223,6 @@ msgstr ""
 msgid ""
 "Cannot chattr \"%s\"\n"
 "%s"
-msgstr ""
-
-msgid "Cannot change attributes on non-local filesystems"
 msgstr ""
 
 #, c-format
@@ -2354,15 +2324,6 @@ msgstr "输入机器名 (F1 查看细节): "
 msgid "Files tagged, want to cd?"
 msgstr "文件已经标记，要更改目录吗?"
 
-msgid "Cannot change directory"
-msgstr "无法改变目录"
-
-msgid "Filter"
-msgstr "过滤"
-
-msgid "Set expression for filtering filenames"
-msgstr "设置过滤文件名的表达式"
-
 #, c-format
 msgid "Link %s to:"
 msgstr "链接 %s 到: "
@@ -2377,10 +2338,6 @@ msgstr "链接: %s"
 #, c-format
 msgid "symlink: %s"
 msgstr "符号链接: %s"
-
-#, c-format
-msgid "Cannot chdir to \"%s\""
-msgstr "无法进入目录“%s”"
 
 msgid "View file"
 msgstr "查看文件"
@@ -2510,29 +2467,30 @@ msgid "Pipe failed"
 msgstr "管道失败"
 
 #, c-format
-msgid " %s%s file error"
-msgstr " %s%s 文件错误"
+msgid ""
+"You have an outdated %s file.\n"
+"Midnight Commander now uses %s file.\n"
+"Please copy your modifications of the old file to the new one."
+msgstr ""
 
 #, c-format
 msgid ""
-"The format of the %smc.ext file has changed with version 3.0. It seems that "
-"the installation failed. Please fetch a fresh copy from the Midnight "
-"Commander package."
+"The format of the\n"
+"%s%s\n"
+"file has changed with version 4.0.\n"
+"It seems that the installation has failed.\n"
+"Please fetch a fresh copy from the Midnight Commander package."
 msgstr ""
-"文件 %smc.ext 的格式在3.0版本时已经被修改。似乎安装有错误。请获取新的"
-"Midnight Commander软件包。"
-
-#, c-format
-msgid "%s file error"
-msgstr "%s 文件错误"
 
 #, c-format
 msgid ""
-"The format of the %s file has changed with version 3.0. You may either want "
-"to copy it from %smc.ext or use that file as an example of how to write it."
+"The format of the\n"
+"%s\n"
+"file has changed with version 4.0.\n"
+"You may either want to copy it from\n"
+"%s%s\n"
+"or use that file as an example of how to write it."
 msgstr ""
-"%s 文件的格式在 3.0 版中已经改变。您可以或者将 %smc.ext 文件复制过来，或者将"
-"其为作为范本撰写您自己的版本。"
 
 msgid "DialogTitle|Copy"
 msgstr "DialogTitle|复制"
@@ -2740,6 +2698,18 @@ msgstr ""
 
 #, c-format
 msgid ""
+"Cannot get attributes of source file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot set attributes of target file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
 "Cannot create special file \"%s\"\n"
 "%s"
 msgstr ""
@@ -2824,6 +2794,15 @@ msgstr ""
 msgid "(stalled)"
 msgstr "(暂停)"
 
+msgid "Incomplete file was retrieved"
+msgstr ""
+
+msgid "&Keep"
+msgstr "保留(&K)"
+
+msgid "&Continue copy"
+msgstr ""
+
 #, c-format
 msgid ""
 "Cannot close source file \"%s\"\n"
@@ -2840,11 +2819,11 @@ msgstr ""
 "无法关闭目标文件“%s”\n"
 "%s"
 
-msgid "Incomplete file was retrieved. Keep it?"
-msgstr "文件没有完整获取。保留它吗?"
-
-msgid "&Keep"
-msgstr "保留(&K)"
+#, c-format
+msgid ""
+"Cannot set attributes for target file \"%s\"\n"
+"%s"
+msgstr ""
 
 #, c-format
 msgid ""
@@ -2853,6 +2832,12 @@ msgid ""
 msgstr ""
 "无法 stat 源目录“%s”\n"
 "%s"
+
+#, c-format
+msgid ""
+"Cannot get attributes of source directory \"%s\"\n"
+"%s"
+msgstr ""
 
 #, c-format
 msgid ""
@@ -2908,8 +2893,8 @@ msgid "Con&tinue"
 msgstr "继续(&T)"
 
 #, c-format
-msgid "%d:%02d.%02d"
-msgstr "%d:%02d.%02d"
+msgid "%d:%02d:%02d"
+msgstr ""
 
 #, c-format
 msgid "ETA %s"
@@ -2964,8 +2949,8 @@ msgid "Background process: File exists"
 msgstr "后台进程: 文件已存在"
 
 #, c-format
-msgid "Files processed: %zu/%zu"
-msgstr "已处理文件: %zu/%zu"
+msgid "Files processed: %zu / %zu"
+msgstr ""
 
 #, c-format
 msgid "Files processed: %zu"
@@ -2992,8 +2977,8 @@ msgid " Total: %s "
 msgstr " 总共: %s "
 
 #, c-format
-msgid " Total: %s/%s "
-msgstr " 总共: %s/%s "
+msgid " Total: %s / %s "
+msgstr ""
 
 msgid "Source"
 msgstr "来源"
@@ -3045,7 +3030,7 @@ msgid "&Listing format..."
 msgstr "列表格式(&L)…"
 
 msgid "&Sort order..."
-msgstr "排序(&S)..."
+msgstr ""
 
 msgid "&Filter..."
 msgstr "过滤(&F)..."
@@ -3059,8 +3044,8 @@ msgstr "FTP 链接(&P)..."
 msgid "S&hell link..."
 msgstr "S&hell 链接..."
 
-msgid "S&FTP link..."
-msgstr "SFTP 链接(&S)..."
+msgid "SFTP li&nk..."
+msgstr ""
 
 msgid "Paneli&ze"
 msgstr "面板化(&Z)"
@@ -3440,8 +3425,8 @@ msgid "No space information"
 msgstr "没有空间信息"
 
 #, c-format
-msgid "Free space: %s/%s (%d%%)"
-msgstr "空余空间: %s/%s (%d%%)"
+msgid "Free space: %s / %s (%d%%)"
+msgstr ""
 
 #, c-format
 msgid "Type:       %s"
@@ -3491,9 +3476,6 @@ msgstr "所有者:  %s/%s"
 #, c-format
 msgid "Links:      %d"
 msgstr "链接:   %d"
-
-msgid "Attributes: not supported"
-msgstr ""
 
 #, c-format
 msgid "Attributes: %s"
@@ -3682,6 +3664,9 @@ msgstr "选择"
 
 msgid "Unselect"
 msgstr "取消选择"
+
+msgid "Filter"
+msgstr "过滤"
 
 msgid "Do you really want to execute?"
 msgstr "您真的要执行吗?"
@@ -3929,10 +3914,10 @@ msgstr "Shell 仍在运行中。依然退出?"
 msgid "Warning: Cannot change to %s.\n"
 msgstr "警告: 无法切换至 %s。\n"
 
-msgid "With builtin Editor and Aspell support"
+msgid "With builtin editor and aspell support"
 msgstr ""
 
-msgid "With builtin Editor"
+msgid "With builtin editor"
 msgstr ""
 
 msgid "With optional subshell support"
@@ -3982,6 +3967,10 @@ msgid "Built with ncursesw %s\n"
 msgstr ""
 
 msgid "Built with ncursesw (unknown version)"
+msgstr ""
+
+#, c-format
+msgid "Built with libssh2 %d.%d.%d\n"
 msgstr ""
 
 msgid "Virtual File Systems:"
@@ -4109,6 +4098,15 @@ msgstr ""
 "异常的文件结束\n"
 "%s"
 
+msgid "Inconsistent archive"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot open %s archive\n"
+"%s"
+msgstr ""
+
 #, c-format
 msgid ""
 "Cannot open %s archive\n"
@@ -4122,66 +4120,24 @@ msgid ""
 "%s"
 msgstr ""
 
+msgid ""
+"EXTFS virtual file system:\n"
+"wrong file name"
+msgstr ""
+
+msgid ""
+"EXTFS virtual file system:\n"
+"wrong archive name"
+msgstr ""
+
+msgid ""
+"EXTFS virtual file system:\n"
+"cannot build command"
+msgstr ""
+
 #, c-format
 msgid "Warning: cannot open %s directory\n"
 msgstr "警告: 无法打开目录 %s\n"
-
-#, c-format
-msgid "fish: Disconnecting from %s"
-msgstr "fish: 正在从 %s 断开连接"
-
-msgid "fish: Waiting for initial line..."
-msgstr "fish: 正在等待初始化行..."
-
-msgid "Sorry, we cannot do password authenticated connections for now."
-msgstr "抱歉，目前无法建立密码验证的连接。"
-
-#, c-format
-msgid "fish: Password is required for %s"
-msgstr "fish: %s 需要密码"
-
-msgid "fish: Sending password..."
-msgstr "fish: 正在发送密码..."
-
-msgid "fish: Sending initial line..."
-msgstr "fish: 正在发送初始化行..."
-
-msgid "fish: Handshaking version..."
-msgstr "fish: 正在握手，协商版本..."
-
-msgid "fish: Getting host info..."
-msgstr "fish: 正在获取主机信息..."
-
-#, c-format
-msgid "fish: Reading directory %s..."
-msgstr "fish: 正在读取目录 %s..."
-
-#, c-format
-msgid "%s: done."
-msgstr "%s: 完成。"
-
-#, c-format
-msgid "%s: failure"
-msgstr "%s: 失败"
-
-#, c-format
-msgid "fish: store %s: sending command..."
-msgstr "fish: 保存 %s: 正在发送命令..."
-
-msgid "fish: Local read failed, sending zeros"
-msgstr "fish: 本地读取失败，正在发送零"
-
-msgid "fish: storing file"
-msgstr "fish: 正在保存文件"
-
-msgid "Aborting transfer..."
-msgstr "正在中止传输..."
-
-msgid "Error reported after abort."
-msgstr "中止后发生错误。"
-
-msgid "Aborted transfer would be successful."
-msgstr "被中止的传输可能成功完成了。"
 
 #, c-format
 msgid "ftpfs: Disconnecting from %s"
@@ -4236,6 +4192,21 @@ msgstr "ftpfs: 连接服务器失败: %s"
 msgid "Waiting to retry... %d (Control-G to cancel)"
 msgstr "等待重试... %d (Ctrl-G 取消)"
 
+#, c-format
+msgid "ftpfs: could not make address-to-name translation: %s"
+msgstr ""
+
+#, c-format
+msgid "ftpfs: try reconnect to server, attempt %u"
+msgstr ""
+
+#, c-format
+msgid "ftpfs: could not get socket name: %s"
+msgstr ""
+
+msgid "ftpfs: could not reconnect to server"
+msgstr ""
+
 msgid "ftpfs: invalid address family"
 msgstr "ftpfs: 无效的地址族"
 
@@ -4277,6 +4248,14 @@ msgstr "(先改变目录)"
 
 msgid "ftpfs: failed; nowhere to fallback to"
 msgstr "ftpfs: 失败；没有后备"
+
+#, c-format
+msgid "%s: failure"
+msgstr "%s: 失败"
+
+#, c-format
+msgid "%s: done."
+msgstr "%s: 完成。"
 
 msgid "ftpfs: storing file"
 msgstr "ftpfs: 保存文件中"
@@ -4418,12 +4397,50 @@ msgid "sftp: Listing done."
 msgstr "sftp: 列出完毕。"
 
 #, c-format
-msgid ""
-"Cannot open tar archive\n"
-"%s"
+msgid "shell: Disconnecting from %s"
 msgstr ""
-"无法打开 tar 档案文件\n"
-"%s"
+
+msgid "shell: Waiting for initial line..."
+msgstr ""
+
+msgid "Sorry, we cannot do password authenticated connections for now."
+msgstr "抱歉，目前无法建立密码验证的连接。"
+
+#, c-format
+msgid "shell: Password is required for %s"
+msgstr ""
+
+msgid "shell: Sending password..."
+msgstr ""
+
+msgid "shell: Sending initial line..."
+msgstr ""
+
+msgid "shell: Getting host info..."
+msgstr ""
+
+#, c-format
+msgid "shell: Reading directory %s..."
+msgstr ""
+
+#, c-format
+msgid "shell: store %s: sending command..."
+msgstr ""
+
+msgid "shell: Local read failed, sending zeros"
+msgstr ""
+
+msgid "shell: storing file"
+msgstr ""
+
+msgid "Aborting transfer..."
+msgstr "正在中止传输..."
+
+msgid "Error reported after abort."
+msgstr "中止后发生错误。"
+
+msgid "Aborted transfer would be successful."
+msgstr "被中止的传输可能成功完成了。"
 
 msgid "Inconsistent tar archive"
 msgstr "不完整的 tar 档案文件"
@@ -4433,11 +4450,20 @@ msgstr "档案文件出现不可预料的文件末端"
 
 #, c-format
 msgid ""
-"%s\n"
-"doesn't look like a tar archive."
+"Cannot open tar archive\n"
+"%s"
 msgstr ""
+"无法打开 tar 档案文件\n"
+"%s"
+
+#, c-format
+msgid ""
 "%s\n"
-"不是 tar 档案文件。"
+"doesn't look like a tar archive"
+msgstr ""
+
+msgid "tar: mc_lseek not stopped at a record boundary"
+msgstr ""
 
 msgid "undelfs: error"
 msgstr "undelfs: 错误"
@@ -4630,55 +4656,3 @@ msgstr "从头继续搜索?"
 
 msgid "Cannot fetch a local copy of /ftp://some.host/editme.txt"
 msgstr "无法获取 /ftp://some.host/editme.txt 的本地副本"
-
-#~ msgid "Set debug level"
-#~ msgstr "设置调试级别"
-
-#~ msgid "<integer>"
-#~ msgstr "<integer>"
-
-#, c-format
-#~ msgid "Password for \\\\%s\\%s"
-#~ msgstr "\\\\%s\\%s 的密码"
-
-#~ msgid "Domain:"
-#~ msgstr "域: "
-
-#~ msgid "Username:"
-#~ msgstr "用户名: "
-
-#~ msgid "SMB authentication"
-#~ msgstr "SMB 认证"
-
-#~ msgid "SMB link to machine"
-#~ msgstr "SMB 链接到主机"
-
-#~ msgid "SM&B link..."
-#~ msgstr "SMB 链接(&B)..."
-
-#, c-format
-#~ msgid "reconnect to %s failed"
-#~ msgstr "重新连接 %s 失败"
-
-#~ msgid "Authentication failed"
-#~ msgstr "验证失败"
-
-#, c-format
-#~ msgid "Error %s creating directory %s"
-#~ msgstr "创建目录 %s 时出错 %s"
-
-#, c-format
-#~ msgid "Error %s removing directory %s"
-#~ msgstr "删除目录 %s 时出错 %s"
-
-#, c-format
-#~ msgid "%s opening remote file %s"
-#~ msgstr "%s 正在打开远程文件 %s"
-
-#, c-format
-#~ msgid "%s removing remote file %s"
-#~ msgstr "%s 正在删除远程文件 %s"
-
-#, c-format
-#~ msgid "%s renaming files\n"
-#~ msgstr "%s 正在重命名文件\n"

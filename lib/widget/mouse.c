@@ -1,7 +1,7 @@
 /*
    Widgets for the Midnight Commander
 
-   Copyright (C) 2016-2021
+   Copyright (C) 2016-2024
    Free Software Foundation, Inc.
 
    Authors:
@@ -40,6 +40,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* --------------------------------------------------------------------------------------------- */
@@ -57,12 +59,12 @@
  *    http://www.fifi.org/cgi-bin/info2www?(gpm)Event+Types
  */
 static void
-init_mouse_event (mouse_event_t * event, mouse_msg_t msg, const Gpm_Event * global_gpm,
-                  const Widget * w)
+init_mouse_event (mouse_event_t *event, mouse_msg_t msg, const Gpm_Event *global_gpm,
+                  const Widget *w)
 {
     event->msg = msg;
-    event->x = global_gpm->x - w->x - 1;        /* '-1' because Gpm_Event is 1-based. */
-    event->y = global_gpm->y - w->y - 1;
+    event->x = global_gpm->x - w->rect.x - 1;   /* '-1' because Gpm_Event is 1-based. */
+    event->y = global_gpm->y - w->rect.y - 1;
     event->count = global_gpm->type & (GPM_SINGLE | GPM_DOUBLE | GPM_TRIPLE);
     event->buttons = global_gpm->buttons;
     event->result.abort = FALSE;
@@ -80,7 +82,7 @@ init_mouse_event (mouse_event_t * event, mouse_msg_t msg, const Gpm_Event * glob
  * @return high level mouse event
  */
 static mouse_event_t
-mouse_translate_event (Widget * w, Gpm_Event * event)
+mouse_translate_event (Widget *w, Gpm_Event *event)
 {
     gboolean in_widget;
     mouse_msg_t msg = MSG_MOUSE_NONE;
@@ -171,7 +173,7 @@ mouse_translate_event (Widget * w, Gpm_Event * event)
  * @return result of mouse event handling
  */
 static int
-mouse_process_event (Widget * w, mouse_event_t * event)
+mouse_process_event (Widget *w, mouse_event_t *event)
 {
     int ret = MOU_UNHANDLED;
 
@@ -213,7 +215,7 @@ mouse_process_event (Widget * w, mouse_event_t * event)
  * @return result of mouse event handling
  */
 int
-mouse_handle_event (Widget * w, Gpm_Event * event)
+mouse_handle_event (Widget *w, Gpm_Event *event)
 {
     mouse_event_t me;
 

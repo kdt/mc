@@ -1,13 +1,14 @@
 /*
    Virtual File System switch code
 
-   Copyright (C) 1995-2021
+   Copyright (C) 1995-2024
    Free Software Foundation, Inc.
 
    Written by: 1995 Miguel de Icaza
    Jakub Jelinek, 1995
    Pavel Machek, 1998
-   Slava Zanko <slavazanko@gmail.com>, 2013
+   Slava Zanko <slavazanko@gmail.com>, 2011-2013
+   Andrew Borodin <aborodin@vmail.ru>, 2011-2022
 
    This file is part of the Midnight Commander.
 
@@ -33,7 +34,7 @@
  * \author Pavel Machek
  * \date 1995, 1998
  * \warning functions like extfs_lstat() have right to destroy any
- * strings you pass to them. This is acutally ok as you g_strdup what
+ * strings you pass to them. This is actually ok as you g_strdup what
  * you are passing to them, anyway; still, beware.
  *
  * Namespace: exports *many* functions with vfs_ prefix; exports
@@ -94,6 +95,8 @@ struct vfs_openfile
     void *fsinfo;
 };
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /** They keep track of the current directory */
@@ -109,13 +112,13 @@ static long vfs_free_handle_list = -1;
  * plugin to automatic detect encoding
  * path - path to translate
  * size - how many bytes from path translate
- * defcnv - convertor, that is used as default, when path does not contain any
- *          #enc: subtring
+ * defcnv - converter, that is used as default, when path does not contain any
+ *          #enc: substring
  * buffer - used to store result of translation
  */
 
 static estr_t
-_vfs_translate_path (const char *path, int size, GIConv defcnv, GString * buffer)
+_vfs_translate_path (const char *path, int size, GIConv defcnv, GString *buffer)
 {
     estr_t state = ESTR_SUCCESS;
 #ifdef HAVE_CHARSET
@@ -209,7 +212,7 @@ vfs_get_openfile (int handle)
 /* --------------------------------------------------------------------------------------------- */
 
 static gboolean
-vfs_test_current_dir (const vfs_path_t * vpath)
+vfs_test_current_dir (const vfs_path_t *vpath)
 {
     struct stat my_stat, my_stat2;
 
@@ -305,7 +308,7 @@ vfs_ferrno (struct vfs_class *vfs)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-vfs_register_class (struct vfs_class * vfs)
+vfs_register_class (struct vfs_class *vfs)
 {
     if (vfs->init != NULL)      /* vfs has own initialization function */
         if (!vfs->init (vfs))   /* but it failed */
@@ -427,7 +430,7 @@ vfs_get_raw_current_dir (void)
  * @param vpath new path
  */
 void
-vfs_set_raw_current_dir (const vfs_path_t * vpath)
+vfs_set_raw_current_dir (const vfs_path_t *vpath)
 {
     vfs_path_free (current_path, TRUE);
     current_path = (vfs_path_t *) vpath;
@@ -446,7 +449,7 @@ vfs_current_is_local (void)
 /* Return flags of the VFS class of the given filename */
 
 vfs_flags_t
-vfs_file_class_flags (const vfs_path_t * vpath)
+vfs_file_class_flags (const vfs_path_t *vpath)
 {
     const vfs_path_element_t *path_element;
 
@@ -478,8 +481,6 @@ vfs_init (void)
 void
 vfs_setup_work_dir (void)
 {
-    const vfs_path_element_t *path_element;
-
     vfs_setup_cwd ();
 
     /* FIXME: is we really need for this check? */
@@ -488,8 +489,7 @@ vfs_setup_work_dir (void)
        vfs_die ("Current dir too long.\n");
      */
 
-    path_element = vfs_path_get_by_index (current_path, -1);
-    current_vfs = path_element->class;
+    current_vfs = VFS_CLASS (vfs_path_get_last_path_vfs (current_path));
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -565,6 +565,7 @@ vfs_dirent_assign (struct vfs_dirent *d, const char *fname, ino_t ino)
 {
     g_string_assign (d->d_name_str, fname);
     d->d_name = d->d_name_str->str;
+    d->d_len = d->d_name_str->len;
     d->d_ino = ino;
 }
 
@@ -606,7 +607,7 @@ vfs_fill_names (fill_names_f func)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-vfs_file_is_local (const vfs_path_t * vpath)
+vfs_file_is_local (const vfs_path_t *vpath)
 {
     return (vfs_file_class_flags (vpath) & VFSF_LOCAL) != 0;
 }
@@ -637,7 +638,7 @@ vfs_setup_cwd (void)
 {
     char *current_dir;
     vfs_path_t *tmp_vpath;
-    const vfs_path_element_t *path_element;
+    const struct vfs_class *me;
 
     if (vfs_get_raw_current_dir () == NULL)
     {
@@ -657,9 +658,8 @@ vfs_setup_cwd (void)
         }
     }
 
-    path_element = vfs_path_get_by_index (vfs_get_raw_current_dir (), -1);
-
-    if ((path_element->class->flags & VFSF_LOCAL) != 0)
+    me = vfs_path_get_last_path_vfs (vfs_get_raw_current_dir ());
+    if ((me->flags & VFSF_LOCAL) != 0)
     {
         current_dir = g_get_current_dir ();
         tmp_vpath = vfs_path_from_str (current_dir);
@@ -685,13 +685,10 @@ vfs_setup_cwd (void)
  */
 
 char *
-_vfs_get_cwd (void)
+vfs_get_cwd (void)
 {
-    const vfs_path_t *current_dir_vpath;
-
     vfs_setup_cwd ();
-    current_dir_vpath = vfs_get_raw_current_dir ();
-    return g_strdup (vfs_path_as_str (current_dir_vpath));
+    return vfs_get_current_dir_n ();
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -746,7 +743,7 @@ vfs_clone_file (int dest_vfs_fd, int src_vfs_fd)
     dest_class = vfs_class_find_by_handle (dest_vfs_fd, &dest_fd);
     if ((dest_class->flags & VFSF_LOCAL) == 0)
     {
-        errno = EOPNOTSUPP;
+        errno = ENOTSUP;
         return (-1);
     }
     if (dest_fd == NULL)
@@ -758,7 +755,7 @@ vfs_clone_file (int dest_vfs_fd, int src_vfs_fd)
     src_class = vfs_class_find_by_handle (src_vfs_fd, &src_fd);
     if ((src_class->flags & VFSF_LOCAL) == 0)
     {
-        errno = EOPNOTSUPP;
+        errno = ENOTSUP;
         return (-1);
     }
     if (src_fd == NULL)
@@ -771,7 +768,7 @@ vfs_clone_file (int dest_vfs_fd, int src_vfs_fd)
 #else
     (void) dest_vfs_fd;
     (void) src_vfs_fd;
-    errno = EOPNOTSUPP;
+    errno = ENOTSUP;
     return (-1);
 #endif
 }

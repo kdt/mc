@@ -4,12 +4,12 @@
    with all the magic of the command input line, we depend on some
    help from the program's callback.
 
-   Copyright (C) 1995-2021
+   Copyright (C) 1995-2024
    Free Software Foundation, Inc.
 
    Written by:
    Slava Zanko <slavazanko@gmail.com>, 2013
-   Andrew Borodin <aborodin@vmail.ru>, 2020
+   Andrew Borodin <aborodin@vmail.ru>, 2011-2022
 
    This file is part of the Midnight Commander.
 
@@ -63,6 +63,8 @@ WInput *cmdline;
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* Color styles command line */
@@ -75,16 +77,18 @@ static input_colors_t command_colors;
 /** Handle Enter on the command line
  *
  * @param lc_cmdline string for handling
- * @return MSG_HANDLED on sucsess else MSG_NOT_HANDLED
+ * @return MSG_HANDLED on success else MSG_NOT_HANDLED
  */
 
 static cb_ret_t
-enter (WInput * lc_cmdline)
+enter (WInput *lc_cmdline)
 {
-    char *cmd = lc_cmdline->buffer;
+    const char *cmd;
 
     if (!command_prompt)
         return MSG_HANDLED;
+
+    cmd = input_get_ctext (lc_cmdline);
 
     /* Any initial whitespace should be removed at this point */
     while (whiteness (*cmd))
@@ -135,8 +139,11 @@ enter (WInput * lc_cmdline)
                 char *s;
 
                 s = expand_format (NULL, cmd[++i], TRUE);
-                g_string_append (command, s);
-                g_free (s);
+                if (s != NULL)
+                {
+                    g_string_append (command, s);
+                    g_free (s);
+                }
             }
         }
 
@@ -176,7 +183,7 @@ enter (WInput * lc_cmdline)
  */
 
 static cb_ret_t
-command_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+command_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     switch (msg)
     {
@@ -239,13 +246,16 @@ command_set_default_colors (void)
  */
 
 void
-command_insert (WInput * in, const char *text, gboolean insert_extra_space)
+command_insert (WInput *in, const char *text, gboolean insert_extra_space)
 {
     char *quoted_text;
 
     quoted_text = name_quote (text, TRUE);
-    input_insert (in, quoted_text, insert_extra_space);
-    g_free (quoted_text);
+    if (quoted_text != NULL)
+    {
+        input_insert (in, quoted_text, insert_extra_space);
+        g_free (quoted_text);
+    }
 }
 
 /* --------------------------------------------------------------------------------------------- */

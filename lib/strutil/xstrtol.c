@@ -1,6 +1,6 @@
 /* A more useful interface to strtol.
 
-   Copyright (C) 1995-2021
+   Copyright (C) 1995-2024
    Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -39,6 +39,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* --------------------------------------------------------------------------------------------- */
@@ -46,7 +48,7 @@
 /* --------------------------------------------------------------------------------------------- */
 
 static strtol_error_t
-bkm_scale (uintmax_t * x, int scale_factor)
+bkm_scale (uintmax_t *x, int scale_factor)
 {
     if (UINTMAX_MAX / scale_factor < *x)
     {
@@ -61,7 +63,7 @@ bkm_scale (uintmax_t * x, int scale_factor)
 /* --------------------------------------------------------------------------------------------- */
 
 static strtol_error_t
-bkm_scale_by_power (uintmax_t * x, int base, int power)
+bkm_scale_by_power (uintmax_t *x, int base, int power)
 {
     strtol_error_t err = LONGINT_OK;
     while (power-- != 0)
@@ -74,7 +76,7 @@ bkm_scale_by_power (uintmax_t * x, int base, int power)
 /* --------------------------------------------------------------------------------------------- */
 
 strtol_error_t
-xstrtoumax (const char *s, char **ptr, int base, uintmax_t * val, const char *valid_suffixes)
+xstrtoumax (const char *s, char **ptr, int base, uintmax_t *val, const char *valid_suffixes)
 {
     char *t_ptr;
     char **p;
@@ -147,6 +149,8 @@ xstrtoumax (const char *s, char **ptr, int base, uintmax_t * val, const char *va
         case 'M':
         case 'm':
         case 'P':
+        case 'Q':
+        case 'R':
         case 'T':
         case 't':
         case 'Y':
@@ -219,6 +223,14 @@ xstrtoumax (const char *s, char **ptr, int base, uintmax_t * val, const char *va
 
         case 'P':              /* peta or pebi */
             overflow = bkm_scale_by_power (&tmp, base, 5);
+            break;
+
+        case 'Q':              /* quetta or 2**100 */
+            overflow = bkm_scale_by_power (&tmp, base, 10);
+            break;
+
+        case 'R':              /* ronna or 2**90 */
+            overflow = bkm_scale_by_power (&tmp, base, 9);
             break;
 
         case 'T':              /* tera or tebi */

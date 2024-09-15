@@ -2,7 +2,7 @@
    Skins engine.
    Reading and parse ini-files
 
-   Copyright (C) 2009-2021
+   Copyright (C) 2009-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -40,14 +40,16 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
-
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-mc_skin_get_list_from_dir (const gchar * base_dir, GPtrArray * list)
+mc_skin_get_list_from_dir (const gchar *base_dir, GPtrArray *list)
 {
     gchar *name;
     GDir *dir;
@@ -97,7 +99,7 @@ string_array_comparator (gconstpointer a, gconstpointer b)
 /* --------------------------------------------------------------------------------------------- */
 
 static gboolean
-mc_skin_ini_file_load_search_in_dir (mc_skin_t * mc_skin, const gchar * base_dir)
+mc_skin_ini_file_load_search_in_dir (mc_skin_t *mc_skin, const gchar *base_dir)
 {
     char *file_name, *file_name2;
 
@@ -133,7 +135,7 @@ mc_skin_list (void)
 {
     GPtrArray *list;
 
-    list = g_ptr_array_new ();
+    list = g_ptr_array_new_with_free_func (g_free);
     mc_skin_get_list_from_dir (mc_config_get_data_path (), list);
     mc_skin_get_list_from_dir (mc_global.sysconfig_dir, list);
     mc_skin_get_list_from_dir (mc_global.share_data_dir, list);
@@ -145,7 +147,7 @@ mc_skin_list (void)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mc_skin_ini_file_load (mc_skin_t * mc_skin)
+mc_skin_ini_file_load (mc_skin_t *mc_skin)
 {
     char *file_name;
 
@@ -178,7 +180,7 @@ mc_skin_ini_file_load (mc_skin_t * mc_skin)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mc_skin_ini_file_parse (mc_skin_t * mc_skin)
+mc_skin_ini_file_parse (mc_skin_t *mc_skin)
 {
     mc_skin->description =
         mc_config_get_string (mc_skin->config, "skin", "description", "- no description -");
@@ -195,7 +197,7 @@ mc_skin_ini_file_parse (mc_skin_t * mc_skin)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mc_skin_set_hardcoded_skin (mc_skin_t * mc_skin)
+mc_skin_set_hardcoded_skin (mc_skin_t *mc_skin)
 {
     mc_skin->config = mc_config_init (NULL, TRUE);
 

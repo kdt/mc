@@ -2,7 +2,7 @@
    Internal file viewer for the Midnight Commander
    Functions for datasources
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -67,6 +67,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* --------------------------------------------------------------------------------------------- */
@@ -74,7 +76,7 @@
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-mcview_set_datasource_stdio_pipe (WView * view, mc_pipe_t * p)
+mcview_set_datasource_stdio_pipe (WView *view, mc_pipe_t *p)
 {
     p->out.len = MC_PIPE_BUFSIZE;
     p->out.null_term = FALSE;
@@ -92,7 +94,7 @@ mcview_set_datasource_stdio_pipe (WView * view, mc_pipe_t * p)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_set_datasource_none (WView * view)
+mcview_set_datasource_none (WView *view)
 {
     view->datasource = DS_NONE;
 }
@@ -100,7 +102,7 @@ mcview_set_datasource_none (WView * view)
 /* --------------------------------------------------------------------------------------------- */
 
 off_t
-mcview_get_filesize (WView * view)
+mcview_get_filesize (WView *view)
 {
     switch (view->datasource)
     {
@@ -119,7 +121,7 @@ mcview_get_filesize (WView * view)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_update_filesize (WView * view)
+mcview_update_filesize (WView *view)
 {
     if (view->datasource == DS_FILE)
     {
@@ -132,7 +134,7 @@ mcview_update_filesize (WView * view)
 /* --------------------------------------------------------------------------------------------- */
 
 char *
-mcview_get_ptr_file (WView * view, off_t byte_index)
+mcview_get_ptr_file (WView *view, off_t byte_index)
 {
     g_assert (view->datasource == DS_FILE);
 
@@ -147,7 +149,7 @@ mcview_get_ptr_file (WView * view, off_t byte_index)
 /* Invalid UTF-8 is reported as negative integers (one for each byte),
  * see ticket 3783. */
 gboolean
-mcview_get_utf (WView * view, off_t byte_index, int *ch, int *ch_len)
+mcview_get_utf (WView *view, off_t byte_index, int *ch, int *ch_len)
 {
     gchar *str = NULL;
     int res;
@@ -219,7 +221,7 @@ mcview_get_utf (WView * view, off_t byte_index, int *ch, int *ch_len)
 /* --------------------------------------------------------------------------------------------- */
 
 char *
-mcview_get_ptr_string (WView * view, off_t byte_index)
+mcview_get_ptr_string (WView *view, off_t byte_index)
 {
     g_assert (view->datasource == DS_STRING);
 
@@ -231,7 +233,7 @@ mcview_get_ptr_string (WView * view, off_t byte_index)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mcview_get_byte_string (WView * view, off_t byte_index, int *retval)
+mcview_get_byte_string (WView *view, off_t byte_index, int *retval)
 {
     char *p;
 
@@ -250,7 +252,7 @@ mcview_get_byte_string (WView * view, off_t byte_index, int *retval)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mcview_get_byte_none (WView * view, off_t byte_index, int *retval)
+mcview_get_byte_none (WView *view, off_t byte_index, int *retval)
 {
     (void) &view;
     (void) byte_index;
@@ -265,9 +267,10 @@ mcview_get_byte_none (WView * view, off_t byte_index, int *retval)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_set_byte (WView * view, off_t offset, byte b)
+mcview_set_byte (WView *view, off_t offset, byte b)
 {
     (void) &b;
+    (void) offset;
 
     g_assert (offset < mcview_get_filesize (view));
     g_assert (view->datasource == DS_FILE);
@@ -279,7 +282,7 @@ mcview_set_byte (WView * view, off_t offset, byte b)
 
 /*static */
 void
-mcview_file_load_data (WView * view, off_t byte_index)
+mcview_file_load_data (WView *view, off_t byte_index)
 {
     off_t blockoffset;
     ssize_t res;
@@ -328,7 +331,7 @@ mcview_file_load_data (WView * view, off_t byte_index)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_close_datasource (WView * view)
+mcview_close_datasource (WView *view)
 {
     switch (view->datasource)
     {
@@ -364,7 +367,7 @@ mcview_close_datasource (WView * view)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_set_datasource_file (WView * view, int fd, const struct stat *st)
+mcview_set_datasource_file (WView *view, int fd, const struct stat *st)
 {
     view->datasource = DS_FILE;
     view->ds_file_fd = fd;
@@ -378,7 +381,7 @@ mcview_set_datasource_file (WView * view, int fd, const struct stat *st)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mcview_load_command_output (WView * view, const char *command)
+mcview_load_command_output (WView *view, const char *command)
 {
     mc_pipe_t *p;
     GError *error = NULL;
@@ -409,7 +412,7 @@ mcview_load_command_output (WView * view, const char *command)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_set_datasource_vfs_pipe (WView * view, int fd)
+mcview_set_datasource_vfs_pipe (WView *view, int fd)
 {
     g_assert (fd != -1);
 
@@ -422,7 +425,7 @@ mcview_set_datasource_vfs_pipe (WView * view, int fd)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_set_datasource_string (WView * view, const char *s)
+mcview_set_datasource_string (WView *view, const char *s)
 {
     view->datasource = DS_STRING;
     view->ds_string_len = strlen (s);

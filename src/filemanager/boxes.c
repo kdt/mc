@@ -1,13 +1,13 @@
 /*
    Some misc dialog boxes for the program.
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Written by:
    Miguel de Icaza, 1994, 1995
    Jakub Jelinek, 1995
-   Andrew Borodin <aborodin@vmail.ru>, 2009-2015
+   Andrew Borodin <aborodin@vmail.ru>, 2009-2022
 
    This file is part of the Midnight Commander.
 
@@ -88,6 +88,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 static unsigned long configure_old_esc_mode_id, configure_time_out_id;
@@ -123,7 +125,7 @@ static unsigned long shadows_id;
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-configure_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+configure_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     switch (msg)
     {
@@ -150,7 +152,7 @@ configure_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, voi
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-skin_apply (const gchar * skin_override)
+skin_apply (const gchar *skin_override)
 {
     GError *mcerror = NULL;
 
@@ -172,7 +174,7 @@ skin_apply (const gchar * skin_override)
 /* --------------------------------------------------------------------------------------------- */
 
 static const gchar *
-skin_name_to_label (const gchar * name)
+skin_name_to_label (const gchar *name)
 {
     if (strcmp (name, "default") == 0)
         return _("< Default >");
@@ -182,20 +184,18 @@ skin_name_to_label (const gchar * name)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-skin_dlg_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+skin_dlg_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     switch (msg)
     {
     case MSG_RESIZE:
         {
             WDialog *d = DIALOG (w);
-            Widget *wd = WIDGET (d->data);
-            int y, x;
-            WRect r;
+            const WRect *wd = &WIDGET (d->data.p)->rect;
+            WRect r = w->rect;
 
-            y = wd->y + (wd->lines - w->lines) / 2;
-            x = wd->x + wd->cols / 2;
-            rect_init (&r, y, x, w->lines, w->cols);
+            r.y = wd->y + (wd->lines - r.lines) / 2;
+            r.x = wd->x + wd->cols / 2;
 
             return dlg_default_callback (w, NULL, MSG_RESIZE, 0, &r);
         }
@@ -208,7 +208,7 @@ skin_dlg_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-sel_skin_button (WButton * button, int action)
+sel_skin_button (WButton *button, int action)
 {
     int result;
     WListbox *skin_list;
@@ -223,7 +223,7 @@ sel_skin_button (WButton * button, int action)
         dlg_create (TRUE, 0, 0, 13, 24, WPOS_KEEP_DEFAULT, TRUE, dialog_colors, skin_dlg_callback,
                     NULL, "[Appearance]", _("Skins"));
     /* use Appearance dialog for positioning */
-    skin_dlg->data = WIDGET (button)->owner;
+    skin_dlg->data.p = WIDGET (button)->owner;
 
     /* set dialog location before all */
     send_message (skin_dlg, NULL, MSG_RESIZE, 0, NULL);
@@ -234,7 +234,7 @@ sel_skin_button (WButton * button, int action)
                       (void *) skin_name, FALSE);
 
     if (strcmp (skin_name, current_skin_name) == 0)
-        listbox_select_entry (skin_list, 0);
+        listbox_set_current (skin_list, 0);
 
     for (i = 0; i < skin_names->len; i++)
     {
@@ -244,7 +244,7 @@ sel_skin_button (WButton * button, int action)
             listbox_add_item (skin_list, LISTBOX_APPEND_AT_END, 0, skin_name_to_label (skin_name),
                               (void *) skin_name, FALSE);
             if (strcmp (skin_name, current_skin_name) == 0)
-                listbox_select_entry (skin_list, pos);
+                listbox_set_current (skin_list, pos);
             pos++;
         }
     }
@@ -272,7 +272,7 @@ sel_skin_button (WButton * button, int action)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-appearance_box_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+appearance_box_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     switch (msg)
     {
@@ -306,7 +306,7 @@ appearance_box_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-panel_listing_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+panel_listing_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     switch (msg)
     {
@@ -365,7 +365,7 @@ panel_listing_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm,
 
 #ifdef HAVE_CHARSET
 static int
-sel_charset_button (WButton * button, int action)
+sel_charset_button (WButton *button, int action)
 {
     int new_dcp;
 
@@ -397,7 +397,7 @@ sel_charset_button (WButton * button, int action)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-tree_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+tree_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     WDialog *h = DIALOG (w);
 
@@ -405,15 +405,16 @@ tree_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *da
     {
     case MSG_RESIZE:
         {
-            WRect r;
+            WRect r = w->rect;
             Widget *bar;
 
-            rect_init (&r, w->y, w->x, LINES - 9, COLS - 20);
+            r.lines = LINES - 9;
+            r.cols = COLS - 20;
             dlg_default_callback (w, NULL, MSG_RESIZE, 0, &r);
 
-            bar = WIDGET (find_buttonbar (h));
-            bar->x = 0;
-            bar->y = LINES - 1;
+            bar = WIDGET (buttonbar_find (h));
+            bar->rect.x = 0;
+            bar->rect.y = LINES - 1;
             return MSG_HANDLED;
         }
 
@@ -429,7 +430,7 @@ tree_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *da
 
 #if defined(ENABLE_VFS) && defined (ENABLE_VFS_FTP)
 static cb_ret_t
-confvfs_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+confvfs_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     switch (msg)
     {
@@ -457,7 +458,7 @@ confvfs_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void 
 
 #ifdef ENABLE_BACKGROUND
 static void
-jobs_fill_listbox (WListbox * list)
+jobs_fill_listbox (WListbox *list)
 {
     static const char *state_str[2] = { "", "" };
     TaskList *tl;
@@ -473,15 +474,14 @@ jobs_fill_listbox (WListbox * list)
         char *s;
 
         s = g_strconcat (state_str[tl->state], " ", tl->info, (char *) NULL);
-        listbox_add_item (list, LISTBOX_APPEND_AT_END, 0, s, (void *) tl, FALSE);
-        g_free (s);
+        listbox_add_item_take (list, LISTBOX_APPEND_AT_END, 0, s, (void *) tl, FALSE);
     }
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-task_cb (WButton * button, int action)
+task_cb (WButton *button, int action)
 {
     TaskList *tl;
     int sig = 0;
@@ -591,9 +591,10 @@ configure_box (void)
             /* *INDENT-ON* */
         };
 
+        WRect r = { -1, -1, 0, 60 };
+
         quick_dialog_t qdlg = {
-            -1, -1, 60,
-            N_("Configure options"), "[Configuration]",
+            r, N_("Configure options"), "[Configuration]",
             quick_widgets, configure_callback, NULL
         };
 
@@ -612,7 +613,12 @@ configure_box (void)
 #endif
 
         if (quick_dialog (&qdlg) == B_ENTER)
-            old_esc_mode_timeout = atoi (time_out_new);
+        {
+            if (time_out_new[0] == '\0')
+                old_esc_mode_timeout = 0;
+            else
+                old_esc_mode_timeout = atoi (time_out_new);
+        }
 
         g_free (time_out_new);
     }
@@ -644,9 +650,10 @@ appearance_box (void)
             /* *INDENT-ON* */
         };
 
+        WRect r = { -1, -1, 0, 54 };
+
         quick_dialog_t qdlg = {
-            -1, -1, 54,
-            N_("Appearance"), "[Appearance]",
+            r, N_("Appearance"), "[Appearance]",
             quick_widgets, appearance_box_callback, NULL
         };
 
@@ -661,7 +668,6 @@ appearance_box (void)
     }
 
     g_free (current_skin_name);
-    g_ptr_array_foreach (skin_names, (GFunc) g_free, NULL);
     g_ptr_array_free (skin_names, TRUE);
 }
 
@@ -724,9 +730,10 @@ panel_options_box (void)
             /* *INDENT-ON* */
         };
 
+        WRect r = { -1, -1, 0, 60 };
+
         quick_dialog_t qdlg = {
-            -1, -1, 60,
-            N_("Panel options"), "[Panel options]",
+            r, N_("Panel options"), "[Panel options]",
             quick_widgets, NULL, NULL
         };
 
@@ -752,7 +759,7 @@ panel_options_box (void)
 
 /* return list type */
 int
-panel_listing_box (WPanel * panel, int num, char **userp, char **minip, gboolean * use_msformat,
+panel_listing_box (WPanel *panel, int num, char **userp, char **minip, gboolean *use_msformat,
                    int *brief_cols)
 {
     int result = -1;
@@ -800,9 +807,10 @@ panel_listing_box (WPanel * panel, int num, char **userp, char **minip, gboolean
             /* *INDENT-ON* */
         };
 
+        WRect r = { -1, -1, 0, 48 };
+
         quick_dialog_t qdlg = {
-            -1, -1, 48,
-            N_("Listing format"), "[Listing Format...]",
+            r, N_("Listing format"), "[Listing Format...]",
             quick_widgets, panel_listing_callback, NULL
         };
 
@@ -858,7 +866,7 @@ panel_listing_box (WPanel * panel, int num, char **userp, char **minip, gboolean
 /* --------------------------------------------------------------------------------------------- */
 
 const panel_field_t *
-sort_box (dir_sort_options_t * op, const panel_field_t * sort_field)
+sort_box (dir_sort_options_t *op, const panel_field_t *sort_field)
 {
     char **sort_orders_names;
     gsize i;
@@ -890,9 +898,10 @@ sort_box (dir_sort_options_t * op, const panel_field_t * sort_field)
             /* *INDENT-ON* */
         };
 
+        WRect r = { -1, -1, 0, 40 };
+
         quick_dialog_t qdlg = {
-            -1, -1, 40,
-            N_("Sort order"), "[Sort Order...]",
+            r, N_("Sort order"), "[Sort Order...]",
             quick_widgets, NULL, NULL
         };
 
@@ -929,9 +938,10 @@ confirm_box (void)
         /* *INDENT-ON* */
     };
 
+    WRect r = { -1, -1, 0, 46 };
+
     quick_dialog_t qdlg = {
-        -1, -1, 46,
-        N_("Confirmation"), "[Confirmation]",
+        r, N_("Confirmation"), "[Confirmation]",
         quick_widgets, NULL, NULL
     };
 
@@ -964,9 +974,10 @@ display_bits_box (void)
         /* *INDENT-ON* */
     };
 
+    WRect r = { -1, -1, 0, 46 };
+
     quick_dialog_t qdlg = {
-        -1, -1, 46,
-        _("Display bits"), "[Display bits]",
+        r, _("Display bits"), "[Display bits]",
         quick_widgets, NULL, NULL
     };
 
@@ -1022,9 +1033,10 @@ display_bits_box (void)
             /* *INDENT-ON* */
         };
 
+        WRect r = { -1, -1, 0, 46 };
+
         quick_dialog_t qdlg = {
-            -1, -1, 46,
-            N_("Display bits"), "[Display bits]",
+            r, N_("Display bits"), "[Display bits]",
             quick_widgets, NULL, NULL
         };
 
@@ -1064,6 +1076,7 @@ char *
 tree_box (const char *current_dir)
 {
     WTree *mytree;
+    WRect r;
     WDialog *dlg;
     WGroup *g;
     Widget *wd;
@@ -1078,14 +1091,15 @@ tree_box (const char *current_dir)
     g = GROUP (dlg);
     wd = WIDGET (dlg);
 
-    mytree = tree_new (2, 2, wd->lines - 6, wd->cols - 5, FALSE);
+    rect_init (&r, 2, 2, wd->rect.lines - 6, wd->rect.cols - 5);
+    mytree = tree_new (&r, FALSE);
     group_add_widget_autopos (g, mytree, WPOS_KEEP_ALL, NULL);
-    group_add_widget_autopos (g, hline_new (wd->lines - 4, 1, -1), WPOS_KEEP_BOTTOM, NULL);
+    group_add_widget_autopos (g, hline_new (wd->rect.lines - 4, 1, -1), WPOS_KEEP_BOTTOM, NULL);
     bar = buttonbar_new ();
     group_add_widget (g, bar);
     /* restore ButtonBar coordinates after add_widget() */
-    WIDGET (bar)->x = 0;
-    WIDGET (bar)->y = LINES - 1;
+    WIDGET (bar)->rect.x = 0;
+    WIDGET (bar)->rect.y = LINES - 1;
 
     if (dlg_run (dlg) == B_ENTER)
     {
@@ -1149,9 +1163,10 @@ configure_vfs_box (void)
             /* *INDENT-ON* */
         };
 
+        WRect r = { -1, -1, 0, 56 };
+
         quick_dialog_t qdlg = {
-            -1, -1, 56,
-            N_("Virtual File System Setting"), "[Virtual FS]",
+            r, N_("Virtual File System Setting"), "[Virtual FS]",
             quick_widgets,
 #ifdef ENABLE_VFS_FTP
             confvfs_callback,
@@ -1169,7 +1184,10 @@ configure_vfs_box (void)
         if (quick_dialog (&qdlg) != B_CANCEL)
         {
             /* cppcheck-suppress uninitvar */
-            vfs_timeout = atoi (ret_timeout);
+            if (ret_timeout[0] == '\0')
+                vfs_timeout = 0;
+            else
+                vfs_timeout = atoi (ret_timeout);
             g_free (ret_timeout);
 
             if (vfs_timeout < 0 || vfs_timeout > 10000)
@@ -1182,7 +1200,10 @@ configure_vfs_box (void)
             /* cppcheck-suppress uninitvar */
             ftpfs_proxy_host = ret_ftp_proxy;
             /* cppcheck-suppress uninitvar */
-            ftpfs_directory_timeout = atoi (ret_directory_timeout);
+            if (ret_directory_timeout[0] == '\0')
+                ftpfs_directory_timeout = 0;
+            else
+                ftpfs_directory_timeout = atoi (ret_directory_timeout);
             g_free (ret_directory_timeout);
 #endif
         }
@@ -1194,7 +1215,7 @@ configure_vfs_box (void)
 /* --------------------------------------------------------------------------------------------- */
 
 char *
-cd_box (const WPanel * panel)
+cd_box (const WPanel *panel)
 {
     const Widget *w = CONST_WIDGET (panel);
     char *my_str;
@@ -1205,9 +1226,10 @@ cd_box (const WPanel * panel)
         QUICK_END
     };
 
+    WRect r = { w->rect.y + w->rect.lines - 6, w->rect.x, 0, w->rect.cols };
+
     quick_dialog_t qdlg = {
-        w->y + w->lines - 6, w->x, w->cols,
-        N_("Quick cd"), "[Quick cd]",
+        r, N_("Quick cd"), "[Quick cd]",
         quick_widgets, NULL, NULL
     };
 
@@ -1217,7 +1239,7 @@ cd_box (const WPanel * panel)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-symlink_box (const vfs_path_t * existing_vpath, const vfs_path_t * new_vpath,
+symlink_box (const vfs_path_t *existing_vpath, const vfs_path_t *new_vpath,
              char **ret_existing, char **ret_new)
 {
     quick_widget_t quick_widgets[] = {
@@ -1234,9 +1256,10 @@ symlink_box (const vfs_path_t * existing_vpath, const vfs_path_t * new_vpath,
         /* *INDENT-ON* */
     };
 
+    WRect r = { -1, -1, 0, 64 };
+
     quick_dialog_t qdlg = {
-        -1, -1, 64,
-        N_("Symbolic link"), "[File Menu]",
+        r, N_("Symbolic link"), "[File Menu]",
         quick_widgets, NULL, NULL
     };
 
@@ -1261,8 +1284,7 @@ jobs_box (void)
         int len;
         bcback_fn callback;
     }
-    job_but[] =
-    {
+    job_but[] = {
         /* *INDENT-OFF* */
         { N_("&Stop"), NORMAL_BUTTON, B_STOP, 0, task_cb },
         { N_("&Resume"), NORMAL_BUTTON, B_RESUME, 0, task_cb },

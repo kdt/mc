@@ -1,7 +1,7 @@
 /*
    Color setup for NCurses screen library
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -48,10 +48,13 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 static GHashTable *mc_tty_color_color_pair_attrs = NULL;
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
@@ -100,7 +103,7 @@ color_get_attr (int color_pair)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-mc_tty_color_pair_init_special (tty_color_pair_t * mc_color_pair,
+mc_tty_color_pair_init_special (tty_color_lib_pair_t *mc_color_pair,
                                 int fg1, int bg1, int fg2, int bg2, int attr)
 {
     if (has_colors () && !mc_tty_color_disable)
@@ -142,11 +145,11 @@ tty_color_deinit_lib (void)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-tty_color_try_alloc_pair_lib (tty_color_pair_t * mc_color_pair)
+tty_color_try_alloc_lib_pair (tty_color_lib_pair_t *mc_color_pair)
 {
-    if (mc_color_pair->ifg <= (int) SPEC_A_REVERSE)
+    if (mc_color_pair->fg <= (int) SPEC_A_REVERSE)
     {
-        switch (mc_color_pair->ifg)
+        switch (mc_color_pair->fg)
         {
         case SPEC_A_REVERSE:
             mc_tty_color_pair_init_special (mc_color_pair,
@@ -176,8 +179,8 @@ tty_color_try_alloc_pair_lib (tty_color_pair_t * mc_color_pair)
     {
         int ifg, ibg, attr;
 
-        ifg = mc_color_pair->ifg;
-        ibg = mc_color_pair->ibg;
+        ifg = mc_color_pair->fg;
+        ibg = mc_color_pair->bg;
         attr = mc_color_pair->attr;
 
         /* In legacy color mode, change bright colors into bold */
@@ -228,7 +231,7 @@ tty_set_normal_attrs (void)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-tty_use_256colors (GError ** error)
+tty_use_256colors (GError **error)
 {
     (void) error;
 
@@ -238,7 +241,7 @@ tty_use_256colors (GError ** error)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-tty_use_truecolors (GError ** error)
+tty_use_truecolors (GError **error)
 {
     /* Not yet supported in ncurses */
     g_set_error (error, MC_ERROR, -1, _("True color not supported with ncurses."));

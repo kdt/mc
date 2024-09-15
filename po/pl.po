@@ -3,24 +3,24 @@
 # This file is distributed under the same license as the mc package.
 #
 # Translators:
-# Piotr Drąg <piotrdrag@gmail.com>, 2011-2021
+# Piotr Drąg <piotrdrag@gmail.com>, 2011-2024
 # Slava Zanko <slavazanko@gmail.com>, 2011
 # Waldemar Stoczkowski, 2021
 msgid ""
 msgstr ""
 "Project-Id-Version: Midnight Commander\n"
-"Report-Msgid-Bugs-To: http://www.midnight-commander.org/\n"
-"POT-Creation-Date: 2021-09-26 10:06+0300\n"
-"PO-Revision-Date: 2021-07-27 11:29+0000\n"
-"Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
-"Language-Team: Polish (http://www.transifex.com/mc/mc/language/pl/)\n"
+"Report-Msgid-Bugs-To: https://www.midnight-commander.org/\n"
+"POT-Creation-Date: 2024-08-23 19:20+0200\n"
+"PO-Revision-Date: 2010-12-29 10:19+0000\n"
+"Last-Translator: Piotr Drąg <piotrdrag@gmail.com>, 2011-2024\n"
+"Language-Team: Polish (http://app.transifex.com/mc/mc/language/pl/)\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n"
-"%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n"
-"%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
+"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
+"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 
 # "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 msgid "Warning: cannot load codepages list"
@@ -536,6 +536,9 @@ msgstr ""
 "potomnego:\n"
 "%s"
 
+msgid "Cannot close pipe descriptor (p == NULL)"
+msgstr "Nie można zamknąć deskryptora potoku (p == NULL)"
+
 #, c-format
 msgid ""
 "Unexpected error in waitpid():\n"
@@ -566,28 +569,12 @@ msgid "Changes to file lost"
 msgstr "Utracono zmiany w pliku"
 
 #, c-format
-msgid "%s is not a directory\n"
-msgstr "%s nie jest katalogiem\n"
-
-#, c-format
-msgid "Directory %s is not owned by you\n"
-msgstr "Katalog %s nie należy do ciebie\n"
-
-#, c-format
-msgid "Cannot set correct permissions for directory %s\n"
-msgstr "Nie można ustawić odpowiednich uprawnień dla katalogu %s\n"
-
-#, c-format
-msgid "Cannot create temporary directory %s: %s\n"
-msgstr "Nie można utworzyć katalogu tymczasowego %s: %s\n"
-
-#, c-format
-msgid "Temporary files will be created in %s\n"
-msgstr "Pliki tymczasowe zostaną utworzone w %s\n"
-
-#, c-format
-msgid "Temporary files will not be created\n"
-msgstr "Pliki tymczasowe nie zostaną utworzone\n"
+msgid ""
+"Cannot create temporary directory %s: %s.\n"
+"Temporary files will not be created\n"
+msgstr ""
+"Nie można utworzyć katalogu tymczasowego %s: %s.\n"
+"Pliki tymczasowe nie zostaną utworzone\n"
 
 msgid "Press any key to continue..."
 msgstr "Naciśnięcie dowolnego klawisza kontynuuje…"
@@ -740,15 +727,16 @@ msgid ""
 "                 errdhotfocus\n"
 "   Menus:        menunormal, menuhot, menusel, menuhotsel, menuinactive\n"
 "   Popup menus:  pmenunormal, pmenusel, pmenutitle\n"
-"   Editor:       editnormal, editbold, editmarked, editwhitespace,\n"
+"   Editor:       editnormal, editbold, editmarked, editwhitespace, "
+"editnonprintable,\n"
 "                 editlinestate, editbg, editframe, editframeactive\n"
 "                 editframedrag\n"
 "   Viewer:       viewnormal,viewbold, viewunderline, viewselected\n"
 "   Help:         helpnormal, helpitalic, helpbold, helplink, helpslink\n"
 msgstr ""
-"--colors KEYWORD={TEKST},{TŁO},{ATR}:SŁOWO_KLUCZOWE2=…\n"
+"--colors SŁOWO_KLUCZOWE={TEKST},{TŁO},{ATR}:SŁOWO_KLUCZOWE2=…\n"
 "\n"
-"{TEKST}, {TŁO} i {ATR} można pominąć, zostaną użyte wartości domyślne\n"
+"{TEKST}, {TŁO} i {ATR} można pominąć, zostaną użyte wartości domyślne\n"
 "\n"
 " Słowa kluczowe:\n"
 "   Globalne:     errors, disabled, reverse, gauge, header\n"
@@ -758,8 +746,9 @@ msgstr ""
 "   Okna dialogowe: dnormal, dfocus, dhotnormal, dhotfocus, errdhotnormal,\n"
 "                 errdhotfocus\n"
 "   Menu:         menunormal, menuhot, menusel, menuhotsel, menuinactive\n"
-"   Menu wyskakujące: pmenunormal, pmenusel, pmenutitle\n"
-"   Edytor:       editnormal, editbold, editmarked, editwhitespace,\n"
+"   Menu wyskakujące:  pmenunormal, pmenusel, pmenutitle\n"
+"   Edytor:       editnormal, editbold, editmarked, editwhitespace, "
+"editnonprintable,\n"
 "                 editlinestate, editbg, editframe, editframeactive\n"
 "                 editframedrag\n"
 "   Przeglądarka: viewnormal,viewbold, viewunderline, viewselected\n"
@@ -828,10 +817,13 @@ msgstr "Opcje terminala"
 msgid "Arguments parse error!"
 msgstr "Błąd podczas przetwarzania parametrów."
 
+msgid "MC is built without builtin editor."
+msgstr "MC został zbudowany bez wbudowanego edytora."
+
 msgid "No arguments given to the viewer."
 msgstr "Nie podano parametrów dla przeglądarki."
 
-msgid "Two files are required to envoke the diffviewer."
+msgid "Two files are required to invoke the diffviewer."
 msgstr "Wymagane są dwa pliki, aby wywołać program diffviewer."
 
 msgid "Background protocol error"
@@ -1215,10 +1207,10 @@ msgstr "Należy najpierw wyróżnić blok tekstu"
 msgid "Run sort"
 msgstr "Wykonaj polecenie sort"
 
-msgid "Enter sort options (see manpage) separated by whitespace:"
+msgid "Enter sort options (see sort(1) manpage) separated by whitespace:"
 msgstr ""
-"Proszę podać opcje polecenia sort (proszę zobaczyć stronę man), rozdzielone "
-"spacjami: "
+"Proszę podać opcje polecenia sort (strona podręcznika sort(1) zawiera więcej "
+"informacji), rozdzielone spacjami:"
 
 msgid "Sort"
 msgstr "Posortuj"
@@ -1634,8 +1626,8 @@ msgstr ""
 "Łatwy w obsłudze edytor tekstu,\n"
 "napisany dla programu Midnight Commander."
 
-msgid "Copyright (C) 1996-2021 the Free Software Foundation"
-msgstr "Copyright © 1996-2021 Free Software Foundation"
+msgid "Copyright (C) 1996-2024 the Free Software Foundation"
+msgstr "Copyright © 1996-2024 Free Software Foundation"
 
 msgid "About"
 msgstr "O programie"
@@ -2169,10 +2161,12 @@ msgstr "Zadania w tle"
 
 #, c-format
 msgid ""
-"Cannot chdir to \"%s\"\n"
+"Cannot change directory to\n"
+"%s\n"
 "%s"
 msgstr ""
-"Nie można zmienić katalogu na „%s”\n"
+"Nie można zmienić katalogu na\n"
+"%s\n"
 "%s"
 
 msgid "Secure deletion"
@@ -2269,9 +2263,6 @@ msgid ""
 msgstr ""
 "Nie można wykonać polecenia chattr na „%s”\n"
 "%s"
-
-msgid "Cannot change attributes on non-local filesystems"
-msgstr "Nie można zmienić atrybutów na nielokalnych systemach plików"
 
 #, c-format
 msgid ""
@@ -2374,15 +2365,6 @@ msgstr "Nazwa komputera (F1 wyświetli więcej informacji):"
 msgid "Files tagged, want to cd?"
 msgstr "Zaznaczono pliki, zmienić katalog?"
 
-msgid "Cannot change directory"
-msgstr "Nie można zmienić katalogu"
-
-msgid "Filter"
-msgstr "Filtr"
-
-msgid "Set expression for filtering filenames"
-msgstr "Wyrażenie filtrujące nazwy plików"
-
 #, c-format
 msgid "Link %s to:"
 msgstr "Dowiązanie %s do:"
@@ -2397,10 +2379,6 @@ msgstr "dowiązanie: %s"
 #, c-format
 msgid "symlink: %s"
 msgstr "dowiązanie symboliczne: %s"
-
-#, c-format
-msgid "Cannot chdir to \"%s\""
-msgstr "Nie można zmienić katalogu na „%s”"
 
 msgid "View file"
 msgstr "Podgląd pliku"
@@ -2530,29 +2508,43 @@ msgid "Pipe failed"
 msgstr "Potok się nie powiódł"
 
 #, c-format
-msgid " %s%s file error"
-msgstr " Błąd pliku %s%s"
+msgid ""
+"You have an outdated %s file.\n"
+"Midnight Commander now uses %s file.\n"
+"Please copy your modifications of the old file to the new one."
+msgstr ""
+"Plik %s jest przestarzały.\n"
+"Midnight Commander używa teraz pliku %s.\n"
+"Proszę skopiować wprowadzone zmiany z poprzedniego pliku do nowego."
 
 #, c-format
 msgid ""
-"The format of the %smc.ext file has changed with version 3.0. It seems that "
-"the installation failed. Please fetch a fresh copy from the Midnight "
-"Commander package."
+"The format of the\n"
+"%s%s\n"
+"file has changed with version 4.0.\n"
+"It seems that the installation has failed.\n"
+"Please fetch a fresh copy from the Midnight Commander package."
 msgstr ""
-"Format pliku %smc.ext uległ zmianie wraz z wersją 3.0. Wygląda na to, że "
-"instalacja się nie powiodła. Proszę pobrać nową wersję tego pliku z pakietu "
-"programu Midnight Commander."
-
-#, c-format
-msgid "%s file error"
-msgstr "Błąd pliku %s"
+"Format pliku\n"
+"%s%s\n"
+"uległ zmianie wraz z wersją 4.0.\n"
+"Wygląda na to, że instalacja się nie powiodła.\n"
+"Proszę pobrać nową wersję tego pliku z pakietu programu Midnight Commander."
 
 #, c-format
 msgid ""
-"The format of the %s file has changed with version 3.0. You may either want "
-"to copy it from %smc.ext or use that file as an example of how to write it."
+"The format of the\n"
+"%s\n"
+"file has changed with version 4.0.\n"
+"You may either want to copy it from\n"
+"%s%s\n"
+"or use that file as an example of how to write it."
 msgstr ""
-"Format pliku %s został zmieniony w wersji 3.0. Można skopiować go z %smc.ext "
+"Format pliku\n"
+"%s\n"
+"został zmieniony w wersji 4.0.\n"
+"Można skopiować go z\n"
+"%s%s\n"
 "lub użyć tego pliku jako przykład."
 
 msgid "DialogTitle|Copy"
@@ -2764,6 +2756,22 @@ msgstr ""
 
 #, c-format
 msgid ""
+"Cannot get attributes of source file \"%s\"\n"
+"%s"
+msgstr ""
+"Nie można uzyskać atrybutów pliku źródłowego „%s”\n"
+"%s"
+
+#, c-format
+msgid ""
+"Cannot set attributes of target file \"%s\"\n"
+"%s"
+msgstr ""
+"Nie można ustawić atrybutów pliku docelowego „%s”\n"
+"%s"
+
+#, c-format
+msgid ""
 "Cannot create special file \"%s\"\n"
 "%s"
 msgstr ""
@@ -2848,6 +2856,15 @@ msgstr ""
 msgid "(stalled)"
 msgstr "(wstrzymany)"
 
+msgid "Incomplete file was retrieved"
+msgstr "Pobrano niepełny plik"
+
+msgid "&Keep"
+msgstr "&Zachowaj"
+
+msgid "&Continue copy"
+msgstr "&Kontynuuj kopiowanie"
+
 #, c-format
 msgid ""
 "Cannot close source file \"%s\"\n"
@@ -2864,11 +2881,13 @@ msgstr ""
 "Nie można zamknąć pliku docelowego „%s”\n"
 "%s"
 
-msgid "Incomplete file was retrieved. Keep it?"
-msgstr "Pobrano niepełny plik. Zachować go?"
-
-msgid "&Keep"
-msgstr "&Zachowaj"
+#, c-format
+msgid ""
+"Cannot set attributes for target file \"%s\"\n"
+"%s"
+msgstr ""
+"Nie można ustawić atrybutów dla pliku docelowego „%s”\n"
+"%s"
 
 #, c-format
 msgid ""
@@ -2876,6 +2895,14 @@ msgid ""
 "%s"
 msgstr ""
 "Nie można wykonać polecenia stat na katalogu źródłowym „%s”\n"
+"%s"
+
+#, c-format
+msgid ""
+"Cannot get attributes of source directory \"%s\"\n"
+"%s"
+msgstr ""
+"Nie można uzyskać atrybutów katalogu źródłowego „%s”\n"
 "%s"
 
 #, c-format
@@ -2932,8 +2959,8 @@ msgid "Con&tinue"
 msgstr "Kon&tynuuj"
 
 #, c-format
-msgid "%d:%02d.%02d"
-msgstr "%d:%02d.%02d"
+msgid "%d:%02d:%02d"
+msgstr "%d:%02d:%02d"
 
 #, c-format
 msgid "ETA %s"
@@ -2988,7 +3015,7 @@ msgid "Background process: File exists"
 msgstr "Proces w tle: plik istnieje"
 
 #, c-format
-msgid "Files processed: %zu/%zu"
+msgid "Files processed: %zu / %zu"
 msgstr "Przetworzono pliki: %zu/%zu"
 
 #, c-format
@@ -3016,7 +3043,7 @@ msgid " Total: %s "
 msgstr " Razem: %s "
 
 #, c-format
-msgid " Total: %s/%s "
+msgid " Total: %s / %s "
 msgstr " Razem: %s/%s "
 
 msgid "Source"
@@ -3083,8 +3110,8 @@ msgstr "Połączenie FT&P…"
 msgid "S&hell link..."
 msgstr "Połączenie po po&włoce…"
 
-msgid "S&FTP link..."
-msgstr "Połączenie S&FTP…"
+msgid "SFTP li&nk..."
+msgstr "Połączenie SF&TP…"
 
 msgid "Paneli&ze"
 msgstr "Filtru&j"
@@ -3471,7 +3498,7 @@ msgid "No space information"
 msgstr "Brak informacji o miejscu"
 
 #, c-format
-msgid "Free space: %s/%s (%d%%)"
+msgid "Free space: %s / %s (%d%%)"
 msgstr "Wolne miejsce: %s/%s (%d%%)"
 
 #, c-format
@@ -3525,9 +3552,6 @@ msgstr "Właściciel:    %s/%s"
 #, c-format
 msgid "Links:      %d"
 msgstr "Dowiązania:    %d"
-
-msgid "Attributes: not supported"
-msgstr "Atrybuty: nieobsługiwane"
 
 #, c-format
 msgid "Attributes: %s"
@@ -3719,6 +3743,9 @@ msgstr "Wybierz"
 
 msgid "Unselect"
 msgstr "Odznacz"
+
+msgid "Filter"
+msgstr "Filtr"
 
 msgid "Do you really want to execute?"
 msgstr "Na pewno wykonać?"
@@ -3975,10 +4002,10 @@ msgstr "Powłoka jest wciąż aktywna. Zakończyć mimo to?"
 msgid "Warning: Cannot change to %s.\n"
 msgstr "Ostrzeżenie: nie można zmienić katalogu na %s.\n"
 
-msgid "With builtin Editor and Aspell support"
-msgstr "Z wbudowanym edytorem i obsługą Aspell"
+msgid "With builtin editor and aspell support"
+msgstr "Z wbudowanym edytorem i obsługą aspell"
 
-msgid "With builtin Editor"
+msgid "With builtin editor"
 msgstr "Z wbudowanym edytorem"
 
 msgid "With optional subshell support"
@@ -4029,6 +4056,10 @@ msgstr "Zbudowano za pomocą biblioteki ncursesw %s\n"
 
 msgid "Built with ncursesw (unknown version)"
 msgstr "Zbudowano za pomocą biblioteki ncursesw (nieznana wersja)"
+
+#, c-format
+msgid "Built with libssh2 %d.%d.%d\n"
+msgstr "Zbudowano za pomocą biblioteki libssh2 %d.%d.%d\n"
 
 msgid "Virtual File Systems:"
 msgstr "Wirtualne systemy plików:"
@@ -4155,6 +4186,17 @@ msgstr ""
 "Nieoczekiwany koniec pliku\n"
 "%s"
 
+msgid "Inconsistent archive"
+msgstr "Niespójne archiwum"
+
+#, c-format
+msgid ""
+"Cannot open %s archive\n"
+"%s"
+msgstr ""
+"Nie można otworzyć archiwum %s\n"
+"%s"
+
 #, c-format
 msgid ""
 "Cannot open %s archive\n"
@@ -4173,66 +4215,30 @@ msgstr ""
 "Wirtualny system plików EXTFS:\n"
 "%s"
 
+msgid ""
+"EXTFS virtual file system:\n"
+"wrong file name"
+msgstr ""
+"Wirtualny system plików EXTFS:\n"
+"błędna nazwa pliku"
+
+msgid ""
+"EXTFS virtual file system:\n"
+"wrong archive name"
+msgstr ""
+"Wirtualny system plików EXTFS:\n"
+"błędna nazwa archiwum"
+
+msgid ""
+"EXTFS virtual file system:\n"
+"cannot build command"
+msgstr ""
+"Wirtualny system plików EXTFS:\n"
+"nie można zbudować polecenia"
+
 #, c-format
 msgid "Warning: cannot open %s directory\n"
 msgstr "Ostrzeżenie: nie można utworzyć katalogu %s\n"
-
-#, c-format
-msgid "fish: Disconnecting from %s"
-msgstr "fish: rozłączanie z %s"
-
-msgid "fish: Waiting for initial line..."
-msgstr "fish: oczekiwanie na wiersz początkowy…"
-
-msgid "Sorry, we cannot do password authenticated connections for now."
-msgstr "Połączenia uwierzytelniane hasłem nie są na razie obsługiwane."
-
-#, c-format
-msgid "fish: Password is required for %s"
-msgstr "fish: wymagane jest hasło dla %s"
-
-msgid "fish: Sending password..."
-msgstr "fish: wysyłanie hasła…"
-
-msgid "fish: Sending initial line..."
-msgstr "fish: wysyłanie wiersza początkowego…"
-
-msgid "fish: Handshaking version..."
-msgstr "fish: ustalanie wersji…"
-
-msgid "fish: Getting host info..."
-msgstr "fish: pobieranie informacji o komputerze…"
-
-#, c-format
-msgid "fish: Reading directory %s..."
-msgstr "fish: odczytywanie katalogu %s…"
-
-#, c-format
-msgid "%s: done."
-msgstr "%s: ukończono."
-
-#, c-format
-msgid "%s: failure"
-msgstr "%s: niepowodzenie"
-
-#, c-format
-msgid "fish: store %s: sending command..."
-msgstr "fish: zapis %s: wysyłanie polecenia…"
-
-msgid "fish: Local read failed, sending zeros"
-msgstr "fish: lokalny odczyt się nie powiódł, wysyłanie zer"
-
-msgid "fish: storing file"
-msgstr "fish: wysyłanie pliku"
-
-msgid "Aborting transfer..."
-msgstr "Przerywanie przesyłania…"
-
-msgid "Error reported after abort."
-msgstr "Zgłoszono błąd po przerwaniu."
-
-msgid "Aborted transfer would be successful."
-msgstr "Przerwane przesyłanie zostałoby pomyślnie zakończone."
 
 #, c-format
 msgid "ftpfs: Disconnecting from %s"
@@ -4287,6 +4293,21 @@ msgstr "ftpfs: połączenie z serwerem się nie powiodło: %s"
 msgid "Waiting to retry... %d (Control-G to cancel)"
 msgstr "Oczekiwanie na ponowienie… %d (Ctrl-G anuluje)"
 
+#, c-format
+msgid "ftpfs: could not make address-to-name translation: %s"
+msgstr "ftpfs: nie można wykonać tłumaczenia adresu na nazwę: %s"
+
+#, c-format
+msgid "ftpfs: try reconnect to server, attempt %u"
+msgstr "ftpfs: próba ponownego połączenia z serwerem, %u. próba"
+
+#, c-format
+msgid "ftpfs: could not get socket name: %s"
+msgstr "ftpfs: nie można uzyskać nazwy gniazda: %s"
+
+msgid "ftpfs: could not reconnect to server"
+msgstr "ftpfs: nie można ponownie połączyć się z serwerem"
+
 msgid "ftpfs: invalid address family"
 msgstr "ftpfs: nieprawidłowa rodzina adresów"
 
@@ -4328,6 +4349,14 @@ msgstr "(najpierw chdir)"
 
 msgid "ftpfs: failed; nowhere to fallback to"
 msgstr "ftpfs: niepowodzenie; brak możliwości wycofania"
+
+#, c-format
+msgid "%s: failure"
+msgstr "%s: niepowodzenie"
+
+#, c-format
+msgid "%s: done."
+msgstr "%s: ukończono."
 
 msgid "ftpfs: storing file"
 msgstr "ftpfs: wysyłanie pliku"
@@ -4488,12 +4517,50 @@ msgid "sftp: Listing done."
 msgstr "sftp: ukończono wyświetlanie listy."
 
 #, c-format
-msgid ""
-"Cannot open tar archive\n"
-"%s"
-msgstr ""
-"Nie można otworzyć archiwum tar\n"
-"%s"
+msgid "shell: Disconnecting from %s"
+msgstr "powłoka: rozłączanie z %s"
+
+msgid "shell: Waiting for initial line..."
+msgstr "powłoka: oczekiwanie na wiersz początkowy…"
+
+msgid "Sorry, we cannot do password authenticated connections for now."
+msgstr "Połączenia uwierzytelniane hasłem nie są na razie obsługiwane."
+
+#, c-format
+msgid "shell: Password is required for %s"
+msgstr "powłoka: wymagane jest hasło dla %s"
+
+msgid "shell: Sending password..."
+msgstr "powłoka: wysyłanie hasła…"
+
+msgid "shell: Sending initial line..."
+msgstr "powłoka: wysyłanie wiersza początkowego…"
+
+msgid "shell: Getting host info..."
+msgstr "powłoka: pobieranie informacji o komputerze…"
+
+#, c-format
+msgid "shell: Reading directory %s..."
+msgstr "powłoka: odczytywanie katalogu %s…"
+
+#, c-format
+msgid "shell: store %s: sending command..."
+msgstr "powłoka: zapis %s: wysyłanie polecenia…"
+
+msgid "shell: Local read failed, sending zeros"
+msgstr "powłoka: lokalny odczyt się nie powiódł, wysyłanie zer"
+
+msgid "shell: storing file"
+msgstr "powłoka: wysyłanie pliku"
+
+msgid "Aborting transfer..."
+msgstr "Przerywanie przesyłania…"
+
+msgid "Error reported after abort."
+msgstr "Zgłoszono błąd po przerwaniu."
+
+msgid "Aborted transfer would be successful."
+msgstr "Przerwane przesyłanie zostałoby pomyślnie zakończone."
 
 msgid "Inconsistent tar archive"
 msgstr "Niespójne archiwum tar"
@@ -4503,11 +4570,22 @@ msgstr "Nieoczekiwany koniec pliku archiwum"
 
 #, c-format
 msgid ""
+"Cannot open tar archive\n"
+"%s"
+msgstr ""
+"Nie można otworzyć archiwum tar\n"
+"%s"
+
+#, c-format
+msgid ""
 "%s\n"
-"doesn't look like a tar archive."
+"doesn't look like a tar archive"
 msgstr ""
 "%s\n"
-"nie wygląda na archiwum tar."
+"nie wygląda na archiwum tar"
+
+msgid "tar: mc_lseek not stopped at a record boundary"
+msgstr "tar: mc_lseek nie zatrzymało się na granicy wpisu"
 
 msgid "undelfs: error"
 msgstr "undelfs: błąd"
@@ -4701,55 +4779,3 @@ msgstr "Kontynuować od początku?"
 msgid "Cannot fetch a local copy of /ftp://some.host/editme.txt"
 msgstr ""
 "Nie można pobrać lokalnej kopii /ftp://jakiś.komputer/modyfikuj_mnie.txt"
-
-#~ msgid "Set debug level"
-#~ msgstr "Ustawia poziom debugowania"
-
-#~ msgid "<integer>"
-#~ msgstr "<liczba-całkowita>"
-
-#, c-format
-#~ msgid "Password for \\\\%s\\%s"
-#~ msgstr "Hasło dla \\\\%s\\%s"
-
-#~ msgid "Domain:"
-#~ msgstr "Domena:"
-
-#~ msgid "Username:"
-#~ msgstr "Nazwa użytkownika:"
-
-#~ msgid "SMB authentication"
-#~ msgstr "Uwierzytelnianie SMB"
-
-#~ msgid "SMB link to machine"
-#~ msgstr "Połączenie SMB z komputerem"
-
-#~ msgid "SM&B link..."
-#~ msgstr "Połączenie SM&B…"
-
-#, c-format
-#~ msgid "reconnect to %s failed"
-#~ msgstr "ponowne połączenie z %s się nie powiodło"
-
-#~ msgid "Authentication failed"
-#~ msgstr "Uwierzytelnienie się nie powiodło"
-
-#, c-format
-#~ msgid "Error %s creating directory %s"
-#~ msgstr "Błąd %s podczas tworzenia katalogu %s"
-
-#, c-format
-#~ msgid "Error %s removing directory %s"
-#~ msgstr "Błąd %s podczas usuwania katalogu %s"
-
-#, c-format
-#~ msgid "%s opening remote file %s"
-#~ msgstr "%s podczas otwierania zdalnego pliku %s"
-
-#, c-format
-#~ msgid "%s removing remote file %s"
-#~ msgstr "%s podczas usuwania zdalnego pliku %s"
-
-#, c-format
-#~ msgid "%s renaming files\n"
-#~ msgstr "%s podczas zmieniania nazw plików\n"

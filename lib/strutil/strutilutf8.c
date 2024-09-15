@@ -1,7 +1,7 @@
 /*
    UTF-8 strings utilities
 
-   Copyright (C) 2007-2021
+   Copyright (C) 2007-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -27,6 +27,7 @@
 
 #include <stdlib.h>
 #include <langinfo.h>
+#include <limits.h>             /* MB_LEN_MAX */
 #include <string.h>
 
 #include "lib/global.h"
@@ -51,10 +52,12 @@ struct utf8_tool
 
 struct term_form
 {
-    char text[BUF_MEDIUM * 6];
+    char text[BUF_MEDIUM * MB_LEN_MAX];
     size_t width;
     gboolean compose;
 };
+
+/*** forward declarations (file scope functions) *************************************************/
 
 /*** file scope variables ************************************************************************/
 
@@ -77,7 +80,7 @@ str_unichar_iscombiningmark (gunichar uni)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-str_utf8_insert_replace_char (GString * buffer)
+str_utf8_insert_replace_char (GString *buffer)
 {
     g_string_append (buffer, replch);
 }
@@ -274,7 +277,7 @@ str_utf8_cprev_noncomb_char (const char **text, const char *begin)
 /* --------------------------------------------------------------------------------------------- */
 
 static gboolean
-str_utf8_toupper (const char *text, char **out, size_t * remain)
+str_utf8_toupper (const char *text, char **out, size_t *remain)
 {
     gunichar uni;
     size_t left;
@@ -297,7 +300,7 @@ str_utf8_toupper (const char *text, char **out, size_t * remain)
 /* --------------------------------------------------------------------------------------------- */
 
 static gboolean
-str_utf8_tolower (const char *text, char **out, size_t * remain)
+str_utf8_tolower (const char *text, char **out, size_t *remain)
 {
     gunichar uni;
     size_t left;
@@ -395,7 +398,7 @@ str_utf8_length_noncomb (const char *text)
 
 #if 0
 static void
-str_utf8_questmark_sustb (char **string, size_t * left, GString * buffer)
+str_utf8_questmark_sustb (char **string, size_t *left, GString *buffer)
 {
     char *next;
 
@@ -409,7 +412,7 @@ str_utf8_questmark_sustb (char **string, size_t * left, GString * buffer)
 /* --------------------------------------------------------------------------------------------- */
 
 static gchar *
-str_utf8_conv_gerror_message (GError * mcerror, const char *def_msg)
+str_utf8_conv_gerror_message (GError *mcerror, const char *def_msg)
 {
     if (mcerror != NULL)
         return g_strdup (mcerror->message);
@@ -420,7 +423,7 @@ str_utf8_conv_gerror_message (GError * mcerror, const char *def_msg)
 /* --------------------------------------------------------------------------------------------- */
 
 static estr_t
-str_utf8_vfs_convert_to (GIConv coder, const char *string, int size, GString * buffer)
+str_utf8_vfs_convert_to (GIConv coder, const char *string, int size, GString *buffer)
 {
     estr_t result = ESTR_SUCCESS;
 
@@ -512,7 +515,7 @@ str_utf8_make_make_term_form (const char *text, size_t length)
 static const char *
 str_utf8_term_form (const char *text)
 {
-    static char result[BUF_MEDIUM * 6];
+    static char result[BUF_MEDIUM * MB_LEN_MAX];
     const struct term_form *pre_form;
 
     pre_form = str_utf8_make_make_term_form (text, (size_t) (-1));
@@ -677,7 +680,7 @@ utf8_tool_compose (char *buffer, size_t size)
 static const char *
 str_utf8_fit_to_term (const char *text, int width, align_crt_t just_mode)
 {
-    static char result[BUF_MEDIUM * 6];
+    static char result[BUF_MEDIUM * MB_LEN_MAX];
     const struct term_form *pre_form;
     struct utf8_tool tool;
 
@@ -750,7 +753,7 @@ str_utf8_fit_to_term (const char *text, int width, align_crt_t just_mode)
 static const char *
 str_utf8_term_trim (const char *text, int width)
 {
-    static char result[BUF_MEDIUM * 6];
+    static char result[BUF_MEDIUM * MB_LEN_MAX];
     const struct term_form *pre_form;
     struct utf8_tool tool;
 
@@ -827,7 +830,7 @@ str_utf8_term_char_width (const char *text)
 static const char *
 str_utf8_term_substring (const char *text, int start, int width)
 {
-    static char result[BUF_MEDIUM * 6];
+    static char result[BUF_MEDIUM * MB_LEN_MAX];
     const struct term_form *pre_form;
     struct utf8_tool tool;
 
@@ -858,7 +861,7 @@ str_utf8_term_substring (const char *text, int start, int width)
 static const char *
 str_utf8_trunc (const char *text, int width)
 {
-    static char result[MC_MAXPATHLEN * 6 * 2];
+    static char result[MC_MAXPATHLEN * MB_LEN_MAX * 2];
     const struct term_form *pre_form;
     struct utf8_tool tool;
 
@@ -898,12 +901,12 @@ str_utf8_offset_to_pos (const char *text, size_t length)
     else
     {
         int result;
-        GString *buffer;
+        char *buffer;
 
-        buffer = g_string_new (text);
-        str_utf8_fix_string (buffer->str);
-        result = g_utf8_offset_to_pointer (buffer->str, length) - buffer->str;
-        g_string_free (buffer, TRUE);
+        buffer = g_strdup (text);
+        str_utf8_fix_string (buffer);
+        result = g_utf8_offset_to_pointer (buffer, length) - buffer;
+        g_free (buffer);
         return result;
     }
 }
@@ -920,7 +923,7 @@ str_utf8_column_to_pos (const char *text, size_t pos)
     {
         gunichar uni;
 
-        uni = g_utf8_get_char_validated (text, 6);
+        uni = g_utf8_get_char_validated (text, MB_LEN_MAX);
         if ((uni != (gunichar) (-1)) && (uni != (gunichar) (-2)))
         {
             if (g_unichar_isprint (uni))
@@ -1343,7 +1346,7 @@ str_utf8_caseprefix (const char *text, const char *prefix)
 
 static char *
 str_utf8_create_key_gen (const char *text, gboolean case_sen,
-                         gchar * (*keygen) (const gchar * text, gssize size))
+                         gchar *(*keygen) (const gchar *text, gssize size))
 {
     char *result;
 

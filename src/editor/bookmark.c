@@ -1,7 +1,7 @@
 /*
    Editor book mark handling
 
-   Copyright (C) 2001-2021
+   Copyright (C) 2001-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -32,7 +32,6 @@
 #include <config.h>
 
 #include <ctype.h>
-#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,8 +52,11 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
@@ -63,7 +65,7 @@
    by book_mark_found() i.e. last in is the one seen */
 
 static edit_book_mark_t *
-double_marks (WEdit * edit, edit_book_mark_t * p)
+double_marks (WEdit *edit, edit_book_mark_t *p)
 {
     (void) edit;
 
@@ -77,7 +79,7 @@ double_marks (WEdit * edit, edit_book_mark_t * p)
 /** returns the first bookmark on or before this line */
 
 edit_book_mark_t *
-book_mark_find (WEdit * edit, long line)
+book_mark_find (WEdit *edit, long line)
 {
     edit_book_mark_t *p;
 
@@ -149,7 +151,7 @@ book_mark_find (WEdit * edit, long line)
  */
 
 gboolean
-book_mark_query_color (WEdit * edit, long line, int c)
+book_mark_query_color (WEdit *edit, long line, int c)
 {
     if (edit->book_mark != NULL)
     {
@@ -171,7 +173,7 @@ book_mark_query_color (WEdit * edit, long line, int c)
 /** insert a bookmark at this line */
 
 void
-book_mark_insert (WEdit * edit, long line, int c)
+book_mark_insert (WEdit *edit, long line, int c)
 {
     edit_book_mark_t *p, *q;
 
@@ -213,7 +215,7 @@ book_mark_insert (WEdit * edit, long line, int c)
  */
 
 gboolean
-book_mark_clear (WEdit * edit, long line, int c)
+book_mark_clear (WEdit *edit, long line, int c)
 {
     edit_book_mark_t *p, *q;
     gboolean r = FALSE;
@@ -247,7 +249,7 @@ book_mark_clear (WEdit * edit, long line, int c)
 /** clear all bookmarks matching this color, if c is -1 clears all */
 
 void
-book_mark_flush (WEdit * edit, int c)
+book_mark_flush (WEdit *edit, int c)
 {
     edit_book_mark_t *p, *q;
 
@@ -278,7 +280,7 @@ book_mark_flush (WEdit * edit, int c)
 /** shift down bookmarks after this line */
 
 void
-book_mark_inc (WEdit * edit, long line)
+book_mark_inc (WEdit *edit, long line)
 {
     if (edit->book_mark != NULL)
     {
@@ -294,7 +296,7 @@ book_mark_inc (WEdit * edit, long line)
 /** shift up bookmarks after this line */
 
 void
-book_mark_dec (WEdit * edit, long line)
+book_mark_dec (WEdit *edit, long line)
 {
     if (edit->book_mark != NULL)
     {
@@ -310,7 +312,7 @@ book_mark_dec (WEdit * edit, long line)
 /** prepare line positions of bookmarks to be saved to file */
 
 void
-book_mark_serialize (WEdit * edit, int color)
+book_mark_serialize (WEdit *edit, int color)
 {
     if (edit->serialized_bookmarks != NULL)
         g_array_set_size (edit->serialized_bookmarks, 0);
@@ -333,7 +335,7 @@ book_mark_serialize (WEdit * edit, int color)
 /** restore bookmarks from saved line positions */
 
 void
-book_mark_restore (WEdit * edit, int color)
+book_mark_restore (WEdit *edit, int color)
 {
     if (edit->serialized_bookmarks != NULL)
     {

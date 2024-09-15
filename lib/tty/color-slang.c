@@ -1,7 +1,7 @@
 /*
    Color setup for S_Lang screen library
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -48,8 +48,11 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
@@ -96,7 +99,7 @@ has_colors (gboolean disable, gboolean force)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-mc_tty_color_pair_init_special (tty_color_pair_t * mc_color_pair,
+mc_tty_color_pair_init_special (tty_color_lib_pair_t *mc_color_pair,
                                 const char *fg1, const char *bg1,
                                 const char *fg2, const char *bg2, SLtt_Char_Type mask)
 {
@@ -142,11 +145,11 @@ tty_color_deinit_lib (void)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-tty_color_try_alloc_pair_lib (tty_color_pair_t * mc_color_pair)
+tty_color_try_alloc_lib_pair (tty_color_lib_pair_t *mc_color_pair)
 {
-    if (mc_color_pair->ifg <= (int) SPEC_A_REVERSE)
+    if (mc_color_pair->fg <= (int) SPEC_A_REVERSE)
     {
-        switch (mc_color_pair->ifg)
+        switch (mc_color_pair->fg)
         {
         case SPEC_A_REVERSE:
             mc_tty_color_pair_init_special (mc_color_pair,
@@ -173,8 +176,8 @@ tty_color_try_alloc_pair_lib (tty_color_pair_t * mc_color_pair)
     {
         const char *fg, *bg;
 
-        fg = tty_color_get_name_by_index (mc_color_pair->ifg);
-        bg = tty_color_get_name_by_index (mc_color_pair->ibg);
+        fg = tty_color_get_name_by_index (mc_color_pair->fg);
+        bg = tty_color_get_name_by_index (mc_color_pair->bg);
         SLtt_set_color (mc_color_pair->pair_index, (char *) "", (char *) fg, (char *) bg);
         SLtt_add_color_attribute (mc_color_pair->pair_index, mc_color_pair->attr);
     }
@@ -210,7 +213,7 @@ tty_set_normal_attrs (void)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-tty_use_256colors (GError ** error)
+tty_use_256colors (GError **error)
 {
     gboolean ret;
 
@@ -226,7 +229,7 @@ tty_use_256colors (GError ** error)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-tty_use_truecolors (GError ** error)
+tty_use_truecolors (GError **error)
 {
     char *colorterm;
 

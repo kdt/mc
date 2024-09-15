@@ -1,10 +1,10 @@
 /* Rectangular class for Midnight Commander widgets
 
-   Copyright (C) 2020-2021
+   Copyright (C) 2020-2024
    The Free Software Foundation, Inc.
 
    Written by:
-   Andrew Borodin <aborodin@vmail.ru>, 2020
+   Andrew Borodin <aborodin@vmail.ru>, 2020-2022
 
    This file is part of the Midnight Commander.
 
@@ -52,7 +52,7 @@
   *
   * @param y y-coordinate of left-up corner
   * @param x x-coordinate of left-up corner
-  * @param lines heigth
+  * @param lines height
   * @param cols width
   *
   * @return newly allocated WRect object.
@@ -78,12 +78,12 @@ rect_new (int y, int x, int lines, int cols)
   * @param r WRect object
   * @param y y-coordinate of left-up corner
   * @param x x-coordinate of left-up corner
-  * @param lines heigth
+  * @param lines height
   * @param cols width
   */
 
 void
-rect_init (WRect * r, int y, int x, int lines, int cols)
+rect_init (WRect *r, int y, int x, int lines, int cols)
 {
     r->y = y;
     r->x = x;
@@ -101,7 +101,7 @@ rect_init (WRect * r, int y, int x, int lines, int cols)
   */
 
 void
-rect_move (WRect * r, int dy, int dx)
+rect_move (WRect *r, int dy, int dx)
 {
     r->y += dy;
     r->x += dx;
@@ -109,18 +109,40 @@ rect_move (WRect * r, int dy, int dx)
 
 /* --------------------------------------------------------------------------------------------- */
 /**
-  * Change size of rectangle area.
+  * Change size of rectangle area keeping it's position.
   *
   * @param r WRect object
-  * @param dl change size value of heigth
+  * @param dl change size value of height
   * @param dc change size value of width
   */
 
 void
-rect_resize (WRect * r, int dl, int dc)
+rect_resize (WRect *r, int dl, int dc)
 {
     r->lines += dl;
     r->cols += dc;
+}
+
+/* --------------------------------------------------------------------------------------------- */
+/**
+  * Change size of rectangle area keeping it's center.
+  *
+  * @param r WRect object
+  * @param dl change size value of y-coordinate and height
+  *           Positive value means move up and increase height.
+  *           Negative value means move down and decrease height.
+  * @param dc change size value of x-coordinate and width
+  *           Positive value means move left and increase width.
+  *           Negative value means move right and decrease width.
+  */
+
+void
+rect_grow (WRect *r, int dl, int dc)
+{
+    r->y -= dl;
+    r->x -= dc;
+    r->lines += dl * 2;
+    r->cols += dc * 2;
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -135,7 +157,7 @@ rect_resize (WRect * r, int dl, int dc)
   */
 
 void
-rect_intersect (WRect * r, const WRect * r1)
+rect_intersect (WRect *r, const WRect *r1)
 {
     int y, x;
     int y1, x1;
@@ -171,7 +193,7 @@ rect_intersect (WRect * r, const WRect * r1)
   */
 
 void
-rect_union (WRect * r, const WRect * r1)
+rect_union (WRect *r, const WRect *r1)
 {
     int x, y;
     int x1, y1;
@@ -206,7 +228,7 @@ rect_union (WRect * r, const WRect * r1)
   */
 
 gboolean
-rects_are_overlapped (const WRect * r1, const WRect * r2)
+rects_are_overlapped (const WRect *r1, const WRect *r2)
 {
     return !((r2->x >= r1->x + r1->cols) || (r1->x >= r2->x + r2->cols)
              || (r2->y >= r1->y + r1->lines) || (r1->y >= r2->y + r2->lines));
@@ -223,7 +245,7 @@ rects_are_overlapped (const WRect * r1, const WRect * r2)
   */
 
 gboolean
-rects_are_equal (const WRect * r1, const WRect * r2)
+rects_are_equal (const WRect *r1, const WRect *r2)
 {
     return (r1->y == r2->y && r1->x == r2->x && r1->lines == r2->lines && r1->cols == r2->cols);
 }

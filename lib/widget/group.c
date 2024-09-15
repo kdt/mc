@@ -1,11 +1,11 @@
 /*
    Widget group features module for the Midnight Commander
 
-   Copyright (C) 2020-2021
+   Copyright (C) 2020-2024
    The Free Software Foundation, Inc.
 
    Written by:
-   Andrew Borodin <aborodin@vmail.ru>, 2020
+   Andrew Borodin <aborodin@vmail.ru>, 2020-2022
 
    This file is part of the Midnight Commander.
 
@@ -60,6 +60,8 @@ typedef struct
     gboolean enable;
 } widget_state_info_t;
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* --------------------------------------------------------------------------------------------- */
@@ -77,7 +79,7 @@ group_widget_init (void *data, void *user_data)
 /* --------------------------------------------------------------------------------------------- */
 
 static GList *
-group_get_next_or_prev_of (GList * list, gboolean next)
+group_get_next_or_prev_of (GList *list, gboolean next)
 {
     GList *l = NULL;
 
@@ -108,7 +110,7 @@ group_get_next_or_prev_of (GList * list, gboolean next)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-group_select_next_or_prev (WGroup * g, gboolean next)
+group_select_next_or_prev (WGroup *g, gboolean next)
 {
     if (g->widgets != NULL && g->current != NULL)
     {
@@ -146,7 +148,7 @@ group_widget_set_state (gpointer data, gpointer user_data)
  */
 
 static void
-group_send_broadcast_msg_custom (WGroup * g, widget_msg_t msg, gboolean reverse,
+group_send_broadcast_msg_custom (WGroup *g, widget_msg_t msg, gboolean reverse,
                                  widget_options_t options)
 {
     GList *p, *first;
@@ -184,7 +186,7 @@ group_send_broadcast_msg_custom (WGroup * g, widget_msg_t msg, gboolean reverse,
   */
 
 static void
-group_default_make_global (Widget * w, const WRect * delta)
+group_default_make_global (Widget *w, const WRect *delta)
 {
     GList *iter;
 
@@ -198,8 +200,10 @@ group_default_make_global (Widget * w, const WRect * delta)
     }
     else if (w->owner != NULL)
     {
-        WRect r = { WIDGET (w->owner)->y, WIDGET (w->owner)->x, 0, 0 };
+        WRect r = WIDGET (w->owner)->rect;
 
+        r.lines = 0;
+        r.cols = 0;
         /* change own coordinates */
         widget_default_make_global (w, &r);
         /* change child widget coordinates */
@@ -218,7 +222,7 @@ group_default_make_global (Widget * w, const WRect * delta)
   */
 
 static void
-group_default_make_local (Widget * w, const WRect * delta)
+group_default_make_local (Widget *w, const WRect *delta)
 {
     GList *iter;
 
@@ -232,8 +236,10 @@ group_default_make_local (Widget * w, const WRect * delta)
     }
     else if (w->owner != NULL)
     {
-        WRect r = { WIDGET (w->owner)->y, WIDGET (w->owner)->x, 0, 0 };
+        WRect r = WIDGET (w->owner)->rect;
 
+        r.lines = 0;
+        r.cols = 0;
         /* change own coordinates */
         widget_default_make_local (w, &r);
         /* change child widget coordinates */
@@ -254,7 +260,7 @@ group_default_make_local (Widget * w, const WRect * delta)
  */
 
 static GList *
-group_default_find (const Widget * w, const Widget * what)
+group_default_find (const Widget *w, const Widget *what)
 {
     GList *w0;
 
@@ -286,7 +292,7 @@ group_default_find (const Widget * w, const Widget * what)
  */
 
 static Widget *
-group_default_find_by_type (const Widget * w, widget_cb_fn cb)
+group_default_find_by_type (const Widget *w, widget_cb_fn cb)
 {
     Widget *w0;
 
@@ -318,7 +324,7 @@ group_default_find_by_type (const Widget * w, widget_cb_fn cb)
  */
 
 static Widget *
-group_default_find_by_id (const Widget * w, unsigned long id)
+group_default_find_by_id (const Widget *w, unsigned long id)
 {
     Widget *w0;
 
@@ -348,7 +354,7 @@ group_default_find_by_id (const Widget * w, unsigned long id)
  */
 
 static cb_ret_t
-group_update_cursor (WGroup * g)
+group_update_cursor (WGroup *g)
 {
     GList *p = g->current;
 
@@ -382,12 +388,12 @@ group_widget_set_position (gpointer data, gpointer user_data)
      */
 
     Widget *c = WIDGET (data);
-    Widget *g = WIDGET (c->owner);
+    const WRect *g = &CONST_WIDGET (c->owner)->rect;
     const widget_shift_scale_t *wss = (const widget_shift_scale_t *) user_data;
-    WRect r = { c->y, c->x, c->lines, c->cols };
+    WRect r = c->rect;
 
     if ((c->pos_flags & WPOS_CENTER_HORZ) != 0)
-        r.x = g->x + (g->cols - c->cols) / 2;
+        r.x = g->x + (g->cols - c->rect.cols) / 2;
     else if ((c->pos_flags & WPOS_KEEP_LEFT) != 0 && (c->pos_flags & WPOS_KEEP_RIGHT) != 0)
     {
         r.x += wss->shift_x;
@@ -399,7 +405,7 @@ group_widget_set_position (gpointer data, gpointer user_data)
         r.x += wss->shift_x + wss->scale_x;
 
     if ((c->pos_flags & WPOS_CENTER_VERT) != 0)
-        r.y = g->y + (g->lines - c->lines) / 2;
+        r.y = g->y + (g->lines - c->rect.lines) / 2;
     else if ((c->pos_flags & WPOS_KEEP_TOP) != 0 && (c->pos_flags & WPOS_KEEP_BOTTOM) != 0)
     {
         r.y += wss->shift_y;
@@ -416,17 +422,14 @@ group_widget_set_position (gpointer data, gpointer user_data)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-group_set_position (WGroup * g, const WRect * r)
+group_set_position (WGroup *g, const WRect *r)
 {
-    Widget *w = WIDGET (g);
+    WRect *w = &WIDGET (g)->rect;
     widget_shift_scale_t wss;
     /* save old positions, will be used to reposition childs */
-    WRect or = { w->y, w->x, w->lines, w->cols };
+    WRect or = *w;
 
-    w->x = r->x;
-    w->y = r->y;
-    w->lines = r->lines;
-    w->cols = r->cols;
+    *w = *r;
 
     /* dialog is empty */
     if (g->widgets == NULL)
@@ -448,7 +451,7 @@ group_set_position (WGroup * g, const WRect * r)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-group_default_resize (WGroup * g, WRect * r)
+group_default_resize (WGroup *g, WRect *r)
 {
     /* This is default resizing mechanism.
      * The main idea of this code is to resize dialog according to flags
@@ -459,19 +462,15 @@ group_default_resize (WGroup * g, WRect * r)
     Widget *w = WIDGET (g);
     WRect r0;
 
-    if (r == NULL)
-        rect_init (&r0, w->y, w->x, w->lines, w->cols);
-    else
-        r0 = *r;
-
-    widget_adjust_position (w->pos_flags, &r0.y, &r0.x, &r0.lines, &r0.cols);
+    r0 = r != NULL ? *r : w->rect;
+    widget_adjust_position (w->pos_flags, &r0);
     group_set_position (g, &r0);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-group_draw (WGroup * g)
+group_draw (WGroup *g)
 {
     Widget *wg = WIDGET (g);
 
@@ -496,7 +495,7 @@ group_draw (WGroup * g)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-group_handle_key (WGroup * g, int key)
+group_handle_key (WGroup *g, int key)
 {
     cb_ret_t handled;
 
@@ -517,7 +516,7 @@ group_handle_key (WGroup * g, int key)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-group_handle_hotkey (WGroup * g, int key)
+group_handle_hotkey (WGroup *g, int key)
 {
     GList *current;
     Widget *w;
@@ -597,13 +596,11 @@ group_handle_hotkey (WGroup * g, int key)
  */
 
 void
-group_init (WGroup * g, int y1, int x1, int lines, int cols, widget_cb_fn callback,
-            widget_mouse_cb_fn mouse_callback)
+group_init (WGroup *g, const WRect *r, widget_cb_fn callback, widget_mouse_cb_fn mouse_callback)
 {
     Widget *w = WIDGET (g);
 
-    widget_init (w, y1, x1, lines, cols, callback != NULL ? callback : group_default_callback,
-                 mouse_callback);
+    widget_init (w, r, callback != NULL ? callback : group_default_callback, mouse_callback);
 
     w->mouse_handler = group_handle_mouse_event;
 
@@ -622,7 +619,7 @@ group_init (WGroup * g, int y1, int x1, int lines, int cols, widget_cb_fn callba
 /* --------------------------------------------------------------------------------------------- */
 
 cb_ret_t
-group_default_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+group_default_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     WGroup *g = GROUP (w);
 
@@ -672,7 +669,7 @@ group_default_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm,
  * @return       MSG_HANDLED if set was handled successfully, MSG_NOT_HANDLED otherwise.
  */
 cb_ret_t
-group_default_set_state (Widget * w, widget_state_t state, gboolean enable)
+group_default_set_state (Widget *w, widget_state_t state, gboolean enable)
 {
     gboolean ret = MSG_HANDLED;
     WGroup *g = GROUP (w);
@@ -714,7 +711,7 @@ group_default_set_state (Widget * w, widget_state_t state, gboolean enable)
  * @return result of mouse event handling
  */
 int
-group_handle_mouse_event (Widget * w, Gpm_Event * event)
+group_handle_mouse_event (Widget *w, Gpm_Event *event)
 {
     WGroup *g = GROUP (w);
 
@@ -764,7 +761,7 @@ group_handle_mouse_event (Widget * w, Gpm_Event * event)
  */
 
 unsigned long
-group_add_widget_autopos (WGroup * g, void *w, widget_pos_flags_t pos_flags, const void *before)
+group_add_widget_autopos (WGroup *g, void *w, widget_pos_flags_t pos_flags, const void *before)
 {
     Widget *wg = WIDGET (g);
     Widget *ww = WIDGET (w);
@@ -774,10 +771,10 @@ group_add_widget_autopos (WGroup * g, void *w, widget_pos_flags_t pos_flags, con
     assert (ww != NULL);
 
     if ((pos_flags & WPOS_CENTER_HORZ) != 0)
-        ww->x = (wg->cols - ww->cols) / 2;
+        ww->rect.x = (wg->rect.cols - ww->rect.cols) / 2;
 
     if ((pos_flags & WPOS_CENTER_VERT) != 0)
-        ww->y = (wg->lines - ww->lines) / 2;
+        ww->rect.y = (wg->rect.lines - ww->rect.lines) / 2;
 
     ww->owner = g;
     ww->pos_flags = pos_flags;
@@ -864,7 +861,7 @@ group_remove_widget (void *w)
  */
 
 void
-group_set_current_widget_next (WGroup * g)
+group_set_current_widget_next (WGroup *g)
 {
     g->current = group_get_next_or_prev_of (g->current, TRUE);
 }
@@ -877,7 +874,7 @@ group_set_current_widget_next (WGroup * g)
  */
 
 void
-group_set_current_widget_prev (WGroup * g)
+group_set_current_widget_prev (WGroup *g)
 {
     g->current = group_get_next_or_prev_of (g->current, FALSE);
 }
@@ -892,7 +889,7 @@ group_set_current_widget_prev (WGroup * g)
  */
 
 GList *
-group_get_widget_next_of (GList * w)
+group_get_widget_next_of (GList *w)
 {
     return group_get_next_or_prev_of (w, TRUE);
 }
@@ -907,7 +904,7 @@ group_get_widget_next_of (GList * w)
  */
 
 GList *
-group_get_widget_prev_of (GList * w)
+group_get_widget_prev_of (GList *w)
 {
     return group_get_next_or_prev_of (w, FALSE);
 }
@@ -920,7 +917,7 @@ group_get_widget_prev_of (GList * w)
  */
 
 void
-group_select_next_widget (WGroup * g)
+group_select_next_widget (WGroup *g)
 {
     group_select_next_or_prev (g, TRUE);
 }
@@ -933,7 +930,7 @@ group_select_next_widget (WGroup * g)
  */
 
 void
-group_select_prev_widget (WGroup * g)
+group_select_prev_widget (WGroup *g)
 {
     group_select_next_or_prev (g, FALSE);
 }
@@ -947,7 +944,7 @@ group_select_prev_widget (WGroup * g)
  */
 
 void
-group_select_widget_by_id (const WGroup * g, unsigned long id)
+group_select_widget_by_id (const WGroup *g, unsigned long id)
 {
     Widget *w;
 
@@ -965,7 +962,7 @@ group_select_widget_by_id (const WGroup * g, unsigned long id)
  */
 
 void
-group_send_broadcast_msg (WGroup * g, widget_msg_t msg)
+group_send_broadcast_msg (WGroup *g, widget_msg_t msg)
 {
     group_send_broadcast_msg_custom (g, msg, FALSE, WOP_DEFAULT);
 }

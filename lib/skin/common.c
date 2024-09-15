@@ -2,7 +2,7 @@
    Skins engine.
    Interface functions
 
-   Copyright (C) 2009-2021
+   Copyright (C) 2009-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -41,6 +41,8 @@ mc_skin_t mc_skin__default;
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 static gboolean mc_skin_is_init = FALSE;
@@ -52,9 +54,10 @@ static gboolean mc_skin_is_init = FALSE;
 static void
 mc_skin_hash_destroy_value (gpointer data)
 {
-    mc_skin_color_t *mc_skin_color = (mc_skin_color_t *) data;
-    g_free (mc_skin_color->fgcolor);
-    g_free (mc_skin_color->bgcolor);
+    tty_color_pair_t *mc_skin_color = (tty_color_pair_t *) data;
+
+    g_free (mc_skin_color->fg);
+    g_free (mc_skin_color->bg);
     g_free (mc_skin_color->attrs);
     g_free (mc_skin_color);
 }
@@ -103,7 +106,6 @@ mc_skin_try_to_load_default (void)
         mc_skin_reinit ();
         mc_skin_set_hardcoded_skin (&mc_skin__default);
     }
-
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -111,7 +113,7 @@ mc_skin_try_to_load_default (void)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mc_skin_init (const gchar * skin_override, GError ** mcerror)
+mc_skin_init (const gchar *skin_override, GError **mcerror)
 {
     gboolean is_good_init = TRUE;
     GError *error = NULL;
@@ -179,8 +181,7 @@ mc_skin_init (const gchar * skin_override, GError ** mcerror)
 void
 mc_skin_deinit (void)
 {
-    tty_color_free_all_tmp ();
-    tty_color_free_all_non_tmp ();
+    tty_color_free_all ();
 
     MC_PTR_FREE (mc_skin__default.name);
     g_hash_table_destroy (mc_skin__default.colors);
@@ -197,12 +198,11 @@ mc_skin_deinit (void)
 /* --------------------------------------------------------------------------------------------- */
 
 gchar *
-mc_skin_get (const gchar * group, const gchar * key, const gchar * default_value)
+mc_skin_get (const gchar *group, const gchar *key, const gchar *default_value)
 {
     if (mc_global.tty.ugly_line_drawing)
-    {
         return g_strdup (default_value);
-    }
+
     return mc_config_get_string (mc_skin__default.config, group, key, default_value);
 }
 

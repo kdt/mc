@@ -1,6 +1,20 @@
 # This file describes which highlighting scheme is applied to a particular
 # file in mcedit.
 #
+#
+# System-wide files (this and syntax definitions) are located in
+# @datarootdir@/@PACKAGE@/syntax/ directory.
+#
+# User's files (this and syntax definitions) are located in
+# ~/.local/share/@PACKAGE@/syntax directory.
+#
+# If user's file is missing, system-wide one is used.
+#
+#
+# This file is rescanned on opening of every new editor file.
+#
+# Format of this file is following.
+#
 # Each entry consists of two lines: a "file" specification and the
 # corresponding highlighting definition ("include"). A file specification
 # can have two or three fields, each separated by white-space characters.
@@ -31,13 +45,13 @@ include filehighlight.syntax
 file ..\*\\.e$ Eiffel\sSource\sFile
 include eiffel.syntax
 
-file ..\*\\.(diff|rej|patch)$ Diff\sOutput ^(diff|Index:)\s
+file ..\*\\.(diff|rej|patch)|COMMIT_EDITMSG$ Diff\sOutput ^(diff|Index:)\s
 include diff.syntax
 
 file ..\*\\.lsm$ LSM\sFile
 include lsm.syntax
 
-file .\*(bash(_completion|rc)|profile|\\.(sh|bash(rc|_(completion|profile|log(in|out)|aliases|exports|history))|profile|zlog(in|out)|zprofile|zsh(env|rc)))$ Shell\sScript ^#!\s\*/(.\*/|usr/bin/env\s)([a-z]?|ba|pdk)sh
+file .\*(bash(_completion|rc)|profile|\\.(sh|bash(rc|_(completion|profile|log(in|out)|aliases|exports|history))|profile|zlog(in|out)|zprofile|zsh(env|rc)?))$ Shell\sScript ^#!\s\*/(.\*/|usr/bin/env\s)([a-z]?|ba|pdk)sh
 include sh.syntax
 
 # Since openrc scripts have no extension "by definition", use an empty pattern
@@ -70,6 +84,9 @@ include html.syntax
 file ..\*\\.((?i:xml|xsd|xslt?|dtd)|qpg|qpg\\.in)$ XML\sdocument (\\?xml\sversion|!DOCTYPE\s)
 include xml.syntax
 
+file ..\*\\.cir$ Spice\scircuit
+include spice.syntax
+
 file ..\*\\.(?i:tt)$ Template::Toolkit\sFile
 include tt.syntax
 
@@ -99,6 +116,9 @@ include latex.syntax
 
 file ..\*\\.(?i:texi|texinfo)$ Texinfo\sDocument
 include texinfo.syntax
+
+file ..\*\\.(dot|gv)$ DOT/Graphviz\sgraph
+include dot.syntax
 
 file ..\*\\.c$ C\sProgram
 include c.syntax
@@ -130,7 +150,7 @@ include php.syntax
 file ..\*\\.ij[xs]$ J\sFile
 include j.syntax
 
-file ..\*\\.(?i:java?|groovy)$ Java\sProgram
+file ..\*\\.(?i:java?|groovy|Jenkinsfile)$ Java\sProgram
 include java.syntax
 
 file ..\*\\.(properties|config)$ Java\sFile
@@ -318,6 +338,15 @@ include kotlin.syntax
 
 file ..\*\\.swift$ Swift\sProgram
 include swift.syntax
+
+file ..\*\\.action$ Privoxy\sFile
+include privoxy.syntax
+
+file .\*\\.toml$ TOML\sFile
+include toml.syntax
+
+file .\*\\.(mch|ref|imp)$ B\sFile
+include b.syntax
 
 file .\* unknown
 include unknown.syntax

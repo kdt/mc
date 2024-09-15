@@ -1,7 +1,7 @@
 /* Virtual File System: SFTP file system.
    The internal functions: connections
 
-   Copyright (C) 2011-2021
+   Copyright (C) 2011-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -55,6 +55,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 #ifdef LIBSSH2_KNOWNHOST_KEY_ED25519
@@ -71,6 +73,37 @@ static const char *const hostkey_method_ssh_ecdsa_256 = "ecdsa-sha2-nistp256";
 #endif
 static const char *const hostkey_method_ssh_rsa = "ssh-rsa";
 static const char *const hostkey_method_ssh_dss = "ssh-dss";
+
+/* *INDENT-OFF* */
+static const char *default_hostkey_methods =
+#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_256
+    "ecdsa-sha2-nistp256,"
+#endif
+#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_384
+    "ecdsa-sha2-nistp384,"
+#endif
+#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_521
+    "ecdsa-sha2-nistp521,"
+#endif
+#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_256
+    "ecdsa-sha2-nistp256-cert-v01@openssh.com,"
+#endif
+#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_384
+    "ecdsa-sha2-nistp384-cert-v01@openssh.com,"
+#endif
+#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_521
+    "ecdsa-sha2-nistp521-cert-v01@openssh.com,"
+#endif
+#ifdef LIBSSH2_KNOWNHOST_KEY_ED25519
+    "ssh-ed25519,"
+    "ssh-ed25519-cert-v01@openssh.com,"
+#endif
+    "rsa-sha2-256,"
+    "rsa-sha2-512,"
+    "ssh-rsa,"
+    "ssh-rsa-cert-v01@openssh.com,"
+    "ssh-dss";
+/* *INDENT-ON* */
 
 /**
  *
@@ -97,7 +130,7 @@ static const struct vfs_s_super *kbi_super = NULL;
  */
 
 static int
-sftpfs_open_socket (struct vfs_s_super *super, GError ** mcerror)
+sftpfs_open_socket (struct vfs_s_super *super, GError **mcerror)
 {
     sftpfs_super_t *sftpfs_super = SFTP_SUPER (super);
     struct addrinfo hints, *res = NULL, *curr_res;
@@ -228,7 +261,7 @@ sftpfs_open_socket (struct vfs_s_super *super, GError ** mcerror)
  * Thanks the Curl project for the code used in this function.
  */
 static gboolean
-sftpfs_read_known_hosts (struct vfs_s_super *super, GError ** mcerror)
+sftpfs_read_known_hosts (struct vfs_s_super *super, GError **mcerror)
 {
     sftpfs_super_t *sftpfs_super = SFTP_SUPER (super);
     struct libssh2_knownhost *store = NULL;
@@ -255,8 +288,10 @@ sftpfs_read_known_hosts (struct vfs_s_super *super, GError ** mcerror)
                 continue;
 
             if (store->name == NULL)
-                found = TRUE;
-            else if (store->name[0] != '[')
+                /* Ignore hashed hostnames. Currently, libssh2 offers no way for us to match it */
+                continue;
+
+            if (store->name[0] != '[')
                 found = strcmp (store->name, super->path_element->host) == 0;
             else
             {
@@ -283,6 +318,7 @@ sftpfs_read_known_hosts (struct vfs_s_super *super, GError ** mcerror)
     {
         int mask;
         const char *hostkey_method = NULL;
+        char *hostkey_methods;
 
         mask = store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK;
 
@@ -319,12 +355,20 @@ sftpfs_read_known_hosts (struct vfs_s_super *super, GError ** mcerror)
                                 _("sftp: found host key of unsupported type: RSA1"));
             return FALSE;
         default:
-            mc_propagate_error (mcerror, 0, "%s %d", _("sftp: unknown host key type:"), mask);
+            mc_propagate_error (mcerror, 0, "%s 0x%x", _("sftp: unknown host key type:"),
+                                (unsigned int) mask);
             return FALSE;
         }
 
+        /* Append the default hostkey methods (with lower priority).
+         * Since we ignored hashed hostnames, the actual matching host
+         * key might have different type than the one found in
+         * known_hosts for non-hashed hostname. Methods not supported
+         * by libssh2 it are ignored. */
+        hostkey_methods = g_strdup_printf ("%s,%s", hostkey_method, default_hostkey_methods);
         rc = libssh2_session_method_pref (sftpfs_super->session, LIBSSH2_METHOD_HOSTKEY,
-                                          hostkey_method);
+                                          hostkey_methods);
+        g_free (hostkey_methods);
         if (rc < 0)
             goto err;
     }
@@ -389,7 +433,7 @@ sftpfs_update_known_hosts (struct vfs_s_super *super, const char *remote_key, si
  * @return pointer to static buffer on success, NULL otherwise
  */
 static const char *
-sftpfs_compute_fingerprint_hash (LIBSSH2_SESSION * session)
+sftpfs_compute_fingerprint_hash (LIBSSH2_SESSION *session)
 {
     static char result[SHA1_DIGEST_LENGTH * 3 + 1];     /* "XX:" for each byte, and EOL */
     const char *fingerprint;
@@ -421,7 +465,7 @@ sftpfs_compute_fingerprint_hash (LIBSSH2_SESSION * session)
  * Thanks the Curl project for the code used in this function.
  */
 static gboolean
-sftpfs_process_known_host (struct vfs_s_super *super, GError ** mcerror)
+sftpfs_process_known_host (struct vfs_s_super *super, GError **mcerror)
 {
     sftpfs_super_t *sftpfs_super = SFTP_SUPER (super);
     const char *remote_key;
@@ -613,7 +657,7 @@ sftpfs_recognize_auth_types (struct vfs_s_super *super)
  */
 
 static gboolean
-sftpfs_open_connection_ssh_agent (struct vfs_s_super *super, GError ** mcerror)
+sftpfs_open_connection_ssh_agent (struct vfs_s_super *super, GError **mcerror)
 {
     sftpfs_super_t *sftpfs_super = SFTP_SUPER (super);
     struct libssh2_agent_publickey *identity, *prev_identity = NULL;
@@ -665,7 +709,7 @@ sftpfs_open_connection_ssh_agent (struct vfs_s_super *super, GError ** mcerror)
  */
 
 static gboolean
-sftpfs_open_connection_ssh_key (struct vfs_s_super *super, GError ** mcerror)
+sftpfs_open_connection_ssh_key (struct vfs_s_super *super, GError **mcerror)
 {
     sftpfs_super_t *sftpfs_super = SFTP_SUPER (super);
     char *p, *passwd;
@@ -740,7 +784,7 @@ LIBSSH2_USERAUTH_KBDINT_RESPONSE_FUNC (sftpfs_keyboard_interactive_helper)
     len = strlen (kbi_passwd);
 
     for (i = 0; i < num_prompts; ++i)
-        if (strncmp (prompts[i].text, "Password: ", prompts[i].length) == 0)
+        if (memcmp (prompts[i].text, "Password: ", prompts[i].length) == 0)
         {
             responses[i].text = strdup (kbi_passwd);
             responses[i].length = len;
@@ -757,7 +801,7 @@ LIBSSH2_USERAUTH_KBDINT_RESPONSE_FUNC (sftpfs_keyboard_interactive_helper)
  */
 
 static gboolean
-sftpfs_open_connection_ssh_password (struct vfs_s_super *super, GError ** mcerror)
+sftpfs_open_connection_ssh_password (struct vfs_s_super *super, GError **mcerror)
 {
     sftpfs_super_t *sftpfs_super = SFTP_SUPER (super);
     char *p, *passwd;
@@ -847,7 +891,7 @@ sftpfs_open_connection_ssh_password (struct vfs_s_super *super, GError ** mcerro
  */
 
 int
-sftpfs_open_connection (struct vfs_s_super *super, GError ** mcerror)
+sftpfs_open_connection (struct vfs_s_super *super, GError **mcerror)
 {
     int rc;
     sftpfs_super_t *sftpfs_super = SFTP_SUPER (super);
@@ -922,7 +966,7 @@ sftpfs_open_connection (struct vfs_s_super *super, GError ** mcerror)
  */
 
 void
-sftpfs_close_connection (struct vfs_s_super *super, const char *shutdown_message, GError ** mcerror)
+sftpfs_close_connection (struct vfs_s_super *super, const char *shutdown_message, GError **mcerror)
 {
     sftpfs_super_t *sftpfs_super = SFTP_SUPER (super);
 

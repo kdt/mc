@@ -1,12 +1,12 @@
 /*
    Search functions for diffviewer.
 
-   Copyright (C) 2010-2021
+   Copyright (C) 2010-2024
    Free Software Foundation, Inc.
 
    Written by:
    Slava Zanko <slavazanko@gmail.com>, 2010.
-   Andrew Borodin <aborodin@vmail.ru>, 2012
+   Andrew Borodin <aborodin@vmail.ru>, 2012-2022
 
    This file is part of the Midnight Commander.
 
@@ -55,6 +55,8 @@ typedef struct mcdiffview_search_options_struct
     gboolean all_codepages;
 } mcdiffview_search_options_t;
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 static mcdiffview_search_options_t mcdiffview_search_options = {
@@ -70,7 +72,7 @@ static mcdiffview_search_options_t mcdiffview_search_options = {
 /* --------------------------------------------------------------------------------------------- */
 
 static gboolean
-mcdiffview_dialog_search (WDiff * dview)
+mcdiffview_dialog_search (WDiff *dview)
 {
     char *exp = NULL;
     int qd_result;
@@ -83,7 +85,8 @@ mcdiffview_dialog_search (WDiff * dview)
         quick_widget_t quick_widgets[] = {
             /* *INDENT-OFF* */
             QUICK_LABELED_INPUT (N_("Enter search string:"), input_label_above, INPUT_LAST_TEXT,
-            MC_HISTORY_SHARED_SEARCH, &exp, NULL, FALSE, FALSE, INPUT_COMPLETE_NONE),
+                                 MC_HISTORY_SHARED_SEARCH, &exp, NULL, FALSE, FALSE,
+                                 INPUT_COMPLETE_NONE),
             QUICK_SEPARATOR (TRUE),
             QUICK_START_COLUMNS,
                 QUICK_RADIO (num_of_types, (const char **) list_of_types,
@@ -101,9 +104,10 @@ mcdiffview_dialog_search (WDiff * dview)
             /* *INDENT-ON* */
         };
 
+        WRect r = { -1, -1, 0, 58 };
+
         quick_dialog_t qdlg = {
-            -1, -1, 58,
-            N_("Search"), "[Input Line Keys]",
+            r, N_("Search"), "[Input Line Keys]",
             quick_widgets, NULL, NULL
         };
 
@@ -112,7 +116,7 @@ mcdiffview_dialog_search (WDiff * dview)
 
     g_strfreev (list_of_types);
 
-    if ((qd_result == B_CANCEL) || (exp == NULL) || (exp[0] == '\0'))
+    if (qd_result == B_CANCEL || exp[0] == '\0')
     {
         g_free (exp);
         return FALSE;
@@ -124,7 +128,10 @@ mcdiffview_dialog_search (WDiff * dview)
 
         tmp = str_convert_to_input (exp);
         g_free (exp);
-        exp = g_string_free (tmp, FALSE);
+        if (tmp != NULL)
+            exp = g_string_free (tmp, FALSE);
+        else
+            exp = g_strdup ("");
     }
 #endif
 
@@ -137,7 +144,7 @@ mcdiffview_dialog_search (WDiff * dview)
 /* --------------------------------------------------------------------------------------------- */
 
 static gboolean
-mcdiffview_do_search_backward (WDiff * dview)
+mcdiffview_do_search_backward (WDiff *dview)
 {
     ssize_t ind;
 
@@ -172,7 +179,7 @@ mcdiffview_do_search_backward (WDiff * dview)
 
 
 static gboolean
-mcdiffview_do_search_forward (WDiff * dview)
+mcdiffview_do_search_forward (WDiff *dview)
 {
     size_t ind;
 
@@ -184,7 +191,7 @@ mcdiffview_do_search_forward (WDiff * dview)
         return FALSE;
     }
 
-    for (ind = (size_t)++ dview->search.last_accessed_num_line; ind < dview->a[dview->ord]->len;
+    for (ind = (size_t) ++dview->search.last_accessed_num_line; ind < dview->a[dview->ord]->len;
          ind++)
     {
         DIFFLN *p;
@@ -206,7 +213,7 @@ mcdiffview_do_search_forward (WDiff * dview)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-mcdiffview_do_search (WDiff * dview)
+mcdiffview_do_search (WDiff *dview)
 {
     gboolean present_result = FALSE;
 
@@ -235,7 +242,7 @@ mcdiffview_do_search (WDiff * dview)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-dview_search_cmd (WDiff * dview)
+dview_search_cmd (WDiff *dview)
 {
     if (dview->dsrc != DATA_SRC_MEM)
     {
@@ -269,7 +276,7 @@ dview_search_cmd (WDiff * dview)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-dview_continue_search_cmd (WDiff * dview)
+dview_continue_search_cmd (WDiff *dview)
 {
     if (dview->dsrc != DATA_SRC_MEM)
         error_dialog (_("Search"), _("Search is disabled"));

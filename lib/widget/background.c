@@ -1,11 +1,11 @@
 /*
    Widgets for the Midnight Commander
 
-   Copyright (C) 2020-2021
+   Copyright (C) 2020-2024
    The Free Software Foundation, Inc.
 
    Authors:
-   Andrew Borodin <aborodin@vmail.ru>, 2020
+   Andrew Borodin <aborodin@vmail.ru>, 2020-2022
 
    This file is part of the Midnight Commander.
 
@@ -42,6 +42,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* --------------------------------------------------------------------------------------------- */
@@ -49,7 +51,7 @@
 /* --------------------------------------------------------------------------------------------- */
 
 static const int *
-background_get_colors (const Widget * w)
+background_get_colors (const Widget *w)
 {
     return &(CONST_BACKGROUND (w)->color);
 }
@@ -57,28 +59,23 @@ background_get_colors (const Widget * w)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-background_adjust (WBackground * b)
+background_adjust (WBackground *b)
 {
     Widget *w = WIDGET (b);
-    Widget *wo = WIDGET (w->owner);
 
-    w->y = wo->y;
-    w->x = wo->x;
-    w->lines = wo->lines;
-    w->cols = wo->cols;
-
+    w->rect = WIDGET (w->owner)->rect;
     w->pos_flags |= WPOS_KEEP_ALL;
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-background_draw (const WBackground * b)
+background_draw (const WBackground *b)
 {
     const Widget *w = CONST_WIDGET (b);
 
     tty_setcolor (b->color);
-    tty_fill_region (w->y, w->x, w->lines, w->cols, b->pattern);
+    tty_fill_region (w->rect.y, w->rect.x, w->rect.lines, w->rect.cols, b->pattern);
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -86,7 +83,7 @@ background_draw (const WBackground * b)
 /* --------------------------------------------------------------------------------------------- */
 
 cb_ret_t
-background_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+background_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     WBackground *b = BACKGROUND (w);
 
@@ -111,12 +108,13 @@ WBackground *
 background_new (int y, int x, int lines, int cols, int color, unsigned char pattern,
                 widget_cb_fn callback)
 {
+    WRect r = { y, x, lines, cols };
     WBackground *b;
     Widget *w;
 
     b = g_new (WBackground, 1);
     w = WIDGET (b);
-    widget_init (w, y, x, lines, cols, callback != NULL ? callback : background_callback, NULL);
+    widget_init (w, &r, callback != NULL ? callback : background_callback, NULL);
     w->get_colors = background_get_colors;
 
     b->color = color;

@@ -2,7 +2,7 @@
    Search text engine.
    Plain search
 
-   Copyright (C) 2009-2021
+   Copyright (C) 2009-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -38,21 +38,21 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
+/* --------------------------------------------------------------------------------------------- */
 
-static GString *
-mc_search__normal_translate_to_regex (const GString * astr)
+static void
+mc_search__normal_translate_to_regex (GString *str)
 {
-    const char *str = astr->str;
-    GString *buff;
     gsize loop;
 
-    buff = g_string_sized_new (32);
-
-    for (loop = 0; loop < astr->len; loop++)
-        switch (str[loop])
+    for (loop = 0; loop < str->len; loop++)
+        switch (str->str[loop])
         {
         case '*':
         case '?':
@@ -70,43 +70,38 @@ mc_search__normal_translate_to_regex (const GString * astr)
         case '^':
         case '-':
         case '|':
-            g_string_append_c (buff, '\\');
-            MC_FALLTHROUGH;
+            g_string_insert_c (str, loop, '\\');
+            loop++;
+            break;
         default:
-            g_string_append_c (buff, str[loop]);
             break;
         }
-
-    return buff;
 }
 
+/* --------------------------------------------------------------------------------------------- */
 /*** public functions ****************************************************************************/
+/* --------------------------------------------------------------------------------------------- */
 
 void
-mc_search__cond_struct_new_init_normal (const char *charset, mc_search_t * lc_mc_search,
-                                        mc_search_cond_t * mc_search_cond)
+mc_search__cond_struct_new_init_normal (const char *charset, mc_search_t *lc_mc_search,
+                                        mc_search_cond_t *mc_search_cond)
 {
-    GString *tmp;
-
-    tmp = mc_search__normal_translate_to_regex (mc_search_cond->str);
-    g_string_free (mc_search_cond->str, TRUE);
-
-    mc_search_cond->str = tmp;
+    mc_search__normal_translate_to_regex (mc_search_cond->str);
     mc_search__cond_struct_new_init_regex (charset, lc_mc_search, mc_search_cond);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mc_search__run_normal (mc_search_t * lc_mc_search, const void *user_data,
-                       gsize start_search, gsize end_search, gsize * found_len)
+mc_search__run_normal (mc_search_t *lc_mc_search, const void *user_data,
+                       gsize start_search, gsize end_search, gsize *found_len)
 {
     return mc_search__run_regex (lc_mc_search, user_data, start_search, end_search, found_len);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 GString *
-mc_search_normal_prepare_replace_str (mc_search_t * lc_mc_search, GString * replace_str)
+mc_search_normal_prepare_replace_str (mc_search_t *lc_mc_search, GString *replace_str)
 {
     (void) lc_mc_search;
 

@@ -9,6 +9,7 @@ SYNTAXFILES =			\
 	aspx.syntax		\
 	assembler.syntax	\
 	awk.syntax		\
+	b.syntax		\
 	c.syntax		\
 	cabal.syntax		\
 	changelog.syntax	\
@@ -27,6 +28,7 @@ SYNTAXFILES =			\
 	diff.syntax		\
 	dlink.syntax		\
 	dos.syntax		\
+	dot.syntax		\
 	ebuild.syntax		\
 	eiffel.syntax		\
 	erlang.syntax		\
@@ -68,6 +70,7 @@ SYNTAXFILES =			\
 	php.syntax		\
 	po.syntax		\
 	povray.syntax		\
+	privoxy.syntax		\
 	procmail.syntax		\
 	properties.syntax	\
 	protobuf.syntax		\
@@ -80,6 +83,7 @@ SYNTAXFILES =			\
 	slang.syntax		\
 	smalltalk.syntax	\
 	spec.syntax		\
+	spice.syntax		\
 	sql.syntax		\
 	strace.syntax 		\
 	swift.syntax		\
@@ -87,6 +91,7 @@ SYNTAXFILES =			\
 	syntax.syntax		\
 	tcl.syntax		\
 	texinfo.syntax		\
+	toml.syntax		\
 	ts.syntax		\
 	tt.syntax		\
 	unknown.syntax		\

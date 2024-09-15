@@ -6,7 +6,11 @@
 #ifdef SEARCH_TYPE_GLIB
 #define mc_search_regex_t GRegex
 #else
+#ifdef HAVE_PCRE2
+#define mc_search_regex_t pcre2_code
+#else
 #define mc_search_regex_t pcre
+#endif
 #endif
 
 /*** enums ***************************************************************************************/
@@ -38,12 +42,12 @@ typedef struct mc_search_cond_struct
 
 /* search/lib.c : */
 
-gchar *mc_search__recode_str (const char *str, gsize str_len, const char *charset_from,
-                              const char *charset_to, gsize * bytes_written);
-gchar *mc_search__get_one_symbol (const char *charset, const char *str, gsize str_len,
-                                  gboolean * just_letters);
-GString *mc_search__tolower_case_str (const char *charset, const char *str, gsize str_len);
-GString *mc_search__toupper_case_str (const char *charset, const char *str, gsize str_len);
+GString *mc_search__recode_str (const char *str, gsize str_len, const char *charset_from,
+                                const char *charset_to);
+GString *mc_search__get_one_symbol (const char *charset, const char *str, gsize str_len,
+                                    gboolean * just_letters);
+GString *mc_search__tolower_case_str (const char *charset, const GString * str);
+GString *mc_search__toupper_case_str (const char *charset, const GString * str);
 
 /* search/regex.c : */
 

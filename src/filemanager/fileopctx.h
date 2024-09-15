@@ -10,7 +10,6 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/time.h>
 #include <inttypes.h>           /* uintmax_t */
 
 #include "lib/global.h"
@@ -93,13 +92,6 @@ typedef struct
     size_t progress_count;
     uintmax_t progress_bytes;
 
-    /* The value of the "preserve Attributes" checkbox in the copy file dialog.
-     * We can't use the value of "ctx->preserve" because it can change in order
-     * to preserve file attributs when moving files across filesystem boundaries
-     * (we want to keep the value of the checkbox between copy operations).
-     */
-    gboolean op_preserve;
-
     /* Result from the recursive query */
     FileCopyMode recursive_result;
 
@@ -171,7 +163,7 @@ typedef struct
     uintmax_t copied_bytes;
     size_t bps;
     size_t bps_count;
-    struct timeval transfer_start;
+    gint64 transfer_start;
     double eta_secs;
 
     gboolean ask_overwrite;

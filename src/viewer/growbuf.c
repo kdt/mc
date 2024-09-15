@@ -1,8 +1,8 @@
 /*
    Internal file viewer for the Midnight Commander
-   Function for work with growing bufers
+   Function for work with growing buffers
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -62,10 +62,10 @@
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_growbuf_init (WView * view)
+mcview_growbuf_init (WView *view)
 {
     view->growbuf_in_use = TRUE;
-    view->growbuf_blockptr = g_ptr_array_new ();
+    view->growbuf_blockptr = g_ptr_array_new_with_free_func (g_free);
     view->growbuf_lastindex = VIEW_PAGE_SIZE;
     view->growbuf_finished = FALSE;
 }
@@ -73,7 +73,7 @@ mcview_growbuf_init (WView * view)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_growbuf_done (WView * view)
+mcview_growbuf_done (WView *view)
 {
     view->growbuf_finished = TRUE;
 
@@ -92,14 +92,11 @@ mcview_growbuf_done (WView * view)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_growbuf_free (WView * view)
+mcview_growbuf_free (WView *view)
 {
     g_assert (view->growbuf_in_use);
 
-    g_ptr_array_foreach (view->growbuf_blockptr, (GFunc) g_free, NULL);
-
-    (void) g_ptr_array_free (view->growbuf_blockptr, TRUE);
-
+    g_ptr_array_free (view->growbuf_blockptr, TRUE);
     view->growbuf_blockptr = NULL;
     view->growbuf_in_use = FALSE;
 }
@@ -107,7 +104,7 @@ mcview_growbuf_free (WView * view)
 /* --------------------------------------------------------------------------------------------- */
 
 off_t
-mcview_growbuf_filesize (WView * view)
+mcview_growbuf_filesize (WView *view)
 {
     g_assert (view->growbuf_in_use);
 
@@ -124,7 +121,7 @@ mcview_growbuf_filesize (WView * view)
  */
 
 void
-mcview_growbuf_read_until (WView * view, off_t ofs)
+mcview_growbuf_read_until (WView *view, off_t ofs)
 {
     gboolean short_read = FALSE;
 
@@ -186,6 +183,16 @@ mcview_growbuf_read_until (WView * view, off_t ofs)
                 view->pipe_first_err_msg = FALSE;
 
                 mcview_show_error (view, sp->err.buf);
+
+                /* when switch from parse to raw mode and back,
+                 * do not close the already closed pipe (see call to mcview_growbuf_done below).
+                 * return from here since (sp == view->ds_stdio_pipe) would now be invalid.
+                 * NOTE: this check was removed by ticket #4103 but the above call to
+                 *       mcview_show_error triggers the stdio pipe handle to be closed:
+                 *       mcview_close_datasource -> mcview_growbuf_done
+                 */
+                if (view->ds_stdio_pipe == NULL)
+                    return;
             }
 
             if (sp->out.len > 0)
@@ -239,7 +246,7 @@ mcview_growbuf_read_until (WView * view, off_t ofs)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mcview_get_byte_growing_buffer (WView * view, off_t byte_index, int *retval)
+mcview_get_byte_growing_buffer (WView *view, off_t byte_index, int *retval)
 {
     char *p;
 
@@ -264,7 +271,7 @@ mcview_get_byte_growing_buffer (WView * view, off_t byte_index, int *retval)
 /* --------------------------------------------------------------------------------------------- */
 
 char *
-mcview_get_ptr_growing_buffer (WView * view, off_t byte_index)
+mcview_get_ptr_growing_buffer (WView *view, off_t byte_index)
 {
     off_t pageno, pageindex;
 

@@ -8,17 +8,17 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Midnight Commander\n"
-"Report-Msgid-Bugs-To: http://www.midnight-commander.org/\n"
-"POT-Creation-Date: 2021-09-26 10:06+0300\n"
-"PO-Revision-Date: 2021-07-26 20:16+0000\n"
-"Last-Translator: Transifex Bot <>\n"
-"Language-Team: Serbian (http://www.transifex.com/mc/mc/language/sr/)\n"
+"Report-Msgid-Bugs-To: https://www.midnight-commander.org/\n"
+"POT-Creation-Date: 2024-08-23 19:20+0200\n"
+"PO-Revision-Date: 2010-12-29 10:19+0000\n"
+"Last-Translator: Slava Zanko <slavazanko@gmail.com>, 2011\n"
+"Language-Team: Serbian (http://app.transifex.com/mc/mc/language/sr/)\n"
 "Language: sr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 # "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 msgid "Warning: cannot load codepages list"
@@ -517,6 +517,9 @@ msgstr ""
 "Неочекивана грешка у функцији бирања података за читање из потпроцеса:\n"
 "%s"
 
+msgid "Cannot close pipe descriptor (p == NULL)"
+msgstr ""
+
 #, c-format
 msgid ""
 "Unexpected error in waitpid():\n"
@@ -547,28 +550,10 @@ msgid "Changes to file lost"
 msgstr "Измене у датотеци су изгубљене"
 
 #, c-format
-msgid "%s is not a directory\n"
-msgstr "„%s“ није директоријум\n"
-
-#, c-format
-msgid "Directory %s is not owned by you\n"
-msgstr "Директоријум „%s“ није у вашем власништву\n"
-
-#, c-format
-msgid "Cannot set correct permissions for directory %s\n"
-msgstr "Не могу да поставим исправне дозволе за директоријум %s\n"
-
-#, c-format
-msgid "Cannot create temporary directory %s: %s\n"
-msgstr "Не могу да направим привремени директоријум %s: %s\n"
-
-#, c-format
-msgid "Temporary files will be created in %s\n"
-msgstr "Привремене датотеке ће бити направљене у %s\n"
-
-#, c-format
-msgid "Temporary files will not be created\n"
-msgstr "Привремене датотеке неће бити направљене\n"
+msgid ""
+"Cannot create temporary directory %s: %s.\n"
+"Temporary files will not be created\n"
+msgstr ""
 
 msgid "Press any key to continue..."
 msgstr "Притиснитенеки тастер да наставите..."
@@ -719,30 +704,13 @@ msgid ""
 "                 errdhotfocus\n"
 "   Menus:        menunormal, menuhot, menusel, menuhotsel, menuinactive\n"
 "   Popup menus:  pmenunormal, pmenusel, pmenutitle\n"
-"   Editor:       editnormal, editbold, editmarked, editwhitespace,\n"
+"   Editor:       editnormal, editbold, editmarked, editwhitespace, "
+"editnonprintable,\n"
 "                 editlinestate, editbg, editframe, editframeactive\n"
 "                 editframedrag\n"
 "   Viewer:       viewnormal,viewbold, viewunderline, viewselected\n"
 "   Help:         helpnormal, helpitalic, helpbold, helplink, helpslink\n"
 msgstr ""
-"--colors KEYWORD={FORE},{BACK},{ATTR}:KEYWORD2=...\n"
-"\n"
-"{FORE}, {BACK} и {ATTR} могу да се изоставе, а биће коришћене основности\n"
-"\n"
-" Кључне речи:\n"
-"   Опште:       errors, disabled, reverse, gauge, header\n"
-"                 input, inputmark, inputunchanged, commandlinemark\n"
-"                 bbarhotkey, bbarbutton, statusbar\n"
-"   Приказивање датотека: normal, selected, marked, markselect\n"
-"   Поља прозорчета: dnormal, dfocus, dhotnormal, dhotfocus, errdhotnormal,\n"
-"                 errdhotfocus\n"
-"   Изборници:        menunormal, menuhot, menusel, menuhotsel, menuinactive\n"
-"   Искачући изборници:  pmenunormal, pmenusel, pmenutitle\n"
-"   Уређивач:       editnormal, editbold, editmarked, editwhitespace,\n"
-"                 editlinestate, editbg, editframe, editframeactive\n"
-"                 editframedrag\n"
-"   Прегледач:       viewnormal,viewbold, viewunderline, viewselected\n"
-"   Помоћ:         helpnormal, helpitalic, helpbold, helplink, helpslink\n"
 
 #. TRANSLATORS: don't translate color names and attributes
 msgid ""
@@ -805,11 +773,14 @@ msgstr "Опције терминала"
 msgid "Arguments parse error!"
 msgstr "Грешка обраде аргумената!"
 
+msgid "MC is built without builtin editor."
+msgstr ""
+
 msgid "No arguments given to the viewer."
 msgstr "Аргументи нису дати прегледачу."
 
-msgid "Two files are required to envoke the diffviewer."
-msgstr "Потребне су две датотеке за призивање прегледача разлика."
+msgid "Two files are required to invoke the diffviewer."
+msgstr ""
 
 msgid "Background protocol error"
 msgstr "Грешка позадинског протокола"
@@ -1192,8 +1163,8 @@ msgstr "Морате прво да изаберете блок текста"
 msgid "Run sort"
 msgstr "Покрени ређање"
 
-msgid "Enter sort options (see manpage) separated by whitespace:"
-msgstr "Унесите опције ређања (видите странице упутства) одвојене празнинама:"
+msgid "Enter sort options (see sort(1) manpage) separated by whitespace:"
+msgstr ""
 
 msgid "Sort"
 msgstr "Поређај"
@@ -1609,7 +1580,7 @@ msgstr ""
 "Уређивач текста наклоњен кориснику\n"
 "написан за Поноћног наредника."
 
-msgid "Copyright (C) 1996-2021 the Free Software Foundation"
+msgid "Copyright (C) 1996-2024 the Free Software Foundation"
 msgstr ""
 
 msgid "About"
@@ -2143,11 +2114,10 @@ msgstr "Позадински послови"
 
 #, c-format
 msgid ""
-"Cannot chdir to \"%s\"\n"
+"Cannot change directory to\n"
+"%s\n"
 "%s"
 msgstr ""
-"Не могу да пређем у директоријум „%s“\n"
-"%s"
 
 msgid "Secure deletion"
 msgstr ""
@@ -2240,9 +2210,6 @@ msgstr ""
 msgid ""
 "Cannot chattr \"%s\"\n"
 "%s"
-msgstr ""
-
-msgid "Cannot change attributes on non-local filesystems"
 msgstr ""
 
 #, c-format
@@ -2344,15 +2311,6 @@ msgstr "Унесите назив рачунара (Ф1 за појединос�
 msgid "Files tagged, want to cd?"
 msgstr "Датотеке су означене, желите ли да променим директоријум?"
 
-msgid "Cannot change directory"
-msgstr "Не могу да променим директоријум"
-
-msgid "Filter"
-msgstr "Пропусник"
-
-msgid "Set expression for filtering filenames"
-msgstr "Поставите израз за издвајање назива датотека"
-
 #, c-format
 msgid "Link %s to:"
 msgstr "Повежите „%s“ са:"
@@ -2367,10 +2325,6 @@ msgstr "веза: %s"
 #, c-format
 msgid "symlink: %s"
 msgstr "симболичка веза: %s"
-
-#, c-format
-msgid "Cannot chdir to \"%s\""
-msgstr "Не могу да пређем у директоријум „%s“"
 
 msgid "View file"
 msgstr "Прегледајте датотеку"
@@ -2500,29 +2454,30 @@ msgid "Pipe failed"
 msgstr "Сојка није успела"
 
 #, c-format
-msgid " %s%s file error"
-msgstr " %s%s грешка датотеке"
+msgid ""
+"You have an outdated %s file.\n"
+"Midnight Commander now uses %s file.\n"
+"Please copy your modifications of the old file to the new one."
+msgstr ""
 
 #, c-format
 msgid ""
-"The format of the %smc.ext file has changed with version 3.0. It seems that "
-"the installation failed. Please fetch a fresh copy from the Midnight "
-"Commander package."
+"The format of the\n"
+"%s%s\n"
+"file has changed with version 4.0.\n"
+"It seems that the installation has failed.\n"
+"Please fetch a fresh copy from the Midnight Commander package."
 msgstr ""
-"Запис датотеке „%smc.ext“ је измењен издањем 3.0. Изгледа да инсталација "
-"није успела. Набавите најновији примерак из пакета Поноћног наредника."
-
-#, c-format
-msgid "%s file error"
-msgstr "Грешка датотеке „%s“"
 
 #, c-format
 msgid ""
-"The format of the %s file has changed with version 3.0. You may either want "
-"to copy it from %smc.ext or use that file as an example of how to write it."
+"The format of the\n"
+"%s\n"
+"file has changed with version 4.0.\n"
+"You may either want to copy it from\n"
+"%s%s\n"
+"or use that file as an example of how to write it."
 msgstr ""
-"Запис датотеке „%s“ је измењен издањем 3.0. Можда желите да је умножите из "
-"„%smc.ext“ или да користите ту датотеку као пример како је записати."
 
 msgid "DialogTitle|Copy"
 msgstr "Умножите"
@@ -2725,6 +2680,18 @@ msgstr ""
 
 #, c-format
 msgid ""
+"Cannot get attributes of source file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot set attributes of target file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
 "Cannot create special file \"%s\"\n"
 "%s"
 msgstr ""
@@ -2807,6 +2774,15 @@ msgstr ""
 msgid "(stalled)"
 msgstr "(застој)"
 
+msgid "Incomplete file was retrieved"
+msgstr ""
+
+msgid "&Keep"
+msgstr "&Задржи"
+
+msgid "&Continue copy"
+msgstr ""
+
 #, c-format
 msgid ""
 "Cannot close source file \"%s\"\n"
@@ -2823,11 +2799,11 @@ msgstr ""
 "Не могу да затворим циљну датотеку „%s“\n"
 "%s"
 
-msgid "Incomplete file was retrieved. Keep it?"
-msgstr "Датотека није у потпуности преузета. Да је задржим?"
-
-msgid "&Keep"
-msgstr "&Задржи"
+#, c-format
+msgid ""
+"Cannot set attributes for target file \"%s\"\n"
+"%s"
+msgstr ""
 
 #, c-format
 msgid ""
@@ -2836,6 +2812,12 @@ msgid ""
 msgstr ""
 "Не могу да добијем податке о изворном директоријуму „%s“\n"
 "%s"
+
+#, c-format
+msgid ""
+"Cannot get attributes of source directory \"%s\"\n"
+"%s"
+msgstr ""
 
 #, c-format
 msgid ""
@@ -2891,8 +2873,8 @@ msgid "Con&tinue"
 msgstr "&Настави"
 
 #, c-format
-msgid "%d:%02d.%02d"
-msgstr "%d:%02d.%02d"
+msgid "%d:%02d:%02d"
+msgstr ""
 
 #, c-format
 msgid "ETA %s"
@@ -2947,8 +2929,8 @@ msgid "Background process: File exists"
 msgstr "Позадински процес: Датотека постоји"
 
 #, c-format
-msgid "Files processed: %zu/%zu"
-msgstr "Обрађене датотеке: %zu/%zu"
+msgid "Files processed: %zu / %zu"
+msgstr ""
 
 #, c-format
 msgid "Files processed: %zu"
@@ -2975,8 +2957,8 @@ msgid " Total: %s "
 msgstr " Укупно: %s "
 
 #, c-format
-msgid " Total: %s/%s "
-msgstr " Укупно: %s/%s "
+msgid " Total: %s / %s "
+msgstr ""
 
 msgid "Source"
 msgstr "Извор"
@@ -3028,7 +3010,7 @@ msgid "&Listing format..."
 msgstr ""
 
 msgid "&Sort order..."
-msgstr "Редослед &ређања..."
+msgstr ""
 
 msgid "&Filter..."
 msgstr "&Пропусник..."
@@ -3042,8 +3024,8 @@ msgstr "&ФТП веза..."
 msgid "S&hell link..."
 msgstr "Веза &љуске..."
 
-msgid "S&FTP link..."
-msgstr "&СФТП веза..."
+msgid "SFTP li&nk..."
+msgstr ""
 
 msgid "Paneli&ze"
 msgstr "Претвори &у окно"
@@ -3427,8 +3409,8 @@ msgid "No space information"
 msgstr "Нема података о простору"
 
 #, c-format
-msgid "Free space: %s/%s (%d%%)"
-msgstr "Слободан простор:  %s/%s (%d%%)"
+msgid "Free space: %s / %s (%d%%)"
+msgstr ""
 
 #, c-format
 msgid "Type:       %s"
@@ -3480,9 +3462,6 @@ msgstr "Власник:      %s/%s"
 #, c-format
 msgid "Links:      %d"
 msgstr "Везе:      %d"
-
-msgid "Attributes: not supported"
-msgstr ""
 
 #, c-format
 msgid "Attributes: %s"
@@ -3673,6 +3652,9 @@ msgstr "Изаберите"
 
 msgid "Unselect"
 msgstr "Поништите избор"
+
+msgid "Filter"
+msgstr "Пропусник"
 
 msgid "Do you really want to execute?"
 msgstr "Да ли стварно желите да извршите?"
@@ -3921,10 +3903,10 @@ msgstr "Љуска је још увек радна. Да ипак изађем?"
 msgid "Warning: Cannot change to %s.\n"
 msgstr "Упозорење: Не могу да пређем на „%s“.\n"
 
-msgid "With builtin Editor and Aspell support"
+msgid "With builtin editor and aspell support"
 msgstr ""
 
-msgid "With builtin Editor"
+msgid "With builtin editor"
 msgstr ""
 
 msgid "With optional subshell support"
@@ -3974,6 +3956,10 @@ msgid "Built with ncursesw %s\n"
 msgstr ""
 
 msgid "Built with ncursesw (unknown version)"
+msgstr ""
+
+#, c-format
+msgid "Built with libssh2 %d.%d.%d\n"
 msgstr ""
 
 msgid "Virtual File Systems:"
@@ -4101,6 +4087,15 @@ msgstr ""
 "Неочекивани крај датотеке\n"
 "%s"
 
+msgid "Inconsistent archive"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot open %s archive\n"
+"%s"
+msgstr ""
+
 #, c-format
 msgid ""
 "Cannot open %s archive\n"
@@ -4114,66 +4109,24 @@ msgid ""
 "%s"
 msgstr ""
 
+msgid ""
+"EXTFS virtual file system:\n"
+"wrong file name"
+msgstr ""
+
+msgid ""
+"EXTFS virtual file system:\n"
+"wrong archive name"
+msgstr ""
+
+msgid ""
+"EXTFS virtual file system:\n"
+"cannot build command"
+msgstr ""
+
 #, c-format
 msgid "Warning: cannot open %s directory\n"
 msgstr "Упозорење: не могу да отворим директоријум „%s“\n"
-
-#, c-format
-msgid "fish: Disconnecting from %s"
-msgstr "fish: Прекидам везу са „%s“"
-
-msgid "fish: Waiting for initial line..."
-msgstr "fish: Чекам почетни ред..."
-
-msgid "Sorry, we cannot do password authenticated connections for now."
-msgstr "Извините, али за сад не можемо да се повезујемо уз потврду лозинке."
-
-#, c-format
-msgid "fish: Password is required for %s"
-msgstr "fish: Потребна је лозинка за „%s“"
-
-msgid "fish: Sending password..."
-msgstr "fish: Шаљем лозинку..."
-
-msgid "fish: Sending initial line..."
-msgstr "fish: Шаљем почетни ред..."
-
-msgid "fish: Handshaking version..."
-msgstr "fish: Преговарам о издању..."
-
-msgid "fish: Getting host info..."
-msgstr "fish: Добављам податке о домаћину..."
-
-#, c-format
-msgid "fish: Reading directory %s..."
-msgstr "fish: Читам директоријум „%s“..."
-
-#, c-format
-msgid "%s: done."
-msgstr "%s: готово."
-
-#, c-format
-msgid "%s: failure"
-msgstr "%s: неуспех"
-
-#, c-format
-msgid "fish: store %s: sending command..."
-msgstr "fish: складиште „%s“: шаљем наредбу..."
-
-msgid "fish: Local read failed, sending zeros"
-msgstr "fish: Месно читање није успело, шаљем нуле"
-
-msgid "fish: storing file"
-msgstr "fish: смештам датотеку"
-
-msgid "Aborting transfer..."
-msgstr "Прекидам пренос..."
-
-msgid "Error reported after abort."
-msgstr "Пријављена је грешка после прекида."
-
-msgid "Aborted transfer would be successful."
-msgstr "Прекинути пренос би био успешан."
 
 #, c-format
 msgid "ftpfs: Disconnecting from %s"
@@ -4228,6 +4181,21 @@ msgstr "ftpfs: повезивање са сервером није успело:
 msgid "Waiting to retry... %d (Control-G to cancel)"
 msgstr "Чекам да бих поново покушао... %d (Ктрл-Г да откажете)"
 
+#, c-format
+msgid "ftpfs: could not make address-to-name translation: %s"
+msgstr ""
+
+#, c-format
+msgid "ftpfs: try reconnect to server, attempt %u"
+msgstr ""
+
+#, c-format
+msgid "ftpfs: could not get socket name: %s"
+msgstr ""
+
+msgid "ftpfs: could not reconnect to server"
+msgstr ""
+
 msgid "ftpfs: invalid address family"
 msgstr "ftpfs: неисправна породица адресе"
 
@@ -4269,6 +4237,14 @@ msgstr "(прво промени директоријум)"
 
 msgid "ftpfs: failed; nowhere to fallback to"
 msgstr "ftpfs: нисам успео; немам решења"
+
+#, c-format
+msgid "%s: failure"
+msgstr "%s: неуспех"
+
+#, c-format
+msgid "%s: done."
+msgstr "%s: готово."
 
 msgid "ftpfs: storing file"
 msgstr "ftpfs: смештам датотеку"
@@ -4410,12 +4386,50 @@ msgid "sftp: Listing done."
 msgstr "sftp: Исписивање је готово."
 
 #, c-format
-msgid ""
-"Cannot open tar archive\n"
-"%s"
+msgid "shell: Disconnecting from %s"
 msgstr ""
-"Не могу да отворим тар архиву\n"
-"%s"
+
+msgid "shell: Waiting for initial line..."
+msgstr ""
+
+msgid "Sorry, we cannot do password authenticated connections for now."
+msgstr "Извините, али за сад не можемо да се повезујемо уз потврду лозинке."
+
+#, c-format
+msgid "shell: Password is required for %s"
+msgstr ""
+
+msgid "shell: Sending password..."
+msgstr ""
+
+msgid "shell: Sending initial line..."
+msgstr ""
+
+msgid "shell: Getting host info..."
+msgstr ""
+
+#, c-format
+msgid "shell: Reading directory %s..."
+msgstr ""
+
+#, c-format
+msgid "shell: store %s: sending command..."
+msgstr ""
+
+msgid "shell: Local read failed, sending zeros"
+msgstr ""
+
+msgid "shell: storing file"
+msgstr ""
+
+msgid "Aborting transfer..."
+msgstr "Прекидам пренос..."
+
+msgid "Error reported after abort."
+msgstr "Пријављена је грешка после прекида."
+
+msgid "Aborted transfer would be successful."
+msgstr "Прекинути пренос би био успешан."
 
 msgid "Inconsistent tar archive"
 msgstr "Недоследна тар архива"
@@ -4425,11 +4439,20 @@ msgstr "Неочекивани крај датотеке у архиви"
 
 #, c-format
 msgid ""
-"%s\n"
-"doesn't look like a tar archive."
+"Cannot open tar archive\n"
+"%s"
 msgstr ""
+"Не могу да отворим тар архиву\n"
+"%s"
+
+#, c-format
+msgid ""
 "%s\n"
-"не изгледа да је тар архива."
+"doesn't look like a tar archive"
+msgstr ""
+
+msgid "tar: mc_lseek not stopped at a record boundary"
+msgstr ""
 
 msgid "undelfs: error"
 msgstr "undelfs: грешка"
@@ -4622,52 +4645,3 @@ msgstr "Да наставим са почетка?"
 
 msgid "Cannot fetch a local copy of /ftp://some.host/editme.txt"
 msgstr "Не могу да довучем месни примерак „/ftp://some.host/editme.txt“"
-
-#~ msgid "Set debug level"
-#~ msgstr "Подешава ниво прочишћавања"
-
-#, c-format
-#~ msgid "Password for \\\\%s\\%s"
-#~ msgstr "Лозинка за „\\\\%s\\%s“"
-
-#~ msgid "Domain:"
-#~ msgstr "Домен:"
-
-#~ msgid "Username:"
-#~ msgstr "Корисник:"
-
-#~ msgid "SMB authentication"
-#~ msgstr "СМБ потврђивање идентитета"
-
-#~ msgid "SMB link to machine"
-#~ msgstr "СМБ веза на рачунар"
-
-#~ msgid "SM&B link..."
-#~ msgstr "СМ&Б веза..."
-
-#, c-format
-#~ msgid "reconnect to %s failed"
-#~ msgstr "поновно повезивање на „%s“ није успело"
-
-#~ msgid "Authentication failed"
-#~ msgstr "Потврђивање идентитета није успело"
-
-#, c-format
-#~ msgid "Error %s creating directory %s"
-#~ msgstr "Грешка „%s“ прављења директоријума „%s“"
-
-#, c-format
-#~ msgid "Error %s removing directory %s"
-#~ msgstr "Грешка „%s“ уклањања директоријума „%s“"
-
-#, c-format
-#~ msgid "%s opening remote file %s"
-#~ msgstr "„%s“ отвара удаљену датотеку „%s“"
-
-#, c-format
-#~ msgid "%s removing remote file %s"
-#~ msgstr "„%s“ уклања удаљену датотеку „%s“"
-
-#, c-format
-#~ msgid "%s renaming files\n"
-#~ msgstr "„%s“ преименује датотеке\n"

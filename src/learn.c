@@ -1,7 +1,7 @@
 /*
    Learn keys
 
-   Copyright (C) 1995-2021
+   Copyright (C) 1995-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -37,7 +37,6 @@
 #include "lib/tty/tty.h"
 #include "lib/tty/key.h"
 #include "lib/mcconfig.h"
-#include "lib/strescape.h"
 #include "lib/strutil.h"
 #include "lib/util.h"           /* convert_controls() */
 #include "lib/widget.h"
@@ -65,6 +64,8 @@ typedef struct
     char *sequence;
 } learnkey_t;
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 static WDialog *learn_dlg;
@@ -75,11 +76,12 @@ static int learn_total;
 static int learnok;
 static gboolean learnchanged = FALSE;
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-learn_button (WButton * button, int action)
+learn_button (WButton *button, int action)
 {
     WDialog *d;
     char *seq;
@@ -105,7 +107,7 @@ learn_button (WButton * button, int action)
          */
         gboolean seq_ok = FALSE;
 
-        if (*seq != '\0' && strcmp (seq, "\\e") != 0 && strcmp (seq, "\\e\\e") != 0
+        if (strcmp (seq, "\\e") != 0 && strcmp (seq, "\\e\\e") != 0
             && strcmp (seq, "^m") != 0 && strcmp (seq, "^i") != 0
             && (seq[1] != '\0' || *seq < ' ' || *seq > '~'))
         {
@@ -199,7 +201,7 @@ learn_check_key (int c)
                          ("Great! You have a complete terminal database!\n"
                           "All your keys work well."));
             }
-            dlg_stop (learn_dlg);
+            dlg_close (learn_dlg);
         }
         return TRUE;
     }
@@ -230,7 +232,7 @@ learn_check_key (int c)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-learn_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+learn_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     switch (msg)
     {
@@ -310,7 +312,7 @@ init_learn (void)
 
         learnkeys[i].button =
             WIDGET (button_new (y, x, B_USER + i, NARROW_BUTTON, buffer, learn_button));
-        learnkeys[i].label = WIDGET (label_new (y, x + 19, ""));
+        learnkeys[i].label = WIDGET (label_new (y, x + 19, NULL));
         group_add_widget (g, learnkeys[i].button);
         group_add_widget (g, learnkeys[i].label);
 
@@ -363,7 +365,7 @@ learn_save (void)
         {
             char *esc_str;
 
-            esc_str = strutils_escape (learnkeys[i].sequence, -1, ";\\", TRUE);
+            esc_str = str_escape (learnkeys[i].sequence, -1, ";\\", TRUE);
             mc_config_set_string_raw_value (mc_global.main_config, section,
                                             key_name_conv_tab[i].name, esc_str);
             g_free (esc_str);

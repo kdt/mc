@@ -5,6 +5,8 @@
 #ifndef MC__EDIT_WIDGET_H
 #define MC__EDIT_WIDGET_H
 
+#include <limits.h>             /* MB_LEN_MAX */
+
 #include "lib/search.h"         /* mc_search_t */
 #include "lib/widget.h"         /* Widget */
 
@@ -80,7 +82,7 @@ struct WEdit
     /* multibyte support */
     gboolean utf8;              /* It's multibyte file codeset */
     GIConv converter;
-    char charbuf[4 + 1];
+    char charbuf[MB_LEN_MAX + 1];
     int charpoint;
 #endif
 
@@ -148,9 +150,12 @@ struct WEdit
     unsigned int redo_stack_reset:1;    /* If 1, need clear redo stack */
 
     struct stat stat1;          /* Result of mc_fstat() on the file */
+    unsigned long attrs;        /* Result of mc_fgetflags() on the file */
+    gboolean attrs_ok;          /* mc_fgetflags() == 0 */
+
     unsigned int skip_detach_prompt:1;  /* Do not prompt whether to detach a file anymore */
 
-    /* syntax higlighting */
+    /* syntax highlighting */
     GSList *syntax_marker;
     GPtrArray *rules;
     off_t last_get_rule;

@@ -3,12 +3,12 @@
 
    Original idea and code: Oleg "Olegarch" Konovalov <olegarch@linuxinside.com>
 
-   Copyright (C) 2009-2021
+   Copyright (C) 2009-2024
    Free Software Foundation, Inc.
 
    Written by:
    Daniel Borca <dborca@yahoo.com>, 2007
-   Andrew Borodin <aborodin@vmail.ru>, 2010, 2013
+   Andrew Borodin <aborodin@vmail.ru>, 2010-2022
 
    This file is part of the Midnight Commander.
 
@@ -40,11 +40,21 @@
 
 /*** global variables ****************************************************************************/
 
+/* Primitive way to check if the the current dialog is our dialog */
+/* This is needed by async routines like load_prompt */
+GList *top_dlg = NULL;
+
+/* If set then dialogs just clean the screen when refreshing, else */
+/* they do a complete refresh, refreshing all the parts of the program */
+gboolean fast_refresh = FALSE;
+
 WDialog *filemanager = NULL;
 
 /*** file scope macro definitions ****************************************************************/
 
 /*** file scope type declarations ****************************************************************/
+
+/*** forward declarations (file scope functions) *************************************************/
 
 /*** file scope variables ************************************************************************/
 
@@ -55,6 +65,7 @@ static GList *mc_current = NULL;
 /* Is there any dialogs that we have to run after returning to the manager from another dialog */
 static gboolean dialog_switch_pending = FALSE;
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
@@ -78,7 +89,7 @@ dialog_switch_suspend (void *data, void *user_data)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-dialog_switch_goto (GList * dlg)
+dialog_switch_goto (GList *dlg)
 {
     if (mc_current != dlg)
     {
@@ -114,7 +125,7 @@ dialog_switch_goto (GList * dlg)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-dialog_switch_resize (WDialog * d)
+dialog_switch_resize (WDialog *d)
 {
     if (widget_get_state (WIDGET (d), WST_ACTIVE))
         send_message (d, NULL, MSG_RESIZE, 0, NULL);
@@ -127,7 +138,7 @@ dialog_switch_resize (WDialog * d)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-dialog_switch_add (WDialog * h)
+dialog_switch_add (WDialog *h)
 {
     GList *dlg;
 
@@ -148,7 +159,7 @@ dialog_switch_add (WDialog * h)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-dialog_switch_remove (WDialog * h)
+dialog_switch_remove (WDialog *h)
 {
     GList *this;
 
@@ -229,7 +240,7 @@ dialog_switch_list (void)
     lines = MIN ((size_t) (LINES * 2 / 3), dlg_num);
     cols = COLS * 2 / 3;
 
-    listbox = create_listbox_window (lines, cols, _("Screens"), "[Screen selector]");
+    listbox = listbox_window_new (lines, cols, _("Screens"), "[Screen selector]");
 
     for (h = mc_dialogs; h != NULL; h = g_list_next (h))
     {
@@ -237,16 +248,15 @@ dialog_switch_list (void)
         char *title;
 
         if (dlg->get_title != NULL)
-            title = dlg->get_title (dlg, WIDGET (listbox->list)->cols - 2);
+            title = dlg->get_title (dlg, WIDGET (listbox->list)->rect.cols - 2);
         else
             title = g_strdup ("");
 
-        listbox_add_item (listbox->list, LISTBOX_APPEND_BEFORE, get_hotkey (i++), title, h, FALSE);
-
-        g_free (title);
+        listbox_add_item_take (listbox->list, LISTBOX_APPEND_BEFORE, get_hotkey (i++), title, h,
+                               FALSE);
     }
 
-    selected = run_listbox_with_data (listbox, mc_current);
+    selected = listbox_run_with_data (listbox, mc_current);
     if (selected != NULL)
         dialog_switch_goto (selected);
 }
@@ -307,6 +317,36 @@ dialog_switch_shutdown (void)
 
         dlg_run (dlg);
         widget_destroy (WIDGET (dlg));
+    }
+}
+
+/* --------------------------------------------------------------------------------------------- */
+
+void
+do_refresh (void)
+{
+    GList *d = top_dlg;
+
+    if (fast_refresh)
+    {
+        if (d != NULL)
+            widget_draw (WIDGET (d->data));
+    }
+    else
+    {
+        /* Search first fullscreen dialog */
+        for (; d != NULL; d = g_list_next (d))
+            if ((WIDGET (d->data)->pos_flags & WPOS_FULLSCREEN) != 0)
+                break;
+
+        /* when small dialog (i.e. error message) is created first,
+           there is no fullscreen dialog in the stack */
+        if (d == NULL)
+            d = g_list_last (top_dlg);
+
+        /* back to top dialog */
+        for (; d != NULL; d = g_list_previous (d))
+            widget_draw (WIDGET (d->data));
     }
 }
 

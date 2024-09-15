@@ -1,11 +1,12 @@
 /*
    Virtual File System: interface functions
 
-   Copyright (C) 2011-2021
+   Copyright (C) 2011-2024
    Free Software Foundation, Inc.
 
    Written by:
    Slava Zanko <slavazanko@gmail.com>, 2011, 2013
+   Andrew Borodin <aborodin@vmail.ru>, 2011-2022
 
    This file is part of the Midnight Commander.
 
@@ -70,13 +71,16 @@ extern struct vfs_dirent *mc_readdir_result;
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
 static vfs_path_t *
-mc_def_getlocalcopy (const vfs_path_t * filename_vpath)
+mc_def_getlocalcopy (const vfs_path_t *filename_vpath)
 {
     vfs_path_t *tmp_vpath = NULL;
     int fdin, fdout = -1;
@@ -126,8 +130,8 @@ mc_def_getlocalcopy (const vfs_path_t * filename_vpath)
 /* --------------------------------------------------------------------------------------------- */
 
 static int
-mc_def_ungetlocalcopy (const vfs_path_t * filename_vpath,
-                       const vfs_path_t * local_vpath, gboolean has_changed)
+mc_def_ungetlocalcopy (const vfs_path_t *filename_vpath,
+                       const vfs_path_t *local_vpath, gboolean has_changed)
 {
     int fdin = -1, fdout = -1;
     const char *local;
@@ -184,11 +188,11 @@ mc_def_ungetlocalcopy (const vfs_path_t * filename_vpath,
 /* --------------------------------------------------------------------------------------------- */
 
 int
-mc_open (const vfs_path_t * vpath, int flags, ...)
+mc_open (const vfs_path_t *vpath, int flags, ...)
 {
     int result = -1;
     mode_t mode = 0;
-    const vfs_path_element_t *path_element;
+    struct vfs_class *me;
 
     if (vpath == NULL)
         return (-1);
@@ -206,20 +210,20 @@ mc_open (const vfs_path_t * vpath, int flags, ...)
         va_end (ap);
     }
 
-    path_element = vfs_path_get_by_index (vpath, -1);
-    if (vfs_path_element_valid (path_element) && path_element->class->open != NULL)
+    me = VFS_CLASS (vfs_path_get_last_path_vfs (vpath));
+    if (me != NULL && me->open != NULL)
     {
         void *info;
 
         /* open must be supported */
-        info = path_element->class->open (vpath, flags, mode);
+        info = me->open (vpath, flags, mode);
         if (info == NULL)
-            errno = vfs_ferrno (path_element->class);
+            errno = vfs_ferrno (me);
         else
-            result = vfs_new_handle (path_element->class, info);
+            result = vfs_new_handle (me, info);
     }
     else
-        errno = -EOPNOTSUPP;
+        errno = ENOTSUP;
 
     return result;
 }
@@ -232,23 +236,25 @@ mc_open (const vfs_path_t * vpath, int flags, ...)
 int mc_##name inarg \
 { \
     int result; \
-    const vfs_path_element_t *path_element; \
+    struct vfs_class *me; \
 \
     if (vpath == NULL) \
         return (-1); \
 \
-    path_element = vfs_path_get_by_index (vpath, -1); \
-    if (!vfs_path_element_valid (path_element)) \
+    me = VFS_CLASS (vfs_path_get_last_path_vfs (vpath)); \
+    if (me == NULL) \
         return (-1); \
 \
-    result = path_element->class->name != NULL ? path_element->class->name callarg : -1; \
+    result = me->name != NULL ? me->name callarg : -1; \
     if (result == -1) \
-        errno = path_element->class->name != NULL ? vfs_ferrno (path_element->class) : E_NOTSUPP; \
+        errno = me->name != NULL ? vfs_ferrno (me) : ENOTSUP; \
     return result; \
 }
 
 MC_NAMEOP (chmod, (const vfs_path_t *vpath, mode_t mode), (vpath, mode))
 MC_NAMEOP (chown, (const vfs_path_t *vpath, uid_t owner, gid_t group), (vpath, owner, group))
+MC_NAMEOP (fgetflags, (const vfs_path_t *vpath, unsigned long *flags), (vpath, flags))
+MC_NAMEOP (fsetflags, (const vfs_path_t *vpath, unsigned long flags), (vpath, flags))
 MC_NAMEOP (utime, (const vfs_path_t *vpath, mc_timesbuf_t * times), (vpath, times))
 MC_NAMEOP (readlink, (const vfs_path_t *vpath, char *buf, size_t bufsiz), (vpath, buf, bufsiz))
 MC_NAMEOP (unlink, (const vfs_path_t *vpath), (vpath))
@@ -261,25 +267,20 @@ MC_NAMEOP (mknod, (const vfs_path_t *vpath, mode_t mode, dev_t dev), (vpath, mod
 /* --------------------------------------------------------------------------------------------- */
 
 int
-mc_symlink (const vfs_path_t * vpath1, const vfs_path_t * vpath2)
+mc_symlink (const vfs_path_t *vpath1, const vfs_path_t *vpath2)
 {
     int result = -1;
 
     if (vpath1 != NULL && vpath2 != NULL)
     {
-        const vfs_path_element_t *path_element;
+        struct vfs_class *me;
 
-        path_element = vfs_path_get_by_index (vpath2, -1);
-        if (vfs_path_element_valid (path_element))
+        me = VFS_CLASS (vfs_path_get_last_path_vfs (vpath2));
+        if (me != NULL)
         {
-            result =
-                path_element->class->symlink != NULL ?
-                path_element->class->symlink (vpath1, vpath2) : -1;
-
+            result = me->symlink != NULL ? me->symlink (vpath1, vpath2) : -1;
             if (result == -1)
-                errno =
-                    path_element->class->symlink != NULL ?
-                    vfs_ferrno (path_element->class) : E_NOTSUPP;
+                errno = me->symlink != NULL ? vfs_ferrno (me) : ENOTSUP;
         }
     }
     return result;
@@ -289,12 +290,12 @@ mc_symlink (const vfs_path_t * vpath1, const vfs_path_t * vpath2)
 
 /* *INDENT-OFF* */
 
-#define MC_HANDLEOP(name) \
-ssize_t mc_##name (int handle, C void *buf, size_t count) \
+#define MC_HANDLEOP(rettype, name, inarg, callarg) \
+rettype mc_##name inarg \
 { \
     struct vfs_class *vfs; \
     void *fsinfo = NULL; \
-    int result; \
+    rettype result; \
 \
     if (handle == -1) \
         return (-1); \
@@ -303,18 +304,15 @@ ssize_t mc_##name (int handle, C void *buf, size_t count) \
     if (vfs == NULL) \
         return (-1); \
 \
-    result = vfs->name != NULL ? vfs->name (fsinfo, buf, count) : -1; \
+    result = vfs->name != NULL ? vfs->name callarg : -1; \
     if (result == -1) \
-        errno = vfs->name != NULL ? vfs_ferrno (vfs) : E_NOTSUPP; \
+        errno = vfs->name != NULL ? vfs_ferrno (vfs) : ENOTSUP; \
     return result; \
 }
 
-#define C
-MC_HANDLEOP (read)
-#undef C
-#define C const
-MC_HANDLEOP (write)
-#undef C
+MC_HANDLEOP (ssize_t, read, (int handle, void *buf, size_t count), (fsinfo, buf, count))
+MC_HANDLEOP (ssize_t, write, (int handle, const void *buf, size_t count), (fsinfo, buf, count))
+MC_HANDLEOP (int, fstat, (int handle, struct stat *buf), (fsinfo, buf))
 
 /* --------------------------------------------------------------------------------------------- */
 
@@ -322,26 +320,23 @@ MC_HANDLEOP (write)
 int mc_##name (const vfs_path_t *vpath1, const vfs_path_t *vpath2) \
 { \
     int result; \
-    const vfs_path_element_t *path_element1; \
-    const vfs_path_element_t *path_element2; \
+    struct vfs_class *me1, *me2; \
 \
     if (vpath1 == NULL || vpath2 == NULL) \
         return (-1); \
 \
-    path_element1 = vfs_path_get_by_index (vpath1, (-1)); \
-    path_element2 = vfs_path_get_by_index (vpath2, (-1)); \
+    me1 = VFS_CLASS (vfs_path_get_last_path_vfs (vpath1)); \
+    me2 = VFS_CLASS (vfs_path_get_last_path_vfs (vpath2)); \
 \
-    if (!vfs_path_element_valid (path_element1) || !vfs_path_element_valid (path_element2) || \
-        path_element1->class != path_element2->class) \
+    if (me1 == NULL || me2 == NULL || me1 != me2) \
     { \
         errno = EXDEV; \
         return (-1); \
     } \
 \
-    result = path_element1->class->name != NULL \
-        ? path_element1->class->name (vpath1, vpath2) : -1; \
+    result = me1->name != NULL ? me1->name (vpath1, vpath2) : -1; \
     if (result == -1) \
-        errno = path_element1->class->name != NULL ? vfs_ferrno (path_element1->class) : E_NOTSUPP; \
+        errno = me1->name != NULL ? vfs_ferrno (me1) : ENOTSUP; \
     return result; \
 }
 
@@ -366,19 +361,17 @@ mc_ctl (int handle, int ctlop, void *arg)
 /* --------------------------------------------------------------------------------------------- */
 
 int
-mc_setctl (const vfs_path_t * vpath, int ctlop, void *arg)
+mc_setctl (const vfs_path_t *vpath, int ctlop, void *arg)
 {
     int result = -1;
-    const vfs_path_element_t *path_element;
+    struct vfs_class *me;
 
     if (vpath == NULL)
         vfs_die ("You don't want to pass NULL to mc_setctl.");
 
-    path_element = vfs_path_get_by_index (vpath, -1);
-    if (vfs_path_element_valid (path_element))
-        result =
-            path_element->class->setctl != NULL ? path_element->class->setctl (vpath,
-                                                                               ctlop, arg) : 0;
+    me = VFS_CLASS (vfs_path_get_last_path_vfs (vpath));
+    if (me != NULL)
+        result = me->setctl != NULL ? me->setctl (vpath, ctlop, arg) : 0;
 
     return result;
 }
@@ -415,7 +408,7 @@ mc_close (int handle)
 /* --------------------------------------------------------------------------------------------- */
 
 DIR *
-mc_opendir (const vfs_path_t * vpath)
+mc_opendir (const vfs_path_t *vpath)
 {
     int handle, *handlep;
     void *info;
@@ -427,14 +420,14 @@ mc_opendir (const vfs_path_t * vpath)
     path_element = (vfs_path_element_t *) vfs_path_get_by_index (vpath, -1);
     if (!vfs_path_element_valid (path_element))
     {
-        errno = E_NOTSUPP;
+        errno = ENOTSUP;
         return NULL;
     }
 
     info = path_element->class->opendir ? path_element->class->opendir (vpath) : NULL;
     if (info == NULL)
     {
-        errno = path_element->class->opendir ? vfs_ferrno (path_element->class) : E_NOTSUPP;
+        errno = path_element->class->opendir ? vfs_ferrno (path_element->class) : ENOTSUP;
         return NULL;
     }
 
@@ -457,7 +450,7 @@ mc_opendir (const vfs_path_t * vpath)
 /* --------------------------------------------------------------------------------------------- */
 
 struct vfs_dirent *
-mc_readdir (DIR * dirp)
+mc_readdir (DIR *dirp)
 {
     int handle;
     struct vfs_class *vfs;
@@ -488,20 +481,20 @@ mc_readdir (DIR * dirp)
 #ifdef HAVE_CHARSET
         str_vfs_convert_from (vfs_path_element->dir.converter, entry->d_name, vfs_str_buffer);
 #else
-        g_string_assign (vfs_str_buffer, entry->d_name);
+        g_string_append_len (vfs_str_buffer, entry->d_name, entry->d_len);
 #endif
         vfs_dirent_assign (mc_readdir_result, vfs_str_buffer->str, entry->d_ino);
         vfs_dirent_free (entry);
     }
     if (entry == NULL)
-        errno = vfs->readdir ? vfs_ferrno (vfs) : E_NOTSUPP;
+        errno = vfs->readdir ? vfs_ferrno (vfs) : ENOTSUP;
     return (entry != NULL) ? mc_readdir_result : NULL;
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 int
-mc_closedir (DIR * dirp)
+mc_closedir (DIR *dirp)
 {
     int handle;
     struct vfs_class *vfs;
@@ -536,69 +529,30 @@ mc_closedir (DIR * dirp)
 
 /* --------------------------------------------------------------------------------------------- */
 
-int
-mc_stat (const vfs_path_t * vpath, struct stat *buf)
-{
-    int result = -1;
-    const vfs_path_element_t *path_element;
+/* *INDENT-OFF* */
 
-    if (vpath == NULL)
-        return (-1);
-
-    path_element = vfs_path_get_by_index (vpath, -1);
-    if (vfs_path_element_valid (path_element))
-    {
-        result = path_element->class->stat ? path_element->class->stat (vpath, buf) : -1;
-        if (result == -1)
-            errno = path_element->class->name ? vfs_ferrno (path_element->class) : E_NOTSUPP;
-    }
-
-    return result;
+#define MC_STATOP(name) \
+int mc_##name (const vfs_path_t *vpath, struct stat *buf) \
+{ \
+    int result = -1; \
+    struct vfs_class *me; \
+\
+    if (vpath == NULL) \
+        return (-1); \
+\
+    me = VFS_CLASS (vfs_path_get_last_path_vfs (vpath)); \
+    if (me != NULL) \
+    { \
+        result = me->name ? me->name (vpath, buf) : -1; \
+        if (result == -1) \
+            errno = me->name ? vfs_ferrno (me) : ENOTSUP; \
+    } \
+\
+    return result; \
 }
 
-/* --------------------------------------------------------------------------------------------- */
-
-int
-mc_lstat (const vfs_path_t * vpath, struct stat *buf)
-{
-    int result = -1;
-    const vfs_path_element_t *path_element;
-
-    if (vpath == NULL)
-        return (-1);
-
-    path_element = vfs_path_get_by_index (vpath, -1);
-    if (vfs_path_element_valid (path_element))
-    {
-        result = path_element->class->lstat ? path_element->class->lstat (vpath, buf) : -1;
-        if (result == -1)
-            errno = path_element->class->name ? vfs_ferrno (path_element->class) : E_NOTSUPP;
-    }
-
-    return result;
-}
-
-/* --------------------------------------------------------------------------------------------- */
-
-int
-mc_fstat (int handle, struct stat *buf)
-{
-    struct vfs_class *vfs;
-    void *fsinfo = NULL;
-    int result;
-
-    if (handle == -1)
-        return (-1);
-
-    vfs = vfs_class_find_by_handle (handle, &fsinfo);
-    if (vfs == NULL)
-        return (-1);
-
-    result = vfs->fstat ? vfs->fstat (fsinfo, buf) : -1;
-    if (result == -1)
-        errno = vfs->fstat ? vfs_ferrno (vfs) : E_NOTSUPP;
-    return result;
-}
+MC_STATOP (stat)
+MC_STATOP (lstat)
 
 /* --------------------------------------------------------------------------------------------- */
 
@@ -606,19 +560,18 @@ vfs_path_t *
 mc_getlocalcopy (const vfs_path_t * pathname_vpath)
 {
     vfs_path_t *result = NULL;
-    const vfs_path_element_t *path_element;
+    struct vfs_class *me;
 
     if (pathname_vpath == NULL)
         return NULL;
 
-    path_element = vfs_path_get_by_index (pathname_vpath, -1);
-    if (vfs_path_element_valid (path_element))
+    me = VFS_CLASS (vfs_path_get_last_path_vfs (pathname_vpath));
+    if (me != NULL)
     {
-        result = path_element->class->getlocalcopy != NULL ?
-            path_element->class->getlocalcopy (pathname_vpath) :
-            mc_def_getlocalcopy (pathname_vpath);
+        result = me->getlocalcopy != NULL ?
+            me->getlocalcopy (pathname_vpath) : mc_def_getlocalcopy (pathname_vpath);
         if (result == NULL)
-            errno = vfs_ferrno (path_element->class);
+            errno = vfs_ferrno (me);
     }
     return result;
 }
@@ -630,15 +583,15 @@ mc_ungetlocalcopy (const vfs_path_t * pathname_vpath, const vfs_path_t * local_v
                    gboolean has_changed)
 {
     int result = -1;
-    const vfs_path_element_t *path_element;
+    const struct vfs_class *me;
 
     if (pathname_vpath == NULL)
         return (-1);
 
-    path_element = vfs_path_get_by_index (pathname_vpath, -1);
-    if (vfs_path_element_valid (path_element))
-        result = path_element->class->ungetlocalcopy != NULL ?
-            path_element->class->ungetlocalcopy (pathname_vpath, local_vpath, has_changed) :
+    me = vfs_path_get_last_path_vfs (pathname_vpath);
+    if (me != NULL)
+        result = me->ungetlocalcopy != NULL ?
+            me->ungetlocalcopy (pathname_vpath, local_vpath, has_changed) :
             mc_def_ungetlocalcopy (pathname_vpath, local_vpath, has_changed);
 
     return result;
@@ -648,7 +601,8 @@ mc_ungetlocalcopy (const vfs_path_t * pathname_vpath, const vfs_path_t * local_v
 /**
  * VFS chdir.
  *
- * @param vpath VFS-path
+ * @param vpath VFS path.
+ *              May be NULL. In this case NULL is returned and errno set to 0.
  *
  * @return 0 on success, -1 on failure.
  */
@@ -659,26 +613,38 @@ mc_chdir (const vfs_path_t * vpath)
     struct vfs_class *old_vfs;
     vfsid old_vfsid;
     int result;
+    struct vfs_class *me;
     const vfs_path_element_t *path_element;
     vfs_path_t *cd_vpath;
 
     if (vpath == NULL)
+    {
+        errno = 0;
         return (-1);
+    }
 
     if (vpath->relative)
         cd_vpath = vfs_path_to_absolute (vpath);
     else
         cd_vpath = vfs_path_clone (vpath);
 
-    path_element = vfs_path_get_by_index (cd_vpath, -1);
-    if (!vfs_path_element_valid (path_element) || path_element->class->chdir == NULL)
+    me = VFS_CLASS (vfs_path_get_last_path_vfs (cd_vpath));
+    if (me == NULL)
+    {
+        errno = EINVAL;
         goto error_end;
+    }
 
+    if (me->chdir == NULL)
+    {
+        errno = ENOTSUP;
+        goto error_end;
+    }
 
-    result = path_element->class->chdir (cd_vpath);
+    result = me->chdir (cd_vpath);
     if (result == -1)
     {
-        errno = vfs_ferrno (path_element->class);
+        errno = vfs_ferrno (me);
         goto error_end;
     }
 
@@ -687,8 +653,7 @@ mc_chdir (const vfs_path_t * vpath)
 
     /* Actually change directory */
     vfs_set_raw_current_dir (cd_vpath);
-
-    current_vfs = path_element->class;
+    current_vfs = me;
 
     /* This function uses the new current_dir implicitly */
     vfs_stamp_create (old_vfs, old_vfsid);
@@ -745,7 +710,7 @@ mc_lseek (int fd, off_t offset, int whence)
 
     result = vfs->lseek ? vfs->lseek (fsinfo, offset, whence) : -1;
     if (result == -1)
-        errno = vfs->lseek ? vfs_ferrno (vfs) : E_NOTSUPP;
+        errno = vfs->lseek ? vfs_ferrno (vfs) : ENOTSUP;
     return result;
 }
 
@@ -797,7 +762,7 @@ mc_mkstemps (vfs_path_t ** pname_vpath, const char *prefix, const char *suffix)
 /* --------------------------------------------------------------------------------------------- */
 /**
  * Return the directory where mc should keep its temporary files.
- * This directory is (in Bourne shell terms) "${TMPDIR=/tmp}/mc-$USER"
+ * This directory is (in Bourne shell terms) "${TMPDIR=/tmp}/mc-XXXXXX"
  * When called the first time, the directory is created if needed.
  * The first call should be done early, since we are using fprintf()
  * and not message() to report possible problems.
@@ -809,9 +774,8 @@ mc_tmpdir (void)
     static char buffer[PATH_MAX];
     static const char *tmpdir = NULL;
     const char *sys_tmp;
-    struct passwd *pwd;
     struct stat st;
-    const char *error = NULL;
+    gchar *template;
 
     /* Check if already correctly initialized */
     if (tmpdir != NULL && lstat (tmpdir, &st) == 0 && S_ISDIR (st.st_mode) &&
@@ -826,83 +790,22 @@ mc_tmpdir (void)
             sys_tmp = TMPDIR_DEFAULT;
     }
 
-    pwd = getpwuid (getuid ());
-    if (pwd != NULL)
-        g_snprintf (buffer, sizeof (buffer), "%s/mc-%s", sys_tmp, pwd->pw_name);
+    template = g_build_filename (sys_tmp, "mc-XXXXXX", (char *) NULL);
+    g_strlcpy (buffer, template, sizeof (buffer));
+    g_free (template);
+
+    tmpdir = g_mkdtemp (buffer);
+    if (tmpdir != NULL)
+        g_setenv ("MC_TMPDIR", tmpdir, TRUE);
     else
-        g_snprintf (buffer, sizeof (buffer), "%s/mc-%lu", sys_tmp, (unsigned long) getuid ());
-
-    canonicalize_pathname (buffer);
-
-    /* Try to create directory */
-    if (mkdir (buffer, S_IRWXU) != 0)
     {
-        if (errno == EEXIST && lstat (buffer, &st) == 0)
-        {
-            /* Sanity check for existing directory */
-            if (!S_ISDIR (st.st_mode))
-                error = _("%s is not a directory\n");
-            else if (st.st_uid != getuid ())
-                error = _("Directory %s is not owned by you\n");
-            else if (((st.st_mode & 0777) != 0700) && (chmod (buffer, 0700) != 0))
-                error = _("Cannot set correct permissions for directory %s\n");
-        }
-        else
-        {
-            fprintf (stderr,
-                     _("Cannot create temporary directory %s: %s\n"),
-                     buffer, unix_error_string (errno));
-            error = "";
-        }
-    }
-
-    if (error != NULL)
-    {
-        int test_fd;
-        char *fallback_prefix;
-        gboolean fallback_ok = FALSE;
-        vfs_path_t *test_vpath;
-
-        if (*error != '\0')
-            fprintf (stderr, error, buffer);
-
-        /* Test if sys_tmp is suitable for temporary files */
-        fallback_prefix = g_strdup_printf ("%s/mctest", sys_tmp);
-        test_fd = mc_mkstemps (&test_vpath, fallback_prefix, NULL);
-        g_free (fallback_prefix);
-        if (test_fd != -1)
-        {
-            close (test_fd);
-            test_fd = open (vfs_path_as_str (test_vpath), O_RDONLY);
-            if (test_fd != -1)
-            {
-                close (test_fd);
-                unlink (vfs_path_as_str (test_vpath));
-                fallback_ok = TRUE;
-            }
-        }
-
-        if (fallback_ok)
-        {
-            fprintf (stderr, _("Temporary files will be created in %s\n"), sys_tmp);
-            g_snprintf (buffer, sizeof (buffer), "%s", sys_tmp);
-            error = NULL;
-        }
-        else
-        {
-            fprintf (stderr, _("Temporary files will not be created\n"));
-            g_snprintf (buffer, sizeof (buffer), "%s", "/dev/null/");
-        }
-
-        vfs_path_free (test_vpath, TRUE);
+        fprintf (stderr, _("Cannot create temporary directory %s: %s.\n"
+                           "Temporary files will not be created\n"), buffer,
+                 unix_error_string (errno));
+        g_snprintf (buffer, sizeof (buffer), "%s", "/dev/null/");
         fprintf (stderr, "%s\n", _("Press any key to continue..."));
         getc (stdin);
     }
-
-    tmpdir = buffer;
-
-    if (error == NULL)
-        g_setenv ("MC_TMPDIR", tmpdir, TRUE);
 
     return tmpdir;
 }

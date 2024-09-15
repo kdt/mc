@@ -1,7 +1,7 @@
 /* Virtual File System: SFTP file system.
    The internal functions: dirs
 
-   Copyright (C) 2011-2021
+   Copyright (C) 2011-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -63,29 +63,22 @@ typedef struct
  */
 
 void *
-sftpfs_opendir (const vfs_path_t * vpath, GError ** mcerror)
+sftpfs_opendir (const vfs_path_t *vpath, GError **mcerror)
 {
     sftpfs_dir_data_t *sftpfs_dir;
-    struct vfs_s_super *super;
     sftpfs_super_t *sftpfs_super;
     const vfs_path_element_t *path_element;
     LIBSSH2_SFTP_HANDLE *handle;
+    const GString *fixfname;
 
-    mc_return_val_if_error (mcerror, NULL);
-
-    path_element = vfs_path_get_by_index (vpath, -1);
-
-    if (vfs_s_get_path (vpath, &super, 0) == NULL)
+    if (!sftpfs_op_init (&sftpfs_super, &path_element, vpath, mcerror))
         return NULL;
 
-    sftpfs_super = SFTP_SUPER (super);
+    fixfname = sftpfs_fix_filename (path_element->path);
 
     while (TRUE)
     {
-        const GString *fixfname;
         int libssh_errno;
-
-        fixfname = sftpfs_fix_filename (path_element->path);
 
         handle =
             libssh2_sftp_open_ex (sftpfs_super->sftp_session, fixfname->str, fixfname->len, 0, 0,
@@ -115,7 +108,7 @@ sftpfs_opendir (const vfs_path_t * vpath, GError ** mcerror)
  */
 
 struct vfs_dirent *
-sftpfs_readdir (void *data, GError ** mcerror)
+sftpfs_readdir (void *data, GError **mcerror)
 {
     char mem[BUF_MEDIUM];
     LIBSSH2_SFTP_ATTRIBUTES attrs;
@@ -148,7 +141,7 @@ sftpfs_readdir (void *data, GError ** mcerror)
  */
 
 int
-sftpfs_closedir (void *data, GError ** mcerror)
+sftpfs_closedir (void *data, GError **mcerror)
 {
     int rc;
     sftpfs_dir_data_t *sftpfs_dir = (sftpfs_dir_data_t *) data;
@@ -171,33 +164,20 @@ sftpfs_closedir (void *data, GError ** mcerror)
  */
 
 int
-sftpfs_mkdir (const vfs_path_t * vpath, mode_t mode, GError ** mcerror)
+sftpfs_mkdir (const vfs_path_t *vpath, mode_t mode, GError **mcerror)
 {
     int res;
-    struct vfs_s_super *super;
     sftpfs_super_t *sftpfs_super;
     const vfs_path_element_t *path_element;
+    const GString *fixfname;
 
-    mc_return_val_if_error (mcerror, -1);
-
-    path_element = vfs_path_get_by_index (vpath, -1);
-
-    if (vfs_s_get_path (vpath, &super, 0) == NULL)
+    if (!sftpfs_op_init (&sftpfs_super, &path_element, vpath, mcerror))
         return -1;
 
-    if (super == NULL)
-        return -1;
-
-    sftpfs_super = SFTP_SUPER (super);
-    if (sftpfs_super->sftp_session == NULL)
-        return -1;
+    fixfname = sftpfs_fix_filename (path_element->path);
 
     do
     {
-        const GString *fixfname;
-
-        fixfname = sftpfs_fix_filename (path_element->path);
-
         res =
             libssh2_sftp_mkdir_ex (sftpfs_super->sftp_session, fixfname->str, fixfname->len, mode);
         if (res >= 0)
@@ -221,33 +201,20 @@ sftpfs_mkdir (const vfs_path_t * vpath, mode_t mode, GError ** mcerror)
  */
 
 int
-sftpfs_rmdir (const vfs_path_t * vpath, GError ** mcerror)
+sftpfs_rmdir (const vfs_path_t *vpath, GError **mcerror)
 {
     int res;
-    struct vfs_s_super *super;
     sftpfs_super_t *sftpfs_super;
     const vfs_path_element_t *path_element;
+    const GString *fixfname;
 
-    mc_return_val_if_error (mcerror, -1);
-
-    path_element = vfs_path_get_by_index (vpath, -1);
-
-    if (vfs_s_get_path (vpath, &super, 0) == NULL)
+    if (!sftpfs_op_init (&sftpfs_super, &path_element, vpath, mcerror))
         return -1;
 
-    if (super == NULL)
-        return -1;
-
-    sftpfs_super = SFTP_SUPER (super);
-    if (sftpfs_super->sftp_session == NULL)
-        return -1;
+    fixfname = sftpfs_fix_filename (path_element->path);
 
     do
     {
-        const GString *fixfname;
-
-        fixfname = sftpfs_fix_filename (path_element->path);
-
         res = libssh2_sftp_rmdir_ex (sftpfs_super->sftp_session, fixfname->str, fixfname->len);
         if (res >= 0)
             break;

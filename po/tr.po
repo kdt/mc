@@ -4,6 +4,7 @@
 #
 # Translators:
 # Hüsamettin Ertürk <hsmertk@gmail.com>, 2016
+# Mehmet Akif 9oglu, 2023
 # Muhammet Kara <muhammetk@gmail.com>, 2014
 # Muhammet Kara <muhammetk@gmail.com>, 2014
 # Serdar Sağlam <teknomobil@msn.com>, 2019-2020
@@ -13,11 +14,11 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Midnight Commander\n"
-"Report-Msgid-Bugs-To: http://www.midnight-commander.org/\n"
-"POT-Creation-Date: 2021-09-26 10:06+0300\n"
-"PO-Revision-Date: 2021-07-26 20:16+0000\n"
-"Last-Translator: Transifex Bot <>\n"
-"Language-Team: Turkish (http://www.transifex.com/mc/mc/language/tr/)\n"
+"Report-Msgid-Bugs-To: https://www.midnight-commander.org/\n"
+"POT-Creation-Date: 2024-08-23 19:20+0200\n"
+"PO-Revision-Date: 2010-12-29 10:19+0000\n"
+"Last-Translator: Mehmet Akif 9oglu, 2023\n"
+"Language-Team: Turkish (http://app.transifex.com/mc/mc/language/tr/)\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -85,6 +86,8 @@ msgid ""
 "Number out of range (should be in byte range, 0 <= n <= 0xFF, expressed in "
 "hex)"
 msgstr ""
+"Sayı aralığın dışında (bayt aralığında olmalıdır, 0 <= n <= 0xFF, onaltılık "
+"ifade edilir)"
 
 msgid "Invalid character"
 msgstr "Geçersiz karakter"
@@ -97,6 +100,8 @@ msgid ""
 "Hex pattern error at position %d:\n"
 "%s."
 msgstr ""
+"%dpozisyonda onaltılı desen hatası:\n"
+"%s."
 
 msgid "Search string not found"
 msgstr "Aranan metin bulunamadı"
@@ -148,6 +153,9 @@ msgid ""
 "%s\n"
 "Default skin has been loaded"
 msgstr ""
+"Gerçek renkler desteğiyle '%s' skin kullanılamıyor:\n"
+"%s\n"
+"Varsayılan skin yüklendi"
 
 #, c-format
 msgid ""
@@ -170,6 +178,7 @@ msgstr "Gerçek renk bu slang sürümünde desteklenmiyor."
 
 msgid "Set COLORTERM=truecolor if your terminal really supports true colors."
 msgstr ""
+"Uçbirim gerçek renkleri destekliyorsa COLORTERM=truecolor olarak ayarlayın."
 
 msgid "Escape"
 msgstr "Vazgeç"
@@ -458,25 +467,31 @@ msgid "The TERM environment variable is unset!\n"
 msgstr "TERM çevre değişkeni atanmamış!\n"
 
 msgid "Cannot check SIGWINCH pipe"
-msgstr ""
+msgstr "SIGWINCH borusu kontrol edilemiyor"
 
 #, c-format
 msgid ""
 "\n"
 "Cannot create pipe for SIGWINCH: %s (%d)\n"
 msgstr ""
+"\n"
+"SIGWINCH için boru oluşturulamıyor: %s (%d)\n"
 
 #, c-format
 msgid ""
 "\n"
 "Cannot configure write end of SIGWINCH pipe: %s (%d)\n"
 msgstr ""
+"\n"
+"SIGWINCH hattının yazma ucu yapılandırılamıyor:%s(%d)\n"
 
 #, c-format
 msgid ""
 "\n"
 "Cannot configure read end of SIGWINCH pipe: %s (%d)\n"
 msgstr ""
+"\n"
+"SIGWINCH hattının okuma ucu yapılandırılamıyor:%s(%d)\n"
 
 #, c-format
 msgid ""
@@ -521,6 +536,9 @@ msgstr ""
 "Alt işlemden select() ile veri okurken beklenmeyen hata oluştu:\n"
 "%s"
 
+msgid "Cannot close pipe descriptor (p == NULL)"
+msgstr "Boru tanımlayıcısı kapatılamıyor (p == NULL)"
+
 #, c-format
 msgid ""
 "Unexpected error in waitpid():\n"
@@ -551,28 +569,10 @@ msgid "Changes to file lost"
 msgstr "Değişiklikler kayıp"
 
 #, c-format
-msgid "%s is not a directory\n"
-msgstr "%s bir dizin değil\n"
-
-#, c-format
-msgid "Directory %s is not owned by you\n"
-msgstr "Dizin %s sahibi değilsiniz\n"
-
-#, c-format
-msgid "Cannot set correct permissions for directory %s\n"
-msgstr "Dizin %s için doğru yetkiler ayarlanamıyor\n"
-
-#, c-format
-msgid "Cannot create temporary directory %s: %s\n"
-msgstr "Geçici dizin %s oluşturulamıyor: %s\n"
-
-#, c-format
-msgid "Temporary files will be created in %s\n"
-msgstr "Geçici dosyalar %s içinde oluşturulacak\n"
-
-#, c-format
-msgid "Temporary files will not be created\n"
-msgstr "Geçici dosyalar oluşturulmayacak\n"
+msgid ""
+"Cannot create temporary directory %s: %s.\n"
+"Temporary files will not be created\n"
+msgstr ""
 
 msgid "Press any key to continue..."
 msgstr "Bir tuşa basınız..."
@@ -723,31 +723,13 @@ msgid ""
 "                 errdhotfocus\n"
 "   Menus:        menunormal, menuhot, menusel, menuhotsel, menuinactive\n"
 "   Popup menus:  pmenunormal, pmenusel, pmenutitle\n"
-"   Editor:       editnormal, editbold, editmarked, editwhitespace,\n"
+"   Editor:       editnormal, editbold, editmarked, editwhitespace, "
+"editnonprintable,\n"
 "                 editlinestate, editbg, editframe, editframeactive\n"
 "                 editframedrag\n"
 "   Viewer:       viewnormal,viewbold, viewunderline, viewselected\n"
 "   Help:         helpnormal, helpitalic, helpbold, helplink, helpslink\n"
 msgstr ""
-"--colors KEYWORD={FORE},{BACK},{ATTR}:KEYWORD2=...\n"
-"\n"
-"{FORE}, {BACK} ve {ATTR} kaldırılabilir, ve varsayılan kullanılacaktır\n"
-"\n"
-" Keywords:\n"
-"   Genel:       errors, disabled, reverse, gauge, header\n"
-"                 input, inputmark, inputunchanged, commandlinemark\n"
-"                 bbarhotkey, bbarbutton, statusbar\n"
-"   Dosya görüntüsü: normal, selected, marked, markselect\n"
-"   İletişim kutucukları: dnormal, dfocus, dhotnormal, dhotfocus, "
-"errdhotnormal,\n"
-"                 errdhotfocus\n"
-"   Menüler:         menunormal, menuhot, menusel, menuhotsel, menuinactive\n"
-"   Açılır pencere menüleri: pmenunormal, pmenusel, pmenutitle\n"
-"   Düzenleyici:  editnormal, editbold, editmarked, editwhitespace,\n"
-"                 editlinestate, editbg, editframe, editframeactive\n"
-"                 editframedrag\n"
-"   Görüntüleyici: viewnormal,viewbold, viewunderline, viewselected\n"
-"   Yardım:       helpnormal, helpitalic, helpbold, helplink, helpslink\n"
 
 #. TRANSLATORS: don't translate color names and attributes
 msgid ""
@@ -777,7 +759,7 @@ msgid "Color options"
 msgstr "Renk seçenekleri"
 
 msgid "[+lineno] file1[:lineno] [file2[:lineno]...]"
-msgstr ""
+msgstr "[+satırno] dosya1[:satırno] [dosya2[:satırno]...]"
 
 msgid "file"
 msgstr "dosya:"
@@ -810,11 +792,14 @@ msgstr "Uçbirim seçenekleri"
 msgid "Arguments parse error!"
 msgstr "Arguman ayrıştırma hatası!"
 
+msgid "MC is built without builtin editor."
+msgstr ""
+
 msgid "No arguments given to the viewer."
 msgstr "Görüntüleyiciye hiç bağımsız değişken verilmedi"
 
-msgid "Two files are required to envoke the diffviewer."
-msgstr "İki dosya için fark görüntüleyicisinin çalıştırılması gerekiyor."
+msgid "Two files are required to invoke the diffviewer."
+msgstr "Diffviewer'ı çalıştırmak için iki dosya gerekir."
 
 msgid "Background protocol error"
 msgstr "Artalan protokol hatası"
@@ -1199,9 +1184,10 @@ msgstr "Önce bir metin blokunu aydınlatmalısınız"
 msgid "Run sort"
 msgstr "Sıralamayı çalıştır"
 
-msgid "Enter sort options (see manpage) separated by whitespace:"
+msgid "Enter sort options (see sort(1) manpage) separated by whitespace:"
 msgstr ""
-"Sıralama seçeneklerini (man sayfasına bakınız) boşluklarla ayırarak veriniz:"
+"Boşlukla ayrılmış sıralama seçeneklerini girin (bkz. sort(1) kılavuz "
+"sayfası):"
 
 msgid "Sort"
 msgstr "Sıralama"
@@ -1617,7 +1603,7 @@ msgstr ""
 "Kullanıcı dostu bir metin düzenleyici\n"
 "Midnight Commander için yazıldı"
 
-msgid "Copyright (C) 1996-2021 the Free Software Foundation"
+msgid "Copyright (C) 1996-2024 the Free Software Foundation"
 msgstr ""
 
 msgid "About"
@@ -1785,6 +1771,8 @@ msgid ""
 "Not an xterm or Linux console;\n"
 "the subshell cannot be toggled."
 msgstr ""
+"Bir xterm veya Linux konsolu değil;\n"
+"alt kabuk değiştirilemez."
 
 msgid "Type 'exit' to return to the Midnight Commander"
 msgstr "Midnight Commander'a dönmek için 'exit' yazın"
@@ -1812,7 +1800,7 @@ msgstr "İm"
 
 #, c-format
 msgid "Permissions (octal): %o"
-msgstr ""
+msgstr "İzinler (sekizlik):%o"
 
 msgid "Chown advanced command"
 msgstr "Dosya özellikleri"
@@ -1939,7 +1927,7 @@ msgid "Skin:"
 msgstr "Tema"
 
 msgid "&Shadows"
-msgstr ""
+msgstr "&Gölgeler"
 
 msgid "Appearance"
 msgstr "Görünüm"
@@ -2154,86 +2142,85 @@ msgstr "Artalan İşleri"
 
 #, c-format
 msgid ""
-"Cannot chdir to \"%s\"\n"
+"Cannot change directory to\n"
+"%s\n"
 "%s"
 msgstr ""
-" \"%s\" dizinine geçilemedi \n"
-" %s "
 
 msgid "Secure deletion"
-msgstr ""
+msgstr "Güvenli sil"
 
 msgid "Undelete"
-msgstr ""
+msgstr "Silmeyi geri al"
 
 msgid "Synchronous updates"
-msgstr ""
+msgstr "Eşzamanlı güncellemeler"
 
 msgid "Synchronous directory updates"
-msgstr ""
+msgstr "Eşzamanlı dizin güncellemeleri"
 
 msgid "Immutable"
-msgstr ""
+msgstr "Sabit"
 
 msgid "Append only"
-msgstr ""
+msgstr "Yalnızca ekle"
 
 msgid "No dump"
-msgstr ""
+msgstr "Boşaltma yok"
 
 msgid "No update atime"
-msgstr ""
+msgstr "atime güncellemesi yok"
 
 msgid "Compress"
-msgstr ""
+msgstr "Sıkıştır"
 
 msgid "Compressed clusters"
-msgstr ""
+msgstr "Sıkıştırılmış kümeler"
 
 msgid "Compressed dirty file"
-msgstr ""
+msgstr "Sıkıştırılmış kirli dosya"
 
 msgid "Compression raw access"
-msgstr ""
+msgstr "Ham sıkıştırma erişimi"
 
 msgid "Encrypted inode"
-msgstr ""
+msgstr "Şifreli inode"
 
 msgid "Journaled data"
-msgstr ""
+msgstr "Günlüklenmiş veri"
 
 msgid "Indexed directory"
-msgstr ""
+msgstr "İndekslenmiş dizin"
 
 msgid "No tail merging"
-msgstr ""
+msgstr "Uç birleştirme yok"
 
 msgid "Top of directory hierarchies"
-msgstr ""
+msgstr "En üstteki dizin hiyerarşisi"
 
 msgid "Inode uses extents"
-msgstr ""
+msgstr "Inode uzantıları kullanır"
 
 msgid "Huge_file"
-msgstr ""
+msgstr "Büyük_dosya"
 
 msgid "No COW"
-msgstr ""
+msgstr "COW yok"
 
 msgid "Direct access for files"
-msgstr ""
+msgstr "Dosyalara doğrudan erişim"
 
 msgid "Casefolded file"
-msgstr ""
+msgstr "Kasalı dosya"
 
 msgid "Inode has inline data"
-msgstr ""
+msgstr "Inode satır içi verilere sahip"
 
 msgid "Project hierarchy"
-msgstr ""
+msgstr "Proje hiyerarşisi"
 
 msgid "Verity protected inode"
-msgstr ""
+msgstr "Verity korumalı inode"
 
 msgid "&Marked all"
 msgstr "Tü&münü seç"
@@ -2245,15 +2232,12 @@ msgid "C&lear marked"
 msgstr "İşa&retlenenleri Temizle"
 
 msgid "Chattr command"
-msgstr ""
+msgstr "Chattr komutu"
 
 #, c-format
 msgid ""
 "Cannot chattr \"%s\"\n"
 "%s"
-msgstr ""
-
-msgid "Cannot change attributes on non-local filesystems"
 msgstr ""
 
 #, c-format
@@ -2355,15 +2339,6 @@ msgstr "makina ismi (ayrıntılar için F1):"
 msgid "Files tagged, want to cd?"
 msgstr "Dosyalar işaretli, dizin değişsin mi?"
 
-msgid "Cannot change directory"
-msgstr "Dizin değiştirilemedi"
-
-msgid "Filter"
-msgstr "Süzgeç"
-
-msgid "Set expression for filtering filenames"
-msgstr "Dosya isimlerini süzmede kullanılacak ifadeyi belirtin"
-
 #, c-format
 msgid "Link %s to:"
 msgstr "%s bağı:"
@@ -2378,10 +2353,6 @@ msgstr "bağ: %s"
 #, c-format
 msgid "symlink: %s"
 msgstr "sembağ: %s"
-
-#, c-format
-msgid "Cannot chdir to \"%s\""
-msgstr "\"%s dizinine geçilemedi"
 
 msgid "View file"
 msgstr "Dosyayı görüntüle"
@@ -2511,29 +2482,30 @@ msgid "Pipe failed"
 msgstr "Boru açılamadı"
 
 #, c-format
-msgid " %s%s file error"
-msgstr " %s%s dosya hatası"
+msgid ""
+"You have an outdated %s file.\n"
+"Midnight Commander now uses %s file.\n"
+"Please copy your modifications of the old file to the new one."
+msgstr ""
 
 #, c-format
 msgid ""
-"The format of the %smc.ext file has changed with version 3.0. It seems that "
-"the installation failed. Please fetch a fresh copy from the Midnight "
-"Commander package."
+"The format of the\n"
+"%s%s\n"
+"file has changed with version 4.0.\n"
+"It seems that the installation has failed.\n"
+"Please fetch a fresh copy from the Midnight Commander package."
 msgstr ""
-"%smc.ext dosyası sürüm 3.0 ile değişti. Kurulum başarısız görünüyor. Lütfen, "
-"Midnight Commander paketinden temiz bir kopyasıyla değiştirin."
-
-#, c-format
-msgid "%s file error"
-msgstr "%s dosya hatası"
 
 #, c-format
 msgid ""
-"The format of the %s file has changed with version 3.0. You may either want "
-"to copy it from %smc.ext or use that file as an example of how to write it."
+"The format of the\n"
+"%s\n"
+"file has changed with version 4.0.\n"
+"You may either want to copy it from\n"
+"%s%s\n"
+"or use that file as an example of how to write it."
 msgstr ""
-"Sürüm 3.0 ile ~/%s dosyası değişti. İster %smc.ext dosyasını kopyalayarak "
-"ister o dosyayı örnek alarak yeniden oluşturunuz."
 
 msgid "DialogTitle|Copy"
 msgstr "DiyalogBaşlığı|Kopyala"
@@ -2739,6 +2711,18 @@ msgstr ""
 
 #, c-format
 msgid ""
+"Cannot get attributes of source file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot set attributes of target file \"%s\"\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
 "Cannot create special file \"%s\"\n"
 "%s"
 msgstr ""
@@ -2823,6 +2807,15 @@ msgstr ""
 msgid "(stalled)"
 msgstr "(durakladı)"
 
+msgid "Incomplete file was retrieved"
+msgstr ""
+
+msgid "&Keep"
+msgstr "&Koru"
+
+msgid "&Continue copy"
+msgstr ""
+
 #, c-format
 msgid ""
 "Cannot close source file \"%s\"\n"
@@ -2839,11 +2832,11 @@ msgstr ""
 "\"%s\" hedef dosyası kapatılamıyor \n"
 " %s"
 
-msgid "Incomplete file was retrieved. Keep it?"
-msgstr " Tamamlanmamış dosya alındı. Korunsun mu?"
-
-msgid "&Keep"
-msgstr "&Koru"
+#, c-format
+msgid ""
+"Cannot set attributes for target file \"%s\"\n"
+"%s"
+msgstr ""
 
 #, c-format
 msgid ""
@@ -2852,6 +2845,12 @@ msgid ""
 msgstr ""
 "\"%s\" kaynak dizini durumlanamıyor \n"
 " %s"
+
+#, c-format
+msgid ""
+"Cannot get attributes of source directory \"%s\"\n"
+"%s"
+msgstr ""
 
 #, c-format
 msgid ""
@@ -2907,8 +2906,8 @@ msgid "Con&tinue"
 msgstr "&Devam Et"
 
 #, c-format
-msgid "%d:%02d.%02d"
-msgstr "%d:%02d.%02d"
+msgid "%d:%02d:%02d"
+msgstr ""
 
 #, c-format
 msgid "ETA %s"
@@ -2963,8 +2962,8 @@ msgid "Background process: File exists"
 msgstr "Artalan süreç: Dosya var"
 
 #, c-format
-msgid "Files processed: %zu/%zu"
-msgstr "İşlenen dosyalar: %zu/%zu"
+msgid "Files processed: %zu / %zu"
+msgstr ""
 
 #, c-format
 msgid "Files processed: %zu"
@@ -2991,8 +2990,8 @@ msgid " Total: %s "
 msgstr " Toplam: %s  "
 
 #, c-format
-msgid " Total: %s/%s "
-msgstr " Toplam: %s/%s "
+msgid " Total: %s / %s "
+msgstr ""
 
 msgid "Source"
 msgstr "Kaynak"
@@ -3044,7 +3043,7 @@ msgid "&Listing format..."
 msgstr "&Listeleme biçimi..."
 
 msgid "&Sort order..."
-msgstr "&Sıralama türü..."
+msgstr ""
 
 msgid "&Filter..."
 msgstr "&Süzgeç..."
@@ -3058,8 +3057,8 @@ msgstr "FT&P bağı..."
 msgid "S&hell link..."
 msgstr "&SSH bağı..."
 
-msgid "S&FTP link..."
-msgstr "FT&P bağı..."
+msgid "SFTP li&nk..."
+msgstr ""
 
 msgid "Paneli&ze"
 msgstr "Pane&lle"
@@ -3441,8 +3440,8 @@ msgid "No space information"
 msgstr "Alan bilgileri yok"
 
 #, c-format
-msgid "Free space: %s/%s (%d%%)"
-msgstr "Boş alan: %s/%s (%d%%)"
+msgid "Free space: %s / %s (%d%%)"
+msgstr ""
 
 #, c-format
 msgid "Type:       %s"
@@ -3493,9 +3492,6 @@ msgstr "Sahibi:     %s/%s"
 #, c-format
 msgid "Links:      %d"
 msgstr "Bağlantılar:%d"
-
-msgid "Attributes: not supported"
-msgstr ""
 
 #, c-format
 msgid "Attributes: %s"
@@ -3685,6 +3681,9 @@ msgstr "Seç"
 
 msgid "Unselect"
 msgstr "Seçme"
+
+msgid "Filter"
+msgstr "Süzgeç"
 
 msgid "Do you really want to execute?"
 msgstr "Gerçekten çalıştırmak istiyor musunuz?"
@@ -3933,10 +3932,10 @@ msgstr "Kabuk hala etkin. Yine de çıkılsın mı?"
 msgid "Warning: Cannot change to %s.\n"
 msgstr "Uyarı: %s'e geçilemedi.\n"
 
-msgid "With builtin Editor and Aspell support"
+msgid "With builtin editor and aspell support"
 msgstr ""
 
-msgid "With builtin Editor"
+msgid "With builtin editor"
 msgstr ""
 
 msgid "With optional subshell support"
@@ -3986,6 +3985,10 @@ msgid "Built with ncursesw %s\n"
 msgstr ""
 
 msgid "Built with ncursesw (unknown version)"
+msgstr ""
+
+#, c-format
+msgid "Built with libssh2 %d.%d.%d\n"
 msgstr ""
 
 msgid "Virtual File Systems:"
@@ -4113,6 +4116,15 @@ msgstr ""
 "%s\n"
 "dosyasının sonu belirsiz"
 
+msgid "Inconsistent archive"
+msgstr ""
+
+#, c-format
+msgid ""
+"Cannot open %s archive\n"
+"%s"
+msgstr ""
+
 #, c-format
 msgid ""
 "Cannot open %s archive\n"
@@ -4126,67 +4138,24 @@ msgid ""
 "%s"
 msgstr ""
 
+msgid ""
+"EXTFS virtual file system:\n"
+"wrong file name"
+msgstr ""
+
+msgid ""
+"EXTFS virtual file system:\n"
+"wrong archive name"
+msgstr ""
+
+msgid ""
+"EXTFS virtual file system:\n"
+"cannot build command"
+msgstr ""
+
 #, c-format
 msgid "Warning: cannot open %s directory\n"
 msgstr "Uyarı: %s dizini açılamadı\n"
-
-#, c-format
-msgid "fish: Disconnecting from %s"
-msgstr "fish: %s bağlantısı kapanıyor"
-
-msgid "fish: Waiting for initial line..."
-msgstr "fish: Kendi satırı için bekliyor..."
-
-msgid "Sorry, we cannot do password authenticated connections for now."
-msgstr ""
-"Üzgünüm, şimdilik parola ile kimlik bildirimi yapılan bağlantılar yapılamıyor"
-
-#, c-format
-msgid "fish: Password is required for %s"
-msgstr "fish: %s için parola gerekli"
-
-msgid "fish: Sending password..."
-msgstr "fish: Parola gönderimi..."
-
-msgid "fish: Sending initial line..."
-msgstr "fish: Satır gönderimi..."
-
-msgid "fish: Handshaking version..."
-msgstr "fish: Sürüm anlaşması..."
-
-msgid "fish: Getting host info..."
-msgstr "fish: İstemci bilgisi alınıyor"
-
-#, c-format
-msgid "fish: Reading directory %s..."
-msgstr "fish: %s dizini okunuyor..."
-
-#, c-format
-msgid "%s: done."
-msgstr "%s: bitti."
-
-#, c-format
-msgid "%s: failure"
-msgstr "%s: başarısız"
-
-#, c-format
-msgid "fish: store %s: sending command..."
-msgstr "fish: %s kaydet: komut gönderiliyor..."
-
-msgid "fish: Local read failed, sending zeros"
-msgstr "fish: Yerel okuma başarısız, sıfırlar gönderiliyor"
-
-msgid "fish: storing file"
-msgstr "fish: dosya saklama"
-
-msgid "Aborting transfer..."
-msgstr "Aktarım durduruluyor..."
-
-msgid "Error reported after abort."
-msgstr "Durdurma sonra hata raporlandı."
-
-msgid "Aborted transfer would be successful."
-msgstr "Aktarımın durdurulması başarıldı."
 
 #, c-format
 msgid "ftpfs: Disconnecting from %s"
@@ -4241,6 +4210,21 @@ msgstr "ftpfs: Sunucuya bağlantı başarısız: %s"
 msgid "Waiting to retry... %d (Control-G to cancel)"
 msgstr "Yinelemek için bekleniyor... %d (iptal etmek için Ctrl-G)"
 
+#, c-format
+msgid "ftpfs: could not make address-to-name translation: %s"
+msgstr ""
+
+#, c-format
+msgid "ftpfs: try reconnect to server, attempt %u"
+msgstr ""
+
+#, c-format
+msgid "ftpfs: could not get socket name: %s"
+msgstr ""
+
+msgid "ftpfs: could not reconnect to server"
+msgstr ""
+
 msgid "ftpfs: invalid address family"
 msgstr "ftpfs: gereksiz adres ailesi"
 
@@ -4282,6 +4266,14 @@ msgstr "(önce chdir)"
 
 msgid "ftpfs: failed; nowhere to fallback to"
 msgstr "ftpfs: başarısız; son çare yok"
+
+#, c-format
+msgid "%s: failure"
+msgstr "%s: başarısız"
+
+#, c-format
+msgid "%s: done."
+msgstr "%s: bitti."
 
 msgid "ftpfs: storing file"
 msgstr "ftpfs: dosya saklama"
@@ -4423,12 +4415,51 @@ msgid "sftp: Listing done."
 msgstr "sftp: Listeleme yapıldı."
 
 #, c-format
-msgid ""
-"Cannot open tar archive\n"
-"%s"
+msgid "shell: Disconnecting from %s"
 msgstr ""
-"%s\n"
-"tar arşivini açılamadı"
+
+msgid "shell: Waiting for initial line..."
+msgstr ""
+
+msgid "Sorry, we cannot do password authenticated connections for now."
+msgstr ""
+"Üzgünüm, şimdilik parola ile kimlik bildirimi yapılan bağlantılar yapılamıyor"
+
+#, c-format
+msgid "shell: Password is required for %s"
+msgstr ""
+
+msgid "shell: Sending password..."
+msgstr ""
+
+msgid "shell: Sending initial line..."
+msgstr ""
+
+msgid "shell: Getting host info..."
+msgstr ""
+
+#, c-format
+msgid "shell: Reading directory %s..."
+msgstr ""
+
+#, c-format
+msgid "shell: store %s: sending command..."
+msgstr ""
+
+msgid "shell: Local read failed, sending zeros"
+msgstr ""
+
+msgid "shell: storing file"
+msgstr ""
+
+msgid "Aborting transfer..."
+msgstr "Aktarım durduruluyor..."
+
+msgid "Error reported after abort."
+msgstr "Durdurma sonra hata raporlandı."
+
+msgid "Aborted transfer would be successful."
+msgstr "Aktarımın durdurulması başarıldı."
 
 msgid "Inconsistent tar archive"
 msgstr "Tar arşivi düzgün değil"
@@ -4438,11 +4469,20 @@ msgstr "Arşiv dosyasında dosya sonu belirsiz"
 
 #, c-format
 msgid ""
-"%s\n"
-"doesn't look like a tar archive."
+"Cannot open tar archive\n"
+"%s"
 msgstr ""
 "%s\n"
-"tar arşivi gibi görünmüyor."
+"tar arşivini açılamadı"
+
+#, c-format
+msgid ""
+"%s\n"
+"doesn't look like a tar archive"
+msgstr ""
+
+msgid "tar: mc_lseek not stopped at a record boundary"
+msgstr ""
 
 msgid "undelfs: error"
 msgstr "undelfs: hata"
@@ -4635,55 +4675,3 @@ msgstr "Başından devam edilsin mi?"
 
 msgid "Cannot fetch a local copy of /ftp://some.host/editme.txt"
 msgstr " /ftp://some.host/editme.txt 'in yerel kopyası alınamadı"
-
-#~ msgid "Set debug level"
-#~ msgstr "Hata ayıklama seviyesini ayarla"
-
-#~ msgid "<integer>"
-#~ msgstr "<integer>"
-
-#, c-format
-#~ msgid "Password for \\\\%s\\%s"
-#~ msgstr "\\\\%s\\%s için parola"
-
-#~ msgid "Domain:"
-#~ msgstr "Alan adı: "
-
-#~ msgid "Username:"
-#~ msgstr "Kullanıcı: "
-
-#~ msgid "SMB authentication"
-#~ msgstr "SMB kimlik doğrulama"
-
-#~ msgid "SMB link to machine"
-#~ msgstr "makinaya SMB bağ"
-
-#~ msgid "SM&B link..."
-#~ msgstr "S&MB bağı..."
-
-#, c-format
-#~ msgid "reconnect to %s failed"
-#~ msgstr "%s ile tekrar bağlantı kurulamadı"
-
-#~ msgid "Authentication failed"
-#~ msgstr "Kimlik denetimi başarısız oldu"
-
-#, c-format
-#~ msgid "Error %s creating directory %s"
-#~ msgstr "%s %s dizinini yaratıyor"
-
-#, c-format
-#~ msgid "Error %s removing directory %s"
-#~ msgstr "%s %s dizinini siliyor"
-
-#, c-format
-#~ msgid "%s opening remote file %s"
-#~ msgstr "%s karşıdaki %s dosyasını açıyor"
-
-#, c-format
-#~ msgid "%s removing remote file %s"
-#~ msgstr "%s karşıdaki %s dosyasını siliyor"
-
-#, c-format
-#~ msgid "%s renaming files\n"
-#~ msgstr "%s dosyaları yeniden adlandırılıyor\n"

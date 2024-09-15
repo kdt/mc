@@ -1,7 +1,7 @@
 /*
    Configure module for the Midnight Commander
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    This file is part of the Midnight Commander.
@@ -46,7 +46,7 @@
 /* --------------------------------------------------------------------------------------------- */
 
 gchar **
-mc_config_get_groups (const mc_config_t * mc_config, gsize * len)
+mc_config_get_groups (const mc_config_t *mc_config, gsize *len)
 {
     gchar **ret = NULL;
 
@@ -66,7 +66,7 @@ mc_config_get_groups (const mc_config_t * mc_config, gsize * len)
 /* --------------------------------------------------------------------------------------------- */
 
 gchar **
-mc_config_get_keys (const mc_config_t * mc_config, const gchar * group, gsize * len)
+mc_config_get_keys (const mc_config_t *mc_config, const gchar *group, gsize *len)
 {
     gchar **ret = NULL;
 
@@ -86,27 +86,15 @@ mc_config_get_keys (const mc_config_t * mc_config, const gchar * group, gsize * 
 /* --------------------------------------------------------------------------------------------- */
 
 gchar *
-mc_config_get_string (mc_config_t * mc_config, const gchar * group,
-                      const gchar * param, const gchar * def)
+mc_config_get_string (mc_config_t *mc_config, const gchar *group,
+                      const gchar *param, const gchar *def)
 {
     GIConv conv;
     GString *buffer;
     gchar *ret;
     estr_t conv_res;
 
-    if (mc_config == NULL || group == NULL || param == NULL)
-        return g_strdup (def);
-
-    if (!mc_config_has_param (mc_config, group, param))
-    {
-        if (def != NULL)
-            mc_config_set_string (mc_config, group, param, def);
-        return g_strdup (def);
-    }
-
-    ret = g_key_file_get_string (mc_config->handle, group, param, NULL);
-    if (ret == NULL)
-        ret = g_strdup (def);
+    ret = mc_config_get_string_raw (mc_config, group, param, def);
 
     if (mc_global.utf8_display)
         return ret;
@@ -133,8 +121,8 @@ mc_config_get_string (mc_config_t * mc_config, const gchar * group,
 /* --------------------------------------------------------------------------------------------- */
 
 gchar *
-mc_config_get_string_raw (mc_config_t * mc_config, const gchar * group,
-                          const gchar * param, const gchar * def)
+mc_config_get_string_raw (mc_config_t *mc_config, const gchar *group,
+                          const gchar *param, const gchar *def)
 {
     gchar *ret;
 
@@ -156,7 +144,7 @@ mc_config_get_string_raw (mc_config_t * mc_config, const gchar * group,
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mc_config_get_bool (mc_config_t * mc_config, const gchar * group, const gchar * param, gboolean def)
+mc_config_get_bool (mc_config_t *mc_config, const gchar *group, const gchar *param, gboolean def)
 {
     if (mc_config == NULL || group == NULL || param == NULL)
         return def;
@@ -173,7 +161,7 @@ mc_config_get_bool (mc_config_t * mc_config, const gchar * group, const gchar * 
 /* --------------------------------------------------------------------------------------------- */
 
 int
-mc_config_get_int (mc_config_t * mc_config, const gchar * group, const gchar * param, int def)
+mc_config_get_int (mc_config_t *mc_config, const gchar *group, const gchar *param, int def)
 {
     if (mc_config == NULL || group == NULL || param == NULL)
         return def;
@@ -190,8 +178,8 @@ mc_config_get_int (mc_config_t * mc_config, const gchar * group, const gchar * p
 /* --------------------------------------------------------------------------------------------- */
 
 gchar **
-mc_config_get_string_list (mc_config_t * mc_config, const gchar * group,
-                           const gchar * param, gsize * length)
+mc_config_get_string_list (mc_config_t *mc_config, const gchar *group,
+                           const gchar *param, gsize *length)
 {
     if (mc_config == NULL || group == NULL || param == NULL)
         return NULL;
@@ -202,8 +190,8 @@ mc_config_get_string_list (mc_config_t * mc_config, const gchar * group,
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean *
-mc_config_get_bool_list (mc_config_t * mc_config, const gchar * group,
-                         const gchar * param, gsize * length)
+mc_config_get_bool_list (mc_config_t *mc_config, const gchar *group,
+                         const gchar *param, gsize *length)
 {
     if (mc_config == NULL || group == NULL || param == NULL)
         return NULL;
@@ -214,8 +202,8 @@ mc_config_get_bool_list (mc_config_t * mc_config, const gchar * group,
 /* --------------------------------------------------------------------------------------------- */
 
 int *
-mc_config_get_int_list (mc_config_t * mc_config, const gchar * group,
-                        const gchar * param, gsize * length)
+mc_config_get_int_list (mc_config_t *mc_config, const gchar *group,
+                        const gchar *param, gsize *length)
 {
     if (mc_config == NULL || group == NULL || param == NULL)
         return NULL;

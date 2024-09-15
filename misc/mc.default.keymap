@@ -50,7 +50,7 @@ ScreenList = alt-prime
 # EditExtensionsFile =
 # EditFileHighlightFile =
 # Filter =
-# ConnectFish =
+# ConnectShell =
 # ConnectFtp =
 # Undelete =
 EditorViewerHistory = alt-shift-e
@@ -127,6 +127,7 @@ Bottom = alt-gt; end; c1
 # SortByExt =
 # SortBySize =
 # SortByMTime =
+# Filter =
 # ScrollLeft =
 # ScrollRight =
 

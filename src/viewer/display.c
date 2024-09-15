@@ -2,7 +2,7 @@
    Internal file viewer for the Midnight Commander
    Function for whow info on display
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -14,7 +14,7 @@
    Pavel Machek, 1998
    Roland Illig <roland.illig@gmx.de>, 2004, 2005
    Slava Zanko <slavazanko@google.com>, 2009
-   Andrew Borodin <aborodin@vmail.ru>, 2009, 2013
+   Andrew Borodin <aborodin@vmail.ru>, 2009-2022
    Ilia Maslakov <il.smind@gmail.com>, 2009, 2010
 
    This file is part of the Midnight Commander.
@@ -60,6 +60,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* If set, show a ruler */
@@ -70,20 +72,21 @@ static enum ruler_type
     RULER_BOTTOM
 } ruler = RULER_NONE;
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
 /** Define labels and handlers for functional keys */
 
 static void
-mcview_set_buttonbar (WView * view)
+mcview_set_buttonbar (WView *view)
 {
     Widget *w = WIDGET (view);
     WDialog *h = DIALOG (w->owner);
     WButtonBar *b;
     const global_keymap_t *keymap = view->mode_flags.hex ? view->hex_keymap : w->keymap;
 
-    b = find_buttonbar (h);
+    b = buttonbar_find (h);
     buttonbar_set_label (b, 1, Q_ ("ButtonBar|Help"), keymap, w);
 
     if (view->mode_flags.hex)
@@ -125,16 +128,17 @@ mcview_set_buttonbar (WView * view)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-mcview_display_percent (WView * view, off_t p)
+mcview_display_percent (WView *view, off_t p)
 {
     int percent;
 
     percent = mcview_calc_percent (view, p);
     if (percent >= 0)
     {
-        const screen_dimen top = view->status_area.top;
-        const screen_dimen right = view->status_area.left + view->status_area.width;
+        int top = view->status_area.y;
+        int right;
 
+        right = view->status_area.x + view->status_area.cols;
         widget_gotoyx (view, top, right - 4);
         tty_printf ("%3d%%", percent);
         /* avoid cursor wrapping in NCurses-base MC */
@@ -145,28 +149,25 @@ mcview_display_percent (WView * view, off_t p)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-mcview_display_status (WView * view)
+mcview_display_status (WView *view)
 {
-    const screen_dimen top = view->status_area.top;
-    const screen_dimen left = view->status_area.left;
-    const screen_dimen width = view->status_area.width;
-    const screen_dimen height = view->status_area.height;
+    const WRect *r = &view->status_area;
     const char *file_label;
 
-    if (height < 1)
+    if (r->lines < 1)
         return;
 
     tty_setcolor (STATUSBAR_COLOR);
-    tty_draw_hline (WIDGET (view)->y + top, WIDGET (view)->x + left, ' ', width);
+    tty_draw_hline (WIDGET (view)->rect.y + r->y, WIDGET (view)->rect.x + r->x, ' ', r->cols);
 
     file_label =
         view->filename_vpath != NULL ?
         vfs_path_get_last_path_str (view->filename_vpath) : view->command != NULL ?
         view->command : "";
 
-    if (width > 40)
+    if (r->cols > 40)
     {
-        widget_gotoyx (view, top, width - 32);
+        widget_gotoyx (view, r->y, r->cols - 32);
         if (view->mode_flags.hex)
             tty_printf ("0x%08" PRIxMAX, (uintmax_t) view->hex_cursor);
         else
@@ -184,12 +185,12 @@ mcview_display_status (WView * view)
                         "");
         }
     }
-    widget_gotoyx (view, top, left);
-    if (width > 40)
-        tty_print_string (str_fit_to_term (file_label, width - 34, J_LEFT_FIT));
+    widget_gotoyx (view, r->y, r->x);
+    if (r->cols > 40)
+        tty_print_string (str_fit_to_term (file_label, r->cols - 34, J_LEFT_FIT));
     else
-        tty_print_string (str_fit_to_term (file_label, width - 5, J_LEFT_FIT));
-    if (width > 26)
+        tty_print_string (str_fit_to_term (file_label, r->cols - 5, J_LEFT_FIT));
+    if (r->cols > 26)
         mcview_display_percent (view, view->mode_flags.hex ? view->hex_cursor : view->dpy_end);
 }
 
@@ -198,7 +199,7 @@ mcview_display_status (WView * view)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_update (WView * view)
+mcview_update (WView *view)
 {
     static int dirt_limit = 1;
 
@@ -206,7 +207,7 @@ mcview_update (WView * view)
     {
         view->dpy_bbar_dirty = FALSE;
         mcview_set_buttonbar (view);
-        widget_draw (WIDGET (find_buttonbar (DIALOG (WIDGET (view)->owner))));
+        widget_draw (WIDGET (buttonbar_find (DIALOG (WIDGET (view)->owner))));
     }
 
     if (view->dirty > dirt_limit)
@@ -244,7 +245,7 @@ mcview_update (WView * view)
 /** Displays as much data from view->dpy_start as fits on the screen */
 
 void
-mcview_display (WView * view)
+mcview_display (WView *view)
 {
     if (view->mode_flags.hex)
         mcview_display_hex (view);
@@ -256,20 +257,20 @@ mcview_display (WView * view)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_compute_areas (WView * view)
+mcview_compute_areas (WView *view)
 {
-    struct area view_area;
-    screen_dimen height, rest, y;
+    WRect view_area;
+    int height, rest, y;
 
     /* The viewer is surrounded by a frame of size view->dpy_frame_size.
      * Inside that frame, there are: The status line (at the top),
      * the data area and an optional ruler, which is shown above or
      * below the data area. */
 
-    view_area.top = view->dpy_frame_size;
-    view_area.left = view->dpy_frame_size;
-    view_area.height = DOZ ((screen_dimen) WIDGET (view)->lines, 2 * view->dpy_frame_size);
-    view_area.width = DOZ ((screen_dimen) WIDGET (view)->cols, 2 * view->dpy_frame_size);
+    view_area.y = view->dpy_frame_size;
+    view_area.x = view->dpy_frame_size;
+    view_area.lines = DOZ (WIDGET (view)->rect.lines, 2 * view->dpy_frame_size);
+    view_area.cols = DOZ (WIDGET (view)->rect.cols, 2 * view->dpy_frame_size);
 
     /* Most coordinates of the areas equal those of the whole viewer */
     view->status_area = view_area;
@@ -277,44 +278,44 @@ mcview_compute_areas (WView * view)
     view->data_area = view_area;
 
     /* Compute the heights of the areas */
-    rest = view_area.height;
+    rest = view_area.lines;
 
     height = MIN (rest, 1);
-    view->status_area.height = height;
+    view->status_area.lines = height;
     rest -= height;
 
     height = (ruler == RULER_NONE || view->mode_flags.hex) ? 0 : 2;
     height = MIN (rest, height);
-    view->ruler_area.height = height;
+    view->ruler_area.lines = height;
     rest -= height;
 
-    view->data_area.height = rest;
+    view->data_area.lines = rest;
 
     /* Compute the position of the areas */
-    y = view_area.top;
+    y = view_area.y;
 
-    view->status_area.top = y;
-    y += view->status_area.height;
+    view->status_area.y = y;
+    y += view->status_area.lines;
 
     if (ruler == RULER_TOP)
     {
-        view->ruler_area.top = y;
-        y += view->ruler_area.height;
+        view->ruler_area.y = y;
+        y += view->ruler_area.lines;
     }
 
-    view->data_area.top = y;
-    y += view->data_area.height;
+    view->data_area.y = y;
+    y += view->data_area.lines;
 
     if (ruler == RULER_BOTTOM)
-        view->ruler_area.top = y;
+        view->ruler_area.y = y;
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_update_bytes_per_line (WView * view)
+mcview_update_bytes_per_line (WView *view)
 {
-    const screen_dimen cols = view->data_area.width;
+    int cols = view->data_area.cols;
     int bytes;
 
     if (cols < 9 + 17)
@@ -331,10 +332,9 @@ mcview_update_bytes_per_line (WView * view)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_display_toggle_ruler (WView * view)
+mcview_display_toggle_ruler (WView *view)
 {
-    static const enum ruler_type next[3] =
-    {
+    static const enum ruler_type next[3] = {
         RULER_TOP,
         RULER_BOTTOM,
         RULER_NONE
@@ -350,52 +350,49 @@ mcview_display_toggle_ruler (WView * view)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_display_clean (WView * view)
+mcview_display_clean (WView *view)
 {
     Widget *w = WIDGET (view);
 
     tty_setcolor (VIEW_NORMAL_COLOR);
     widget_erase (w);
     if (view->dpy_frame_size != 0)
-        tty_draw_box (w->y, w->x, w->lines, w->cols, FALSE);
+        tty_draw_box (w->rect.y, w->rect.x, w->rect.lines, w->rect.cols, FALSE);
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mcview_display_ruler (WView * view)
+mcview_display_ruler (WView *view)
 {
     static const char ruler_chars[] = "|----*----";
-    const screen_dimen top = view->ruler_area.top;
-    const screen_dimen left = view->ruler_area.left;
-    const screen_dimen width = view->ruler_area.width;
-    const screen_dimen height = view->ruler_area.height;
-    const screen_dimen line_row = (ruler == RULER_TOP) ? 0 : 1;
-    const screen_dimen nums_row = (ruler == RULER_TOP) ? 1 : 0;
+    const WRect *r = &view->ruler_area;
+    const int line_row = (ruler == RULER_TOP) ? 0 : 1;
+    const int nums_row = (ruler == RULER_TOP) ? 1 : 0;
 
     char r_buff[10];
     off_t cl;
-    screen_dimen c;
+    int c;
 
-    if (ruler == RULER_NONE || height < 1)
+    if (ruler == RULER_NONE || r->lines < 1)
         return;
 
     tty_setcolor (VIEW_BOLD_COLOR);
-    for (c = 0; c < width; c++)
+    for (c = 0; c < r->cols; c++)
     {
         cl = view->dpy_text_column + c;
-        if (line_row < height)
+        if (line_row < r->lines)
         {
-            widget_gotoyx (view, top + line_row, left + c);
+            widget_gotoyx (view, r->y + line_row, r->x + c);
             tty_print_char (ruler_chars[cl % 10]);
         }
 
         if ((cl != 0) && (cl % 10) == 0)
         {
             g_snprintf (r_buff, sizeof (r_buff), "%" PRIuMAX, (uintmax_t) cl);
-            if (nums_row < height)
+            if (nums_row < r->lines)
             {
-                widget_gotoyx (view, top + nums_row, left + c - 1);
+                widget_gotoyx (view, r->y + nums_row, r->x + c - 1);
                 tty_print_string (r_buff);
             }
         }

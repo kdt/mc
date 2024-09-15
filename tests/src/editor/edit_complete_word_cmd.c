@@ -1,12 +1,12 @@
 /*
    src/editor - tests for edit_complete_word_cmd() function
 
-   Copyright (C) 2013-2021
+   Copyright (C) 2013-2024
    Free Software Foundation, Inc.
 
    Written by:
    Slava Zanko <slavazanko@gmail.com>, 2013
-   Andrew Borodin <aborodin@vmail.ru>, 2021
+   Andrew Borodin <aborodin@vmail.ru>, 2021-2022
 
    This file is part of the Midnight Commander.
 
@@ -56,7 +56,7 @@ mc_refresh (void)
 /* --------------------------------------------------------------------------------------------- */
 /* @Mock */
 void
-edit_load_syntax (WEdit * _edit, GPtrArray * _pnames, const char *_type)
+edit_load_syntax (WEdit *_edit, GPtrArray *_pnames, const char *_type)
 {
     (void) _edit;
     (void) _pnames;
@@ -67,7 +67,7 @@ edit_load_syntax (WEdit * _edit, GPtrArray * _pnames, const char *_type)
 
 /* @Mock */
 int
-edit_get_syntax_color (WEdit * _edit, off_t _byte_index)
+edit_get_syntax_color (WEdit *_edit, off_t _byte_index)
 {
     (void) _edit;
     (void) _byte_index;
@@ -79,7 +79,7 @@ edit_get_syntax_color (WEdit * _edit, off_t _byte_index)
 
 /* @Mock */
 gboolean
-edit_load_macro_cmd (WEdit * _edit)
+edit_load_macro_cmd (WEdit *_edit)
 {
     (void) _edit;
 
@@ -100,7 +100,7 @@ static char *edit_completion_dialog_show__return_value;
 
 /* @Mock */
 char *
-edit_completion_dialog_show (const WEdit * edit, GQueue * compl, int max_width)
+edit_completion_dialog_show (const WEdit *edit, GQueue *compl, int max_width)
 {
 
     edit_completion_dialog_show__edit = edit;
@@ -151,6 +151,9 @@ edit_completion_dialog_show__deinit (void)
 static void
 my_setup (void)
 {
+    WRect r;
+    edit_arg_t arg;
+
     str_init_strings (NULL);
 
     vfs_init ();
@@ -166,9 +169,12 @@ my_setup (void)
     mc_config_set_bool (mc_global.main_config, CONFIG_APP_SECTION,
                         "editor_wordcompletion_collect_all_files", TRUE);
 
-    option_filesize_threshold = (char *) "64M";
+    edit_options.filesize_threshold = (char *) "64M";
 
-    test_edit = edit_init (NULL, 0, 0, 24, 80, vfs_path_from_str ("test-data.txt"), 1);
+    rect_init (&r, 0, 0, 24, 80);
+    arg.file_vpath = vfs_path_from_str ("test-data.txt");
+    arg.line_number = 1;
+    test_edit = edit_init (NULL, &r, &arg);
     memset (&owner, 0, sizeof (owner));
     group_add_widget (&owner, WIDGET (test_edit));
     edit_completion_dialog_show__init ();
@@ -268,9 +274,9 @@ START_PARAMETRIZED_TEST (test_autocomplete, test_autocomplete_ds)
 
     /* then */
     mctest_assert_ptr_eq (edit_completion_dialog_show__edit, test_edit);
-    mctest_assert_int_eq (g_queue_get_length (edit_completion_dialog_show__compl),
-                          data->expected_compl_word_count);
-    mctest_assert_int_eq (edit_completion_dialog_show__max_width, data->expected_max_width);
+    ck_assert_int_eq (g_queue_get_length (edit_completion_dialog_show__compl),
+                      data->expected_compl_word_count);
+    ck_assert_int_eq (edit_completion_dialog_show__max_width, data->expected_max_width);
 
     {
         off_t i = 0;

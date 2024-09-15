@@ -1,7 +1,7 @@
 /*
    Configure module for the Midnight Commander
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    This file is part of the Midnight Commander.
@@ -39,6 +39,8 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* --------------------------------------------------------------------------------------------- */
@@ -46,7 +48,7 @@
 /* --------------------------------------------------------------------------------------------- */
 
 static gboolean
-mc_config_new_or_override_file (mc_config_t * mc_config, const gchar * ini_path, GError ** mcerror)
+mc_config_new_or_override_file (mc_config_t *mc_config, const gchar *ini_path, GError **mcerror)
 {
     gchar *data, *written_data;
     gsize len, total_written;
@@ -102,7 +104,7 @@ mc_config_new_or_override_file (mc_config_t * mc_config, const gchar * ini_path,
 /* --------------------------------------------------------------------------------------------- */
 
 mc_config_t *
-mc_config_init (const gchar * ini_path, gboolean read_only)
+mc_config_init (const gchar *ini_path, gboolean read_only)
 {
     mc_config_t *mc_config;
     struct stat st;
@@ -146,7 +148,7 @@ mc_config_init (const gchar * ini_path, gboolean read_only)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-mc_config_deinit (mc_config_t * mc_config)
+mc_config_deinit (mc_config_t *mc_config)
 {
     if (mc_config != NULL)
     {
@@ -159,18 +161,24 @@ mc_config_deinit (mc_config_t * mc_config)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mc_config_has_param (const mc_config_t * mc_config, const char *group, const gchar * param)
+mc_config_has_param (const mc_config_t *mc_config, const char *group, const gchar *param)
 {
-    if (mc_config == NULL || group == NULL || param == NULL)
-        return FALSE;
+    char *value;
+    gboolean ret;
 
-    return g_key_file_has_key (mc_config->handle, group, param, NULL);
+    g_return_val_if_fail (mc_config != NULL, FALSE);
+
+    value = g_key_file_get_value (mc_config->handle, group, param, NULL);
+    ret = value != NULL;
+    g_free (value);
+
+    return ret;
 }
 
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mc_config_has_group (mc_config_t * mc_config, const char *group)
+mc_config_has_group (mc_config_t *mc_config, const char *group)
 {
     if (mc_config == NULL || group == NULL)
         return FALSE;
@@ -181,7 +189,7 @@ mc_config_has_group (mc_config_t * mc_config, const char *group)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mc_config_del_key (mc_config_t * mc_config, const char *group, const gchar * param)
+mc_config_del_key (mc_config_t *mc_config, const char *group, const gchar *param)
 {
     if (mc_config == NULL || group == NULL || param == NULL)
         return FALSE;
@@ -192,7 +200,7 @@ mc_config_del_key (mc_config_t * mc_config, const char *group, const gchar * par
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mc_config_del_group (mc_config_t * mc_config, const char *group)
+mc_config_del_group (mc_config_t *mc_config, const char *group)
 {
     if (mc_config == NULL || group == NULL)
         return FALSE;
@@ -203,7 +211,7 @@ mc_config_del_group (mc_config_t * mc_config, const char *group)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mc_config_read_file (mc_config_t * mc_config, const gchar * ini_path, gboolean read_only,
+mc_config_read_file (mc_config_t *mc_config, const gchar *ini_path, gboolean read_only,
                      gboolean remove_empty)
 {
     mc_config_t *tmp_config;
@@ -253,7 +261,7 @@ mc_config_read_file (mc_config_t * mc_config, const gchar * ini_path, gboolean r
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mc_config_save_file (mc_config_t * mc_config, GError ** mcerror)
+mc_config_save_file (mc_config_t *mc_config, GError **mcerror)
 {
     mc_return_val_if_error (mcerror, FALSE);
 
@@ -266,7 +274,7 @@ mc_config_save_file (mc_config_t * mc_config, GError ** mcerror)
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mc_config_save_to_file (mc_config_t * mc_config, const gchar * ini_path, GError ** mcerror)
+mc_config_save_to_file (mc_config_t *mc_config, const gchar *ini_path, GError **mcerror)
 {
     mc_return_val_if_error (mcerror, FALSE);
 

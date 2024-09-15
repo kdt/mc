@@ -3,7 +3,7 @@
 
    Copyright (C) 2001 Walery Studennikov <despair@sama.ru>
 
-   Copyright (C) 2011-2021
+   Copyright (C) 2011-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -50,11 +50,13 @@
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
-
 
 static unsigned char
 get_hotkey (int n)
@@ -75,15 +77,15 @@ get_hotkey (int n)
 int
 select_charset (int center_y, int center_x, int current_charset, gboolean seldisplay)
 {
+    Listbox *listbox;
     size_t i;
     int listbox_result;
     char buffer[255];
 
     /* Create listbox */
-    Listbox *listbox = create_listbox_window_centered (center_y, center_x,
-                                                       codepages->len + 1, ENTRY_LEN + 2,
-                                                       _("Choose codepage"),
-                                                       "[Codepages Translation]");
+    listbox =
+        listbox_window_centered_new (center_y, center_x, codepages->len + 1, ENTRY_LEN + 2,
+                                     _("Choose codepage"), "[Codepages Translation]");
 
     if (!seldisplay)
         LISTBOX_APPEND_TEXT (listbox, '-', _("-  < No translation >"), NULL, FALSE);
@@ -91,50 +93,47 @@ select_charset (int center_y, int center_x, int current_charset, gboolean seldis
     /* insert all the items found */
     for (i = 0; i < codepages->len; i++)
     {
-        const char *name = ((codepage_desc *) g_ptr_array_index (codepages, i))->name;
+        const char *name;
+
+        name = ((codepage_desc *) g_ptr_array_index (codepages, i))->name;
         g_snprintf (buffer, sizeof (buffer), "%c  %s", get_hotkey (i), name);
         LISTBOX_APPEND_TEXT (listbox, get_hotkey (i), buffer, NULL, FALSE);
     }
+
     if (seldisplay)
     {
-        unsigned char hotkey = get_hotkey (codepages->len);
+        unsigned char hotkey;
+
+        hotkey = get_hotkey (codepages->len);
         g_snprintf (buffer, sizeof (buffer), "%c  %s", hotkey, _("Other 8 bit"));
         LISTBOX_APPEND_TEXT (listbox, hotkey, buffer, NULL, FALSE);
     }
 
     /* Select the default entry */
-    i = (seldisplay)
+    i = seldisplay
         ? ((current_charset < 0) ? codepages->len : (size_t) current_charset)
         : ((size_t) current_charset + 1);
 
-    listbox_select_entry (listbox->list, i);
+    listbox_set_current (listbox->list, i);
 
-    listbox_result = run_listbox (listbox);
+    listbox_result = listbox_run (listbox);
 
     if (listbox_result < 0)
-    {
         /* Cancel dialog */
         return SELECT_CHARSET_CANCEL;
-    }
-    else
-    {
-        /* some charset has been selected */
-        if (seldisplay)
-        {
-            /* charset list is finished with "Other 8 bit" item */
-            return (listbox_result >= (int) codepages->len)
-                ? SELECT_CHARSET_OTHER_8BIT : listbox_result;
-        }
-        else
-        {
-            /* charset list is began with "-  < No translation >" item */
-            return (listbox_result - 1);
-        }
-    }
+
+    /* some charset has been selected */
+    if (seldisplay)
+        /* charset list is finished with "Other 8 bit" item */
+        return (listbox_result >=
+                (int) codepages->len) ? SELECT_CHARSET_OTHER_8BIT : listbox_result;
+
+    /* charset list is began with "-  < No translation >" item */
+    return (listbox_result - 1);
 }
 
-
 /* --------------------------------------------------------------------------------------------- */
+
 /** Set codepage */
 gboolean
 do_set_codepage (int codepage)
@@ -158,8 +157,8 @@ do_set_codepage (int codepage)
 }
 
 /* --------------------------------------------------------------------------------------------- */
-/** Show menu selecting codepage */
 
+/** Show menu selecting codepage */
 gboolean
 do_select_codepage (void)
 {

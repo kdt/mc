@@ -2,7 +2,7 @@
    Internal file viewer for the Midnight Commander
    Interface functions
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc
 
    Written by:
@@ -14,7 +14,7 @@
    Pavel Machek, 1998
    Roland Illig <roland.illig@gmx.de>, 2004, 2005
    Slava Zanko <slavazanko@google.com>, 2009, 2013
-   Andrew Borodin <aborodin@vmail.ru>, 2009, 2013
+   Andrew Borodin <aborodin@vmail.ru>, 2009-2022
    Ilia Maslakov <il.smind@gmail.com>, 2009
 
    This file is part of the Midnight Commander.
@@ -79,6 +79,8 @@ char *mcview_show_eof = NULL;
 
 /*** file scope type declarations ****************************************************************/
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 /* --------------------------------------------------------------------------------------------- */
@@ -86,9 +88,10 @@ char *mcview_show_eof = NULL;
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-mcview_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
+mcview_mouse_callback (Widget *w, mouse_msg_t msg, mouse_event_t *event)
 {
     WView *view = (WView *) w;
+    const WRect *r = &view->data_area;
     gboolean ok = TRUE;
 
     switch (msg)
@@ -96,7 +99,7 @@ mcview_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
     case MSG_MOUSE_DOWN:
         if (mcview_is_in_panel (view))
         {
-            if (event->y == WIDGET (w->owner)->y)
+            if (event->y == WIDGET (w->owner)->rect.y)
             {
                 /* return MOU_UNHANDLED */
                 event->result.abort = TRUE;
@@ -117,16 +120,16 @@ mcview_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
         if (!view->mode_flags.wrap)
         {
             /* Scrolling left and right */
-            screen_dimen x;
+            int x;
 
             x = event->x + 1;   /* FIXME */
 
-            if (x < view->data_area.width * 1 / 4)
+            if (x < r->cols * 1 / 4)
             {
                 mcview_move_left (view, 1);
                 event->result.repeat = msg == MSG_MOUSE_DOWN;
             }
-            else if (x < view->data_area.width * 3 / 4)
+            else if (x < r->cols * 3 / 4)
             {
                 /* ignore the click */
                 ok = FALSE;
@@ -140,20 +143,20 @@ mcview_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
         else
         {
             /* Scrolling up and down */
-            screen_dimen y;
+            int y;
 
             y = event->y + 1;   /* FIXME */
 
-            if (y < view->data_area.top + view->data_area.height * 1 / 3)
+            if (y < r->y + r->lines * 1 / 3)
             {
                 if (mcview_mouse_move_pages)
-                    mcview_move_up (view, view->data_area.height / 2);
+                    mcview_move_up (view, r->lines / 2);
                 else
                     mcview_move_up (view, 1);
 
                 event->result.repeat = msg == MSG_MOUSE_DOWN;
             }
-            else if (y < view->data_area.top + view->data_area.height * 2 / 3)
+            else if (y < r->y + r->lines * 2 / 3)
             {
                 /* ignore the click */
                 ok = FALSE;
@@ -161,7 +164,7 @@ mcview_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
             else
             {
                 if (mcview_mouse_move_pages)
-                    mcview_move_down (view, view->data_area.height / 2);
+                    mcview_move_down (view, r->lines / 2);
                 else
                     mcview_move_down (view, 1);
 
@@ -192,14 +195,15 @@ mcview_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
 /* --------------------------------------------------------------------------------------------- */
 
 WView *
-mcview_new (int y, int x, int lines, int cols, gboolean is_panel)
+mcview_new (const WRect *r, gboolean is_panel)
 {
     WView *view;
     Widget *w;
 
     view = g_new0 (WView, 1);
     w = WIDGET (view);
-    widget_init (w, y, x, lines, cols, mcview_callback, mcview_mouse_callback);
+
+    widget_init (w, r, mcview_callback, mcview_mouse_callback);
     w->options |= WOP_SELECTABLE | WOP_TOP_SELECT;
     w->keymap = viewer_map;
 
@@ -230,7 +234,7 @@ mcview_new (int y, int x, int lines, int cols, gboolean is_panel)
 /** Real view only */
 
 gboolean
-mcview_viewer (const char *command, const vfs_path_t * file_vpath, int start_line,
+mcview_viewer (const char *command, const vfs_path_t *file_vpath, int start_line,
                off_t search_start, off_t search_end)
 {
     gboolean succeeded;
@@ -238,6 +242,7 @@ mcview_viewer (const char *command, const vfs_path_t * file_vpath, int start_lin
     WDialog *view_dlg;
     Widget *vw, *b;
     WGroup *g;
+    WRect r;
 
     /* Create dialog and widgets, put them on the dialog */
     view_dlg = dlg_create (FALSE, 0, 0, 1, 1, WPOS_FULLSCREEN, FALSE, NULL, mcview_dialog_callback,
@@ -247,7 +252,9 @@ mcview_viewer (const char *command, const vfs_path_t * file_vpath, int start_lin
 
     g = GROUP (view_dlg);
 
-    lc_mcview = mcview_new (vw->y, vw->x, vw->lines - 1, vw->cols, FALSE);
+    r = vw->rect;
+    r.lines--;
+    lc_mcview = mcview_new (&r, FALSE);
     group_add_widget_autopos (g, lc_mcview, WPOS_KEEP_ALL, NULL);
 
     b = WIDGET (buttonbar_new ());
@@ -262,7 +269,7 @@ mcview_viewer (const char *command, const vfs_path_t * file_vpath, int start_lin
     if (succeeded)
         dlg_run (view_dlg);
     else
-        dlg_stop (view_dlg);
+        dlg_close (view_dlg);
 
     if (widget_get_state (vw, WST_CLOSED))
         widget_destroy (vw);
@@ -275,7 +282,7 @@ mcview_viewer (const char *command, const vfs_path_t * file_vpath, int start_lin
 /* --------------------------------------------------------------------------------------------- */
 
 gboolean
-mcview_load (WView * view, const char *command, const char *file, int start_line,
+mcview_load (WView *view, const char *command, const char *file, int start_line,
              off_t search_start, off_t search_end)
 {
     gboolean retval = FALSE;

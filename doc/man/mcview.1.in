@@ -61,16 +61,16 @@ selected=black,green"
 .fi
 .PP
 .SH FILES
-.I %prefix%/share/mc/help/mc.hlp
+.I %pkgdatadir%/help/mc.hlp
 .IP
 The help file for the program.
 .PP
-.I %prefix%/share/mc/mc.ini
+.I %pkgdatadir%/mc.ini
 .IP
 The default system\-wide setup for GNU Midnight Commander, used only if
 the user's own ~/.config/mc/ini file is missing.
 .PP
-.I %prefix%/share/mc/mc.lib
+.I %pkgdatadir%/mc.lib
 .IP
 Global settings for Midnight Commander. Settings in this file
 affect all users, whether they have ~/.config/mc/ini or not.
@@ -92,4 +92,4 @@ http://ftp.midnight\-commander.org/.
 mc(1), mcedit(1)
 .PP
 .SH BUGS
-Bugs should be reported to http://www.midnight\-commander.org/.
+Bugs should be reported to https://www.midnight\-commander.org/.

@@ -54,31 +54,42 @@
  */
 #define _GL_CMP(n1, n2) (((n1) > (n2)) - ((n1) < (n2)))
 
-/* Difference of zero */
+/* Difference or zero */
 #define DOZ(a, b) ((a) > (b) ? (a) - (b) : 0)
+
+/* flags for shell_execute */
+#define EXECUTE_INTERNAL (1 << 0)
+#define EXECUTE_AS_SHELL (1 << 2)
+#define EXECUTE_HIDE     (1 << 3)
 
 /*** enums ***************************************************************************************/
 
 /* Pathname canonicalization */
+/* *INDENT-OFF* */
 typedef enum
 {
-    CANON_PATH_JOINSLASHES = 1L << 0,   /* Multiple '/'s are collapsed to a single '/'. */
-    CANON_PATH_REMSLASHDOTS = 1L << 1,  /* Leading './'s, '/'s and trailing '/.'s are removed. */
-    CANON_PATH_REMDOUBLEDOTS = 1L << 3, /* Non-leading '../'s and trailing '..'s are handled by removing */
-    CANON_PATH_GUARDUNC = 1L << 4,      /* Detect and preserve UNC paths: //server/... */
-    CANON_PATH_ALL = CANON_PATH_JOINSLASHES
-        | CANON_PATH_REMSLASHDOTS | CANON_PATH_REMDOUBLEDOTS | CANON_PATH_GUARDUNC
-} CANON_PATH_FLAGS;
+    CANON_PATH_NOCHANGE = 0,
+    CANON_PATH_JOINSLASHES = 1L << 0,   /**< Multiple '/'s are collapsed to a single '/' */
+    CANON_PATH_REMSLASHDOTS = 1L << 1,  /**< Leading './'s, '/'s and trailing '/.'s are removed */
+    CANON_PATH_REMDOUBLEDOTS = 1L << 3, /**< Non-leading '../'s and trailing '..'s are handled by removing
+                                             portions of the path */
+    CANON_PATH_GUARDUNC = 1L << 4,      /**< Detect and preserve UNC paths: //server/... */
+    CANON_PATH_ALL = CANON_PATH_JOINSLASHES | CANON_PATH_REMSLASHDOTS
+                   | CANON_PATH_REMDOUBLEDOTS | CANON_PATH_GUARDUNC  /**< All flags */
+} canon_path_flags_t;
+/* *INDENT-ON* */
 
 enum compression_type
 {
     COMPRESSION_NONE,
+    COMPRESSION_ZIP,
     COMPRESSION_GZIP,
     COMPRESSION_BZIP,
     COMPRESSION_BZIP2,
     COMPRESSION_LZIP,
     COMPRESSION_LZ4,
     COMPRESSION_LZMA,
+    COMPRESSION_LZO,
     COMPRESSION_XZ,
     COMPRESSION_ZSTD,
 };
@@ -116,27 +127,6 @@ typedef struct
 } mc_pipe_t;
 
 /*** structures declarations (and typedefs of structures)*****************************************/
-
-/* keys are set only during sorting */
-typedef struct
-{
-    /* File attributes */
-    GString *fname;
-    struct stat st;
-    /* key used for comparing names */
-    char *sort_key;
-    /* key used for comparing extensions */
-    char *second_sort_key;
-
-    /* Flags */
-    struct
-    {
-        unsigned int marked:1;  /* File marked in pane window */
-        unsigned int link_to_dir:1;     /* If this is a link, does it point to directory? */
-        unsigned int stale_link:1;      /* If this is a symlink and points to Charon's land */
-        unsigned int dir_size_computed:1;       /* Size of directory was computed with dirsizes_cmd */
-    } f;
-} file_entry_t;
 
 /*** global variables defined in .c file *********************************************************/
 
@@ -196,7 +186,7 @@ char *diff_two_paths (const vfs_path_t * vpath1, const vfs_path_t * vpath2);
 const char *x_basename (const char *fname);
 
 char *load_mc_home_file (const char *from, const char *filename, char **allocated_filename,
-                         size_t * length);
+                         size_t *length);
 
 /* uid/gid managing */
 void init_groups (void);
@@ -228,8 +218,7 @@ void save_stop_handler (void);
 /* Tilde expansion */
 char *tilde_expand (const char *directory);
 
-void custom_canonicalize_pathname (char *path, CANON_PATH_FLAGS flags);
-void canonicalize_pathname (char *path);
+void canonicalize_pathname_custom (char *path, canon_path_flags_t flags);
 
 char *mc_realpath (const char *path, char *resolved_path);
 
@@ -274,7 +263,9 @@ void mc_replace_error (GError ** dest, int code, const char *format, ...) G_GNUC
 
 gboolean mc_time_elapsed (gint64 * timestamp, gint64 delay);
 
-/*** inline functions **************************************************/
+/* --------------------------------------------------------------------------------------------- */
+/*** inline functions ****************************************************************************/
+/* --------------------------------------------------------------------------------------------- */
 
 static inline gboolean
 exist_file (const char *name)
@@ -282,10 +273,31 @@ exist_file (const char *name)
     return (access (name, R_OK) == 0);
 }
 
+/* --------------------------------------------------------------------------------------------- */
+
 static inline gboolean
 is_exe (mode_t mode)
 {
     return ((mode & (S_IXUSR | S_IXGRP | S_IXOTH)) != 0);
 }
+
+/* --------------------------------------------------------------------------------------------- */
+/**
+ * Canonicalize path with CANON_PATH_ALL.
+ *
+ * @param path path to file
+ * @param flags canonicalization flags
+ *
+ * All modifications of @path are made in place.
+ * Well formed UNC paths are modified only in the local part.
+ */
+
+static inline void
+canonicalize_pathname (char *path)
+{
+    canonicalize_pathname_custom (path, CANON_PATH_ALL);
+}
+
+/* --------------------------------------------------------------------------------------------- */
 
 #endif /* MC_UTIL_H */

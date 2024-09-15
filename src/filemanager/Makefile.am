@@ -30,11 +30,9 @@ libmcfilemanager_la_SOURCES = \
 # Unmaintained, unsupported, etc
 #	listmode.c listmode.h
 
-AM_CPPFLAGS = -I$(top_srcdir) $(GLIB_CFLAGS) $(PCRE_CPPFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir) $(GLIB_CFLAGS)
 
 if ENABLE_EXT2FS_ATTR
 libmcfilemanager_la_SOURCES += \
 	chattr.c
-
-AM_CPPFLAGS += @EXT2FS_CFLAGS@ @E2P_CFLAGS@
 endif

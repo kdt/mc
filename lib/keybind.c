@@ -1,7 +1,7 @@
 /*
    Definitions of key bindings.
 
-   Copyright (C) 2005-2021
+   Copyright (C) 2005-2024
    Free Software Foundation, Inc.
 
    Written by:
@@ -50,6 +50,8 @@ typedef struct name_keymap_t
     const char *name;
     long val;
 } name_keymap_t;
+
+/*** forward declarations (file scope functions) *************************************************/
 
 /*** file scope variables ************************************************************************/
 
@@ -172,8 +174,8 @@ static name_keymap_t command_names[] = {
     ADD_KEYMAP_NAME (LinkSymbolicEdit),
     ADD_KEYMAP_NAME (ExternalPanelize),
     ADD_KEYMAP_NAME (Filter),
-#ifdef ENABLE_VFS_FISH
-    ADD_KEYMAP_NAME (ConnectFish),
+#ifdef ENABLE_VFS_SHELL
+    ADD_KEYMAP_NAME (ConnectShell),
 #endif
 #ifdef ENABLE_VFS_FTP
     ADD_KEYMAP_NAME (ConnectFtp),
@@ -382,6 +384,7 @@ static name_keymap_t command_names[] = {
 static const size_t num_command_names = G_N_ELEMENTS (command_names) - 1;
 /* *INDENT-ON* */
 
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
@@ -412,7 +415,7 @@ sort_command_names (void)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-keymap_add (GArray * keymap, long key, long cmd, const char *caption)
+keymap_add (GArray *keymap, long key, long cmd, const char *caption)
 {
     if (key != 0 && cmd != CK_IgnoreKey)
     {
@@ -430,12 +433,12 @@ keymap_add (GArray * keymap, long key, long cmd, const char *caption)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-keybind_cmd_bind (GArray * keymap, const char *keybind, long action)
+keybind_cmd_bind (GArray *keymap, const char *keybind, long action)
 {
     char *caption = NULL;
     long key;
 
-    key = lookup_key (keybind, &caption);
+    key = tty_keyname_to_keycode (keybind, &caption);
     keymap_add (keymap, key, action, caption);
     g_free (caption);
 }
@@ -473,7 +476,7 @@ keybind_lookup_actionname (long action)
 /* --------------------------------------------------------------------------------------------- */
 
 const char *
-keybind_lookup_keymap_shortcut (const global_keymap_t * keymap, long action)
+keybind_lookup_keymap_shortcut (const global_keymap_t *keymap, long action)
 {
     if (keymap != NULL)
     {
@@ -489,7 +492,7 @@ keybind_lookup_keymap_shortcut (const global_keymap_t * keymap, long action)
 /* --------------------------------------------------------------------------------------------- */
 
 long
-keybind_lookup_keymap_command (const global_keymap_t * keymap, long key)
+keybind_lookup_keymap_command (const global_keymap_t *keymap, long key)
 {
     if (keymap != NULL)
     {

@@ -1,5 +1,5 @@
 
-AM_CPPFLAGS = $(GLIB_CFLAGS) -I$(top_srcdir) $(LIBSSH_CFLAGS) $(PCRE_CPPFLAGS)
+AM_CPPFLAGS = $(GLIB_CFLAGS) -I$(top_srcdir) $(LIBSSH_CFLAGS)
 
 noinst_LTLIBRARIES = libvfs-sftpfs.la
 
@@ -8,7 +8,5 @@ libvfs_sftpfs_la_SOURCES = \
 	connection.c \
 	dir.c \
 	file.c \
-	init.c init.h \
 	internal.c internal.h \
-	vfs_class.c \
-	vfs_subclass.c
+	sftpfs.c sftpfs.h

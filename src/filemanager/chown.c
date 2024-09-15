@@ -1,7 +1,7 @@
 /*
    Chown command -- for the Midnight Commander
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    This file is part of the Midnight Commander.
@@ -67,8 +67,9 @@
 
 /*** file scope type declarations ****************************************************************/
 
-/*** file scope variables ************************************************************************/
+/*** forward declarations (file scope functions) *************************************************/
 
+/*** file scope variables ************************************************************************/
 
 static struct
 {
@@ -77,8 +78,7 @@ static struct
     int y;
     int len;
     const char *text;
-} chown_but[BUTTONS] =
-{
+} chown_but[BUTTONS] = {
     /* *INDENT-OFF* */
     { B_SETALL,  NORMAL_BUTTON, 5, 0, N_("Set &all")    },
     { B_SETGRP,  NORMAL_BUTTON, 5, 0, N_("Set &groups") },
@@ -95,8 +95,7 @@ static struct
 {
     int y;
     WLabel *l;
-} chown_label[LABELS] =
-{
+} chown_label[LABELS] = {
     /* *INDENT-OFF* */
     {  4, NULL },
     {  6, NULL },
@@ -147,7 +146,7 @@ chown_init (void)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-chown_refresh (const Widget * h)
+chown_refresh (const Widget *h)
 {
     int y = 3;
     int x = 7 + GW * 2;
@@ -169,7 +168,7 @@ chown_refresh (const Widget * h)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-chown_bg_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+chown_bg_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     switch (msg)
     {
@@ -186,7 +185,7 @@ chown_bg_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void
 /* --------------------------------------------------------------------------------------------- */
 
 static WDialog *
-chown_dlg_create (WPanel * panel)
+chown_dlg_create (WPanel *panel)
 {
     int single_set;
     WDialog *ch_dlg;
@@ -234,7 +233,7 @@ chown_dlg_create (WPanel * panel)
     /* add widgets for the file information */
     for (i = 0; i < LABELS; i++)
     {
-        chown_label[i].l = label_new (chown_label[i].y, 7 + GW * 2, "");
+        chown_label[i].l = label_new (chown_label[i].y, 7 + GW * 2, NULL);
         group_add_widget (g, chown_label[i].l);
     }
 
@@ -258,11 +257,11 @@ chown_dlg_create (WPanel * panel)
     i = BUTTONS - 2;
     y = lines - chown_but[i].y;
     group_add_widget (g, hline_new (y - 1, -1, -1));
-    group_add_widget (g, button_new (y, WIDGET (ch_dlg)->cols / 2 - chown_but[i].len,
+    group_add_widget (g, button_new (y, WIDGET (ch_dlg)->rect.cols / 2 - chown_but[i].len,
                                      chown_but[i].ret_cmd, chown_but[i].flags, chown_but[i].text,
                                      NULL));
     i++;
-    group_add_widget (g, button_new (y, WIDGET (ch_dlg)->cols / 2 + 1, chown_but[i].ret_cmd,
+    group_add_widget (g, button_new (y, WIDGET (ch_dlg)->rect.cols / 2 + 1, chown_but[i].ret_cmd,
                                      chown_but[i].flags, chown_but[i].text, NULL));
 
     /* select first listbox */
@@ -284,9 +283,9 @@ chown_done (gboolean need_update)
 /* --------------------------------------------------------------------------------------------- */
 
 static const GString *
-next_file (const WPanel * panel)
+next_file (const WPanel *panel)
 {
-    while (!panel->dir.list[current_file].f.marked)
+    while (panel->dir.list[current_file].f.marked == 0)
         current_file++;
 
     return panel->dir.list[current_file].fname;
@@ -295,17 +294,19 @@ next_file (const WPanel * panel)
 /* --------------------------------------------------------------------------------------------- */
 
 static gboolean
-try_chown (const vfs_path_t * p, uid_t u, gid_t g)
+try_chown (const vfs_path_t *p, uid_t u, gid_t g)
 {
+    const char *fname = NULL;
+
     while (mc_chown (p, u, g) == -1 && !ignore_all)
     {
         int my_errno = errno;
         int result;
         char *msg;
 
-        msg =
-            g_strdup_printf (_("Cannot chown \"%s\"\n%s"), x_basename (vfs_path_as_str (p)),
-                             unix_error_string (my_errno));
+        if (fname == NULL)
+            fname = x_basename (vfs_path_as_str (p));
+        msg = g_strdup_printf (_("Cannot chown \"%s\"\n%s"), fname, unix_error_string (my_errno));
         result =
             query_dialog (MSG_ERROR, msg, D_ERROR, 4, _("&Ignore"), _("Ignore &all"), _("&Retry"),
                           _("&Cancel"));
@@ -339,7 +340,7 @@ try_chown (const vfs_path_t * p, uid_t u, gid_t g)
 /* --------------------------------------------------------------------------------------------- */
 
 static gboolean
-do_chown (WPanel * panel, const vfs_path_t * p, uid_t u, gid_t g)
+do_chown (WPanel *panel, const vfs_path_t *p, uid_t u, gid_t g)
 {
     gboolean ret;
 
@@ -353,7 +354,7 @@ do_chown (WPanel * panel, const vfs_path_t * p, uid_t u, gid_t g)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-apply_chowns (WPanel * panel, vfs_path_t * vpath, uid_t u, gid_t g)
+apply_chowns (WPanel *panel, vfs_path_t *vpath, uid_t u, gid_t g)
 {
     gboolean ok;
 
@@ -391,7 +392,7 @@ apply_chowns (WPanel * panel, vfs_path_t * vpath, uid_t u, gid_t g)
 /* --------------------------------------------------------------------------------------------- */
 
 void
-chown_cmd (WPanel * panel)
+chown_cmd (WPanel *panel)
 {
     gboolean need_update;
     gboolean end_chown;
@@ -420,7 +421,7 @@ chown_cmd (WPanel * panel)
         if (panel->marked != 0)
             fname = next_file (panel);  /* next marked file */
         else
-            fname = selection (panel)->fname;   /* single file */
+            fname = panel_current_entry (panel)->fname; /* single file */
 
         vpath = vfs_path_from_str (fname->str);
 
@@ -433,8 +434,8 @@ chown_cmd (WPanel * panel)
         ch_dlg = chown_dlg_create (panel);
 
         /* select in listboxes */
-        listbox_select_entry (l_user, listbox_search_text (l_user, get_owner (sf_stat.st_uid)));
-        listbox_select_entry (l_group, listbox_search_text (l_group, get_group (sf_stat.st_gid)));
+        listbox_set_current (l_user, listbox_search_text (l_user, get_owner (sf_stat.st_uid)));
+        listbox_set_current (l_group, listbox_search_text (l_group, get_group (sf_stat.st_gid)));
 
         chown_label (0, str_trunc (fname->str, GW - 4));
         chown_label (1, str_trunc (get_owner (sf_stat.st_uid), GW - 4));

@@ -1,7 +1,7 @@
 /*
    Hypertext file browser.
 
-   Copyright (C) 1994-2021
+   Copyright (C) 1994-2024
    Free Software Foundation, Inc.
 
    This file is part of the Midnight Commander.
@@ -29,7 +29,7 @@
  *  node ends with a ^D character and starts with a bracket, then the
  *  name of the node and then a closing bracket. Right after the closing
  *  bracket a newline is placed. This newline is not to be displayed by
- *  the help viewer and must be skipped - its sole purpose is to faciliate
+ *  the help viewer and must be skipped - its sole purpose is to facilitate
  *  the work of the people managing the help file template (xnc.hlp) .
  *
  *  Links in the hypertext file are specified like this: the text that
@@ -40,7 +40,7 @@
  *  The file must contain a ^D at the beginning and at the end of the
  *  file or the program will not be able to detect the end of file.
  *
- *  Lazyness/widgeting attack: This file does use the dialog manager
+ *  Laziness/widgeting attack: This file does use the dialog manager
  *  and uses mainly the dialog to achieve the help work.  there is only
  *  one specialized widget and it's only used to forward the mouse messages
  *  to the appropriate routine.
@@ -90,6 +90,8 @@ typedef struct Link_Area
     const char *link_name;
 } Link_Area;
 
+/*** forward declarations (file scope functions) *************************************************/
+
 /*** file scope variables ************************************************************************/
 
 static char *fdata = NULL;      /* Pointer to the loaded data file */
@@ -113,8 +115,7 @@ static struct
 static GSList *link_area = NULL;
 static gboolean inside_link_area = FALSE;
 
-static cb_ret_t help_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data);
-
+/* --------------------------------------------------------------------------------------------- */
 /*** file scope functions ************************************************************************/
 /* --------------------------------------------------------------------------------------------- */
 
@@ -125,21 +126,20 @@ static const char *
 search_string (const char *start, const char *text)
 {
     const char *result = NULL;
-    char *local_text = g_strdup (text);
-    char *d = local_text;
+    char *local_text;
+    char *d;
     const char *e = start;
+
+    local_text = g_strdup (text);
 
     /* fmt sometimes replaces a space with a newline in the help file */
     /* Replace the newlines in the link name with spaces to correct the situation */
-    while (*d != '\0')
-    {
+    for (d = local_text; *d != '\0'; str_next_char (&d))
         if (*d == '\n')
             *d = ' ';
-        str_next_char (&d);
-    }
 
     /* Do search */
-    for (d = local_text; *e; e++)
+    for (d = local_text; *e != '\0'; e++)
     {
         if (*d == *e)
             d++;
@@ -165,11 +165,12 @@ search_string (const char *start, const char *text)
 static const char *
 search_string_node (const char *start, const char *text)
 {
-    const char *d = text;
-    const char *e = start;
-
     if (start != NULL)
-        for (; *e && *e != CHAR_NODE_END; e++)
+    {
+        const char *d = text;
+        const char *e;
+
+        for (e = start; *e != '\0' && *e != CHAR_NODE_END; e++)
         {
             if (*d == *e)
                 d++;
@@ -178,6 +179,7 @@ search_string_node (const char *start, const char *text)
             if (*d == '\0')
                 return e + 1;
         }
+    }
 
     return NULL;
 }
@@ -270,7 +272,7 @@ move_backward (int i)
 static void
 move_to_top (void)
 {
-    while (((int) (currentpoint > fdata) > 0) && (*currentpoint != CHAR_NODE_END))
+    while (((int) (currentpoint - fdata) > 0) && (*currentpoint != CHAR_NODE_END))
         currentpoint--;
 
     while (*currentpoint != ']')
@@ -300,7 +302,7 @@ help_follow_link (const char *start, const char *lc_selected_item)
     if (lc_selected_item == NULL)
         return start;
 
-    for (p = lc_selected_item; *p && *p != CHAR_NODE_END && *p != CHAR_LINK_POINTER; p++)
+    for (p = lc_selected_item; *p != '\0' && *p != CHAR_NODE_END && *p != CHAR_LINK_POINTER; p++)
         ;
     if (*p == CHAR_LINK_POINTER)
     {
@@ -308,7 +310,8 @@ help_follow_link (const char *start, const char *lc_selected_item)
         char link_name[MAXLINKNAME];
 
         link_name[0] = '[';
-        for (i = 1; *p != CHAR_LINK_END && *p && *p != CHAR_NODE_END && i < MAXLINKNAME - 3;)
+        for (i = 1;
+             *p != CHAR_LINK_END && *p != '\0' && *p != CHAR_NODE_END && i < MAXLINKNAME - 3;)
             link_name[i++] = *++p;
         link_name[i - 1] = ']';
         link_name[i] = '\0';
@@ -400,7 +403,7 @@ clear_link_areas (void)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-help_print_word (WDialog * h, GString * word, int *col, int *line, gboolean add_space)
+help_print_word (WDialog *h, GString *word, int *col, int *line, gboolean add_space)
 {
     if (*line >= help_lines)
         g_string_set_size (word, 0);
@@ -444,12 +447,9 @@ help_print_word (WDialog * h, GString * word, int *col, int *line, gboolean add_
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-help_show (WDialog * h, const char *paint_start)
+help_show (WDialog *h, const char *paint_start)
 {
-    const char *p, *n;
-    int col, line, c;
     gboolean painting = TRUE;
-    gboolean acs;               /* Flag: Alternate character set active? */
     gboolean repeat_paint;
     int active_col, active_line;        /* Active link position */
     char buff[MB_LEN_MAX + 1];
@@ -460,9 +460,15 @@ help_show (WDialog * h, const char *paint_start)
     tty_setcolor (HELP_NORMAL_COLOR);
     do
     {
-        line = col = active_col = active_line = 0;
+        int line = 0;
+        int col = 0;
+        gboolean acs = FALSE;   /* Flag: Is alternate character set active? */
+        const char *p, *n;
+
+        active_col = 0;
+        active_line = 0;
+
         repeat_paint = FALSE;
-        acs = FALSE;
 
         clear_link_areas ();
         if ((int) (selected_item - paint_start) < 0)
@@ -472,6 +478,8 @@ help_show (WDialog * h, const char *paint_start)
         n = paint_start;
         while ((n[0] != '\0') && (n[0] != CHAR_NODE_END) && (line < help_lines))
         {
+            int c;
+
             p = n;
             n = str_cget_next_char (p);
             memcpy (buff, p, n - p);
@@ -564,8 +572,8 @@ help_show (WDialog * h, const char *paint_start)
 #ifndef HAVE_SLANG
                             tty_print_char (acs_map[c]);
 #else
-                            SLsmg_draw_object (WIDGET (h)->y + line + 2, WIDGET (h)->x + col + 2,
-                                               c);
+                            SLsmg_draw_object (WIDGET (h)->rect.y + line + 2,
+                                               WIDGET (h)->rect.x + col + 2, c);
 #endif
                         col++;
                     }
@@ -596,7 +604,7 @@ help_show (WDialog * h, const char *paint_start)
     g_string_free (word, TRUE);
 
     /* Position the cursor over a nice link */
-    if (active_col)
+    if (active_col != 0)
         widget_gotoyx (h, active_line, active_col);
 }
 
@@ -604,7 +612,7 @@ help_show (WDialog * h, const char *paint_start)
 /** show help */
 
 static void
-help_help (WDialog * h)
+help_help (WDialog *h)
 {
     const char *p;
 
@@ -624,7 +632,7 @@ help_help (WDialog * h)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-help_index (WDialog * h)
+help_index (WDialog *h)
 {
     const char *new_item;
 
@@ -647,7 +655,7 @@ help_index (WDialog * h)
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-help_back (WDialog * h)
+help_back (WDialog *h)
 {
     currentpoint = history[history_ptr].page;
     selected_item = history[history_ptr].link;
@@ -834,7 +842,7 @@ help_execute_cmd (long command)
         help_prev_node ();
         break;
     case CK_Quit:
-        dlg_stop (whelp);
+        dlg_close (whelp);
         break;
     default:
         ret = MSG_NOT_HANDLED;
@@ -846,7 +854,7 @@ help_execute_cmd (long command)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-help_handle_key (WDialog * h, int key)
+help_handle_key (WDialog *h, int key)
 {
     Widget *w = WIDGET (h);
     long command;
@@ -861,7 +869,7 @@ help_handle_key (WDialog * h, int key)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-help_bg_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+help_bg_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     switch (msg)
     {
@@ -878,16 +886,17 @@ help_bg_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void 
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-help_resize (WDialog * h)
+help_resize (WDialog *h)
 {
     Widget *w = WIDGET (h);
     WButtonBar *bb;
-    WRect r;
+    WRect r = w->rect;
 
     help_lines = MIN (LINES - 4, MAX (2 * LINES / 3, 18));
-    rect_init (&r, w->y, w->x, help_lines + 4, HELP_WINDOW_WIDTH + 4);
+    r.lines = help_lines + 4;
+    r.cols = HELP_WINDOW_WIDTH + 4;
     dlg_default_callback (w, NULL, MSG_RESIZE, 0, &r);
-    bb = find_buttonbar (h);
+    bb = buttonbar_find (h);
     widget_set_size (WIDGET (bb), LINES - 1, 0, 1, COLS);
 
     return MSG_HANDLED;
@@ -896,7 +905,7 @@ help_resize (WDialog * h)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-help_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+help_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     WDialog *h = DIALOG (w);
 
@@ -940,26 +949,20 @@ static void
 translate_file (char *filedata)
 {
     GIConv conv;
-    GString *translated_data;
-
-    /* initial allocation for largest whole help file */
-    translated_data = g_string_sized_new (32 * 1024);
 
     conv = str_crt_conv_from ("UTF-8");
-
-    if (conv == INVALID_CONV)
-        g_string_free (translated_data, TRUE);
-    else
+    if (conv != INVALID_CONV)
     {
+        GString *translated_data;
+        gboolean nok;
+
         g_free (fdata);
 
-        if (str_convert (conv, filedata, translated_data) != ESTR_FAILURE)
-            fdata = g_string_free (translated_data, FALSE);
-        else
-        {
-            fdata = NULL;
-            g_string_free (translated_data, TRUE);
-        }
+        /* initial allocation for largest whole help file */
+        translated_data = g_string_sized_new (32 * 1024);
+        nok = (str_convert (conv, filedata, translated_data) == ESTR_FAILURE);
+        fdata = g_string_free (translated_data, nok);
+
         str_close_conv (conv);
     }
 }
@@ -967,13 +970,13 @@ translate_file (char *filedata)
 /* --------------------------------------------------------------------------------------------- */
 
 static cb_ret_t
-md_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data)
+md_callback (Widget *w, Widget *sender, widget_msg_t msg, int parm, void *data)
 {
     switch (msg)
     {
     case MSG_RESIZE:
         widget_default_callback (w, NULL, MSG_RESIZE, 0, data);
-        w->lines = help_lines;
+        w->rect.lines = help_lines;
         return MSG_HANDLED;
 
     default:
@@ -984,7 +987,7 @@ md_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm, void *data
 /* --------------------------------------------------------------------------------------------- */
 
 static void
-help_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
+help_mouse_callback (Widget *w, mouse_msg_t msg, mouse_event_t *event)
 {
     int x, y;
     GSList *current_area;
@@ -1052,12 +1055,12 @@ help_mouse_callback (Widget * w, mouse_msg_t msg, mouse_event_t * event)
 /* --------------------------------------------------------------------------------------------- */
 
 static Widget *
-mousedispatch_new (int y, int x, int yl, int xl)
+mousedispatch_new (const WRect *r)
 {
     Widget *w;
 
     w = g_new0 (Widget, 1);
-    widget_init (w, y, x, yl, xl, md_callback, help_mouse_callback);
+    widget_init (w, r, md_callback, help_mouse_callback);
     w->options |= WOP_SELECTABLE | WOP_WANT_CURSOR;
 
     return w;
@@ -1069,7 +1072,7 @@ mousedispatch_new (int y, int x, int yl, int xl)
 
 /* event callback */
 gboolean
-help_interactive_display (const gchar * event_group_name, const gchar * event_name,
+help_interactive_display (const gchar *event_group_name, const gchar *event_name,
                           gpointer init_data, gpointer data)
 {
     const dlg_colors_t help_colors = {
@@ -1087,6 +1090,7 @@ help_interactive_display (const gchar * event_group_name, const gchar * event_na
     char *hlpfile = NULL;
     char *filedata;
     ev_help_t *event_data = (ev_help_t *) data;
+    WRect r = { 1, 1, 1, 1 };
 
     (void) event_group_name;
     (void) event_name;
@@ -1146,18 +1150,19 @@ help_interactive_display (const gchar * event_group_name, const gchar * event_na
     selected_item = search_string_node (main_node, STRING_LINK_START) - 1;
     currentpoint = main_node + 1;       /* Skip the newline following the start of the node */
 
-    for (history_ptr = HISTORY_SIZE; history_ptr;)
+    for (history_ptr = HISTORY_SIZE - 1; history_ptr >= 0; history_ptr--)
     {
-        history_ptr--;
         history[history_ptr].page = currentpoint;
         history[history_ptr].link = selected_item;
     }
 
     help_bar = buttonbar_new ();
-    WIDGET (help_bar)->y -= wh->y;
-    WIDGET (help_bar)->x -= wh->x;
+    WIDGET (help_bar)->rect.y -= wh->rect.y;
+    WIDGET (help_bar)->rect.x -= wh->rect.x;
 
-    md = mousedispatch_new (1, 1, help_lines, HELP_WINDOW_WIDTH - 2);
+    r.lines = help_lines;
+    r.cols = HELP_WINDOW_WIDTH - 2;
+    md = mousedispatch_new (&r);
 
     group_add_widget (g, md);
     group_add_widget (g, help_bar);     /* FIXME */
